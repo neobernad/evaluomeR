@@ -1,5 +1,5 @@
-Changes in version 0.99.1 (2019-04-15)
+Changes in version 0.99.2 (2019-04-15)
 + SummarizedExperiment can be now processed via `seToDataFrame` method. Adding SummarizedExperiment and airway dependencies.
 
-Changes in version 0.99.0 (2019-04-11)
+Changes in version 0.99.1 (2019-04-11)
 + Submitted to Bioconductor
