@@ -58,6 +58,45 @@ getDataQualityRange <- function(data, k) {
   }
 }
 
+#' @title SummarizedExperiment to Dataframe
+#' @name seToDataFrame
+#' @aliases seToDataFrame
+#' @description
+#' This method is a wrapper to transform a SummarizedExperiment object to a
+#' Dataframe processable in our methods.
+#'
+#' @param SummarizedExperiment A \code{SummarizedExperiment} object
+#' (see \code{\link{SummarizedExperiment}}).
+#'
+#' @return The dataframe that contains information of the first
+#' assay in \code{SummarizedExperiment}.
+#'
+#' @examples
+#' # Using example data from airway package
+#' library(airway)
+#' data(airway)
+#' airwayData = seToDataFrame(airway)
+#' airwayData = airwayData[1:10000,1:4]
+#' stability(airwayData, bs = 20, getImages=FALSE)
+#' correlations(airwayData, getImages=FALSE)
+#'
+seToDataFrame <- function(SummarizedExperiment) {
+  se=SummarizedExperiment
+  if (length(assays(se)) == 0) {
+    stop("SummarizedExperiment has no assays, length is 0")
+  }
+  test = assay(se,1)
+  Datasets <- NULL
+  if (is.null(rownames(test))) {
+    Datasets <- paste("Dataset_", c(1:length(test[,1])), sep="")
+  } else {
+    Datasets <- rownames(test)
+  }
+
+  test <- data.frame(Datasets,test)
+  return(test)
+}
+
 #####################
 ## Private methods ##
 #####################

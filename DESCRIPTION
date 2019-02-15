@@ -2,7 +2,7 @@ Package: evaluomeR
 Type: Package
 Title: Evaluation of Bioinformatics Metrics
 URL: http://sele.inf.um.es/evaluome/index.html
-Version: 0.99.0
+Version: 0.99.1
 Author: José Antonio Bernabé-Díaz [aut, cre], Manuel Franco [aut], Juana-María Vivo [aut], Manuel Quesada-Martínez [aut], Astrid Duque-Ramos [aut], Jesualdo Tomás Fernández-Breis [aut].
 Maintainer: José Antonio Bernabé Díaz <joseantonio.bernabe1@um.es>
 Description: Evaluating the reliability of your own metrics 
@@ -12,7 +12,7 @@ Description: Evaluating the reliability of your own metrics
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.6.0)
+Depends: R (>= 3.5.0)
 Imports:
     fpc (>= 2.1-11.1),
     cluster (>= 2.0.7-1),
@@ -21,6 +21,8 @@ Imports:
     graphics,
     stats,
     utils,
+    SummarizedExperiment,
+    airway,
     Rdpack
 Suggests: BiocStyle, knitr, rmarkdown, kableExtra, magrittr
 VignetteBuilder: knitr
