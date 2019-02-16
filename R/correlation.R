@@ -10,7 +10,8 @@
 #' @inheritParams stability
 #' @param margins See \code{\link{par}}.
 #'
-#' @return The Pearson correlation matrix.
+#' @return The Pearson correlation matrix as an assay
+#' in a \code{\link{SummarizedExperiment}} object.
 #'
 #' @examples
 #' # Using example data from our package
@@ -36,8 +37,8 @@ correlations <- function(data, margins=c(0,10,9,11), getImages=TRUE,
     }
     runMetricsCorrelationIMG(data, MatCorr, margins, label, path)
   }
-
-  return(MatCorr)
+  se <- createSE(MatCorr)
+  return(se)
 }
 
 runMetricsCorrelationIMG <- function(data, correlations, margins, label, path) {

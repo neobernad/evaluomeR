@@ -110,7 +110,9 @@ We provide the `correlations` function to evaluate the correlations among the me
 ```{r correlations-1, echo=TRUE}
 library(evaluomeR)
 rnaMetrics <- loadSample("rna-metrics")
-correlationMatrix <- correlations(rnaMetrics, margins =  c(4,4,12,10))
+correlationSE <- correlations(rnaMetrics, margins =  c(4,4,12,10))
+# Access the correlation matrix via its first assay:
+# assay(correlationSE,1)
 ```
 
 ## Stability analysis ##

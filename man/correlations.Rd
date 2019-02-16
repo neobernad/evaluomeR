@@ -25,7 +25,8 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
-The Pearson correlation matrix.
+The Pearson correlation matrix as an assay
+in a \code{\link{SummarizedExperiment}} object.
 }
 \description{
 Calculation of Pearson correlation coefficient between every pair of

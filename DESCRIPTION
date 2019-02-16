@@ -2,7 +2,7 @@ Package: evaluomeR
 Type: Package
 Title: Evaluation of Bioinformatics Metrics
 URL: http://sele.inf.um.es/evaluome/index.html
-Version: 0.99.3
+Version: 0.99.4
 Author: José Antonio Bernabé-Díaz [aut, cre], Manuel Franco [aut], Juana-María Vivo [aut], Manuel Quesada-Martínez [aut], Astrid Duque-Ramos [aut], Jesualdo Tomás Fernández-Breis [aut].
 Maintainer: José Antonio Bernabé Díaz <joseantonio.bernabe1@um.es>
 Description: Evaluating the reliability of your own metrics 
