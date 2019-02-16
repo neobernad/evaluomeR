@@ -15,9 +15,11 @@
 #' \item Highly Stable: ]0.85, 1].
 #' }
 #'
-#' @param data A matrix. The first row is the header. The first
-#' column of the header is the ID or name of the instance of the dataset
-#' (e.g., ontology, pathway, etc.) on which the metrics are measured.
+#' @param data A \code{\link{SummarizedExperiment}}.
+#' The SummarizedExperiment must contain an assay with the following structure:
+#' A valid header with names. The first  column of the header is the ID or name
+#' of the instance of the dataset (e.g., ontology, pathway, etc.) on which the
+#' metrics are measured.
 #' The other columns of the header contains the names of the metrics.
 #' The rows contains the measurements of the metrics for each instance in the dataset.
 #' @param k Positive integer. Number of clusters between [2,15] range.
@@ -26,15 +28,15 @@
 #' @param label String. If not NULL, the label will appear on the title of the plots.
 #' @param path String. Path to a valid directory where plots are saved.
 #'
-#' @return A dataframe containing the stability measurements and
-#' means for 1 to k clusters.
+#' @return A \code{\link{SummarizedExperiment}},
+#' containing an assay with the stability measurements and means for 1 to k clusters.
 #'
 #' @examples
 #' # Using example data from our package
-#' metrics = loadSample("ont-metrics")
-#' result = stability(data=metrics, k=4, getImages=TRUE)
-#' result = stability(metrics, k=6, getImages=FALSE)
-#' result = stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
+#' metrics <- loadSample("ont-metrics")
+#' result <- stability(data=metrics, k=4, getImages=TRUE)
+#' result <- stability(metrics, k=6, getImages=FALSE)
+#' result <- stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
 #'
 #' @references
 #' \insertRef{milligan1996measuring}{evaluomeR}
@@ -44,6 +46,8 @@
 #'
 stability <- function(data, k=5, bs=100, getImages=TRUE,
                       label=NULL, path=NULL) {
+
+  data <- getAssay(data, 1)
 
   checkKValue(k)
   if (!is.null(label)) {
@@ -64,8 +68,8 @@ stability <- function(data, k=5, bs=100, getImages=TRUE,
       runStabilityIndexK_IMG(bs, k.min = k, k.max = k,
                            label, path, cur.env))
   }
-
-  return(stabilityDataFrame)
+  se <- createSE(stabilityDataFrame)
+  return(se)
 }
 
 
@@ -92,12 +96,13 @@ stability <- function(data, k=5, bs=100, getImages=TRUE,
 #' whilst the second one, \code{k.range[2]}, as the higher. Both values must be
 #' contained in [2,15] range.
 #'
-#' @return A dataframe containing the stability measurements and
+#' @return A \code{\link{SummarizedExperiment}} containing the stability measurements and
 #' means for 1 to k clusters.
 #'
 #' @examples
 #' # Using example data from our package
-#' metrics = loadSample("ont-metrics")
+#' metrics <- loadSample("ont-metrics")
+#' result <- stabilityRange(metrics, k.range=c(2,3))
 #'
 #' @references
 #' \insertRef{milligan1996measuring}{evaluomeR}
@@ -121,6 +126,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
   if (!is.null(label)) {
     isString(label)
   }
+  data <- getAssay(data, 1)
 
   cur.env <- new.env()
   suppressWarnings(
@@ -139,7 +145,8 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
       runStabilityIndexMetric_IMG(bs, k.min=k.min, k.max=k.max,
                                 label, path, cur.env))
   }
-  return(stabilityDataFrame)
+  se <- createSE(stabilityDataFrame)
+  return(se)
 }
 
 runStabilityIndex <- function(data, k.min, k.max, bs, env) {

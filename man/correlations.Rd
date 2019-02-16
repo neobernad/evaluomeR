@@ -8,9 +8,11 @@ correlations(data, margins = c(0, 10, 9, 11), getImages = TRUE,
   label = NULL, path = NULL)
 }
 \arguments{
-\item{data}{A matrix. The first row is the header. The first
-column of the header is the ID or name of the instance of the dataset
-(e.g., ontology, pathway, etc.) on which the metrics are measured.
+\item{data}{A \code{\link{SummarizedExperiment}}.
+The SummarizedExperiment must contain an assay with the following structure:
+A valid header with names. The first  column of the header is the ID or name
+of the instance of the dataset (e.g., ontology, pathway, etc.) on which the
+metrics are measured.
 The other columns of the header contains the names of the metrics.
 The rows contains the measurements of the metrics for each instance in the dataset.}
 

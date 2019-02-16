@@ -8,9 +8,11 @@ stability(data, k = 5, bs = 100, getImages = TRUE, label = NULL,
   path = NULL)
 }
 \arguments{
-\item{data}{A matrix. The first row is the header. The first
-column of the header is the ID or name of the instance of the dataset
-(e.g., ontology, pathway, etc.) on which the metrics are measured.
+\item{data}{A \code{\link{SummarizedExperiment}}.
+The SummarizedExperiment must contain an assay with the following structure:
+A valid header with names. The first  column of the header is the ID or name
+of the instance of the dataset (e.g., ontology, pathway, etc.) on which the
+metrics are measured.
 The other columns of the header contains the names of the metrics.
 The rows contains the measurements of the metrics for each instance in the dataset.}
 
@@ -25,8 +27,8 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
-A dataframe containing the stability measurements and
-means for 1 to k clusters.
+A \code{\link{SummarizedExperiment}},
+containing an assay with the stability measurements and means for 1 to k clusters.
 }
 \description{
 This analysis permits to estimate whether the clustering is meaningfully
@@ -44,10 +46,10 @@ having the following meaning:
 }
 \examples{
 # Using example data from our package
-metrics = loadSample("ont-metrics")
-result = stability(data=metrics, k=4, getImages=TRUE)
-result = stability(metrics, k=6, getImages=FALSE)
-result = stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
+metrics <- loadSample("ont-metrics")
+result <- stability(data=metrics, k=4, getImages=TRUE)
+result <- stability(metrics, k=6, getImages=FALSE)
+result <- stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
 
 }
 \references{

@@ -10,7 +10,7 @@ loadSample(descriptor)
 \item{descriptor}{Sample file to load: "ont-metrics", "rna-metrics" or "biopathways-metrics".}
 }
 \value{
-The dataset specified via \code{descriptor} as a dataframe.
+The \code{\link{SummarizedExperiment}} specified via \code{descriptor}.
 }
 \description{
 This method is a wrapper to load sample input data located inside evaluomeR package.

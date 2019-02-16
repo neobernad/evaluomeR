@@ -23,7 +23,7 @@
 #'
 #' @inheritParams stability
 #'
-#' @return A dataframe containing the silhouette width measurements and
+#' @return A \code{\link{SummarizedExperiment}} containing the silhouette width measurements and
 #' cluster sizes for cluster \code{k}.
 #'
 #' @examples
@@ -43,6 +43,7 @@ quality <- function(data, k=5, getImages=TRUE,
   if (!is.null(label)) {
     isString(label)
   }
+  data <- getAssay(data, 1)
 
   cur.env <- new.env()
   suppressWarnings(
@@ -59,7 +60,8 @@ quality <- function(data, k=5, getImages=TRUE,
     suppressWarnings(
       runSilhouetteIMG(data, k, label, path, cur.env))
   }
-  return(silhouetteDataFrame)
+  se <- createSE(silhouetteDataFrame)
+  return(se)
 
 }
 
@@ -92,7 +94,7 @@ quality <- function(data, k=5, getImages=TRUE,
 #' whilst the second one, \code{k.range[2]}, as the higher. Both values must be
 #' contained in [2,15] range.
 #'
-#' @return A list of dataframes containing the silhouette width measurements and
+#' @return A list of \code{\link{SummarizedExperiment}} containing the silhouette width measurements and
 #' cluster sizes from \code{k.range[1]} to \code{k.range[2]}. The position on the list matches
 #' with the k-value used in that dataframe. For instance, position 5
 #' represents the dataframe with k = 5.
@@ -125,7 +127,7 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE,
   if (!is.null(label)) {
     isString(label)
   }
-
+  data <- getAssay(data, 1)
   cur.env <- new.env()
 
   suppressWarnings(
@@ -144,7 +146,8 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE,
       runQualityIndicesSilhouetteMetric_IMG(k.min = k.min, k.max = k.max,
                                             label, path, cur.env))
   }
-  return(silhouetteData)
+  seList <- createSEList(silhouetteData)
+  return(seList)
 }
 
 runQualityIndicesSilhouette <- function(data, k.min, k.max, bs, env) {

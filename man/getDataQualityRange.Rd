@@ -12,10 +12,10 @@ getDataQualityRange(data, k)
 \item{k}{The desired \code{k} cluster.}
 }
 \value{
-The dataframe that contains information about the selected \code{k} cluster.
+The \code{\link{SummarizedExperiment}} that contains information about the selected \code{k} cluster.
 }
 \description{
-This method is a wrapper to retrieve a specific dataframe given a \code{k} value from
+This method is a wrapper to retrieve a specific \code{\link{SummarizedExperiment}} given a \code{k} value from
 the object returned by \code{\link{qualityRange}} function.
 }
 \examples{
@@ -23,6 +23,6 @@ the object returned by \code{\link{qualityRange}} function.
 metrics = loadSample("ont-metrics")
 qualityRangeData <- qualityRange(data=metrics, k.range=c(3,5), getImages = FALSE)
 # Getting dataframe that contains information about k=5
-k5DataFrame = getDataQualityRange(qualityRangeData, 5)
+k5Data = getDataQualityRange(qualityRangeData, 5)
 
 }

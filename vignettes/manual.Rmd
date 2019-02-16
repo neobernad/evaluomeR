@@ -29,10 +29,11 @@ vignette: >
   %\VignetteEncoding{UTF-8}  
 ---
 
-```{r style, echo = FALSE, results = 'asis'}
+```{r style, include=FALSE, results='hide'}
 BiocStyle::markdown()
 library(kableExtra)
 library(magrittr)
+library(SummarizedExperiment)
 ```
 
 
@@ -68,12 +69,12 @@ BiocManager::install("evaluomeR")
 
 ## Prerequisites ##
 
-The package **evaluomeR** depends on the following CRAN packages for the calculus: *fpc* [@fpc2018], *cluster* [@cluster2018], *corrplot* [@corrplot2017]. Moreover, this package also depends on *grDevices*, *graphics*, *stats* and *utils* from R Core [@rcore] for plotting.
+The package **evaluomeR** depends on the following CRAN packages for the calculus: *fpc* [@fpc2018], *cluster* [@cluster2018], *corrplot* [@corrplot2017]. Moreover, this package also depends on *grDevices*, *graphics*, *stats* and *utils* from R Core [@rcore] for plotting and on the Bioconductor package *SummarizedExperiment* [@summarizedExperiment] for input/output data.
 
 # Using evaluomeR #
 
-## Creating an input dataframe ##
-The input dataframe must follow some structural rules, see Table \@ref(tab:table). The first row is the header. The first column of the header is the ID or name of the instance of the dataset (e.g., ontology, pathway, etc.) on which the metrics are measured. The other  columns of the header contains the names of the metrics. The rows contains the measurements of the metrics for each instance in the dataset.
+## Creating an input SummarizedExperiment ##
+The input is a `SummarizedExperiment` object. The assay contained in `SummarizedExperiment` must follow a certain structure, see Table \@ref(tab:table): A valid header must be specified. The first column of the header is the ID or name of the instance of the dataset (e.g., ontology, pathway, etc.) on which the metrics are measured. The other  columns of the header contains the names of the metrics. The rows contains the measurements of the metrics for each instance in the dataset.
 
 ID        | MetricNameA | MetricNameB | MetricNameC | ... |
 --------- | ----------- | ----------- | ----------- | --- | 
@@ -81,7 +82,7 @@ instance1 | 1.2         | 6.4         | 0.5         | ... |
 instance2 | 2.4         | 5.4         | 0.8         | ... |
 instance3 | 1.9         | 8.9         | 1.1         | ... |
   
-: (\#tab:table) Example of an input dataframe for the **evaluomeR** package.
+: (\#tab:table) Example of an input assay from a `SummarizedExperiment` for the **evaluomeR** package.
 
 ## Using input sample data from evaluomeR ##
 
@@ -104,7 +105,7 @@ biopathwaysMetrics <- loadSample("biopathways-metrics")
 
 ## Correlations ##
 
-We provide the `correlations` function to evaluate the correlations among the metrics defined in the dataframe:
+We provide the `correlations` function to evaluate the correlations among the metrics defined in the `SummarizedExperiment`:
 
 ```{r correlations-1, echo=TRUE}
 library(evaluomeR)
@@ -124,10 +125,15 @@ The stability index analysis is performed by the `stability` function. For insta
 stabilityData <- stability(rnaMetrics, k=2, bs = 100)
 ```
 
-The `stability` function returns the `stabilityData` dataframe, which contains the information shown in the plot:
+The `stability` function returns the `stabilityData` object, a `SummarizedExperiment` that contains an assay with the information shown in the plot:
+
+```{r stability-1-assay, results='hide', echo=TRUE, eval=FALSE}
+assay(stabilityData, 1)
+```
 
 ```{r stability-1-table, results='asis', echo=FALSE}
-kable(stabilityData) %>%
+data <- assay(stabilityData, 1)
+kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
@@ -157,12 +163,17 @@ For instance, running a quality analysis for the two metrics of `rnaMetrics` dat
 qualityData = quality(rnaMetrics, k = 4)
 ```
 
-The data of the first plot titled as "*Qual. Indices for k=4 across metrics*" according to *Silhouette avg. width*, is stored in *Avg_Silhouette_Width* column from `qualityData` dataframe. The other three plots titled by their metric name display the input rows grouped by colours for each cluster, along with their Silhouette width scores.
+The data of the first plot titled as "*Qual. Indices for k=4 across metrics*" according to *Silhouette avg. width*, is stored in *Avg_Silhouette_Width* column from the first assay of the `SummarizedExperiment`, `qualityData`. The other three plots titled by their metric name display the input rows grouped by colours for each cluster, along with their Silhouette width scores.
 
 The variable `qualityData` contains information about the clusters of each metric: The average silhouette width per cluster, the overall average sihouette width (taking into account all the clusters) and the number of individuals per cluster:
 
+```{r quality-1-assay, results='hide', eval=FALSE, echo=TRUE}
+assay(qualityData,1)
+```
+
 ```{r quality-1-table, results='asis', echo=FALSE}
-kable(qualityData) %>%
+data <- assay(qualityData,1)
+kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
   scroll_box(width = "100%")
 ```
@@ -180,7 +191,7 @@ qualityRangeData = qualityRange(rnaMetrics, k.range)
 
 The `qualityRange` function also returns two kind of plots, as seen in [Stability range](#sec:stabilityrange) section. One for each `k` in the `k.range`, showing the quality indices (goodness of the classification) across the metrics, and a second type of plot to show each metric with its respective quality index in each `k` value.
 
-The `qualityRangeData` object returned by `qualityRange` is an array of dataframes, whose size is `diff(k.range)+1`. In the example shown above, the size of `qualityRangeData` is 3, since the array length would contain the dataframes from `k=4` to `k=6`.
+The `qualityRangeData` object returned by `qualityRange` is list of `SummarizedExperiment`, whose size is `diff(k.range)+1`. In the example shown above, the size of `qualityRangeData` is 3, since the array length would contain the dataframes from `k=4` to `k=6`.
 
 ```{r quality-range-2, eval=TRUE, echo=TRUE}
 diff(k.range)+1
@@ -190,13 +201,16 @@ length(qualityRangeData)
 The user can access a specific dataframe for a given `k` value in three different ways: by dollar notation, brackets notation or using our wrapper method `getDataQualityRange`. For instance, if the user wishes to retrieve the dataframe which contains information of `k=5`,  being the `k.range` [4,6]:
 
 ```{r quality-range-3, eval=FALSE, echo=TRUE}
-k5DataFrame = qualityRangeData$k_5
-k5DataFrame = qualityRangeData[["k_5"]]
-k5DataFrame = getDataQualityRange(qualityRangeData, 5)
+k5Data = qualityRangeData$k_5
+k5Data = qualityRangeData[["k_5"]]
+k5Data = getDataQualityRange(qualityRangeData, 5)
+assay(k5Data, 1)
 ```
 
+
 ```{r quality-range-table, results='asis', echo=FALSE}
-kable(qualityRangeData$k_5) %>%
+data <- assay(qualityRangeData$k_5, 1)
+kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive")) %>%
   scroll_box(width = "100%", height = "150px")
 ```

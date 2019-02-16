@@ -1,3 +1,6 @@
+Changes in version 0.99.3 (2019-04-16)
++ All methods depend on `SummarizedExperiment` as input/output object.
+
 Changes in version 0.99.2 (2019-04-15)
 + SummarizedExperiment can be now processed via `seToDataFrame` method. Adding SummarizedExperiment and airway dependencies.
 

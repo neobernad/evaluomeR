@@ -25,7 +25,7 @@ correlations <- function(data, margins=c(0,10,9,11), getImages=TRUE,
   if (!is.null(label)) {
     isString(label)
   }
-
+  data <- getAssay(data, 1)
   cur.env <- new.env()
 
   MatCorr <- cor(data[,2:length(data)])
