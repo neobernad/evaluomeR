@@ -50,8 +50,6 @@ range [0,1], having the following meaning:
 \examples{
 # Using example data from our package
 metrics = loadSample("ont-metrics")
-result = quality(data=metrics, k=5)
-result = quality(metrics, k=6, getImages=FALSE)
 result = quality(metrics, k=4, label="Experiment 1:")
 
 }

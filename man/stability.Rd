@@ -47,8 +47,6 @@ having the following meaning:
 \examples{
 # Using example data from our package
 metrics <- loadSample("ont-metrics")
-result <- stability(data=metrics, k=4, getImages=TRUE)
-result <- stability(metrics, k=6, getImages=FALSE)
 result <- stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
 
 }

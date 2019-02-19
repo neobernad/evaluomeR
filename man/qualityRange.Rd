@@ -56,10 +56,8 @@ range [0,1], having the following meaning:
 \examples{
 # Using example data from our package
 metrics = loadSample("ont-metrics")
-dataFrameList = qualityRange(data=metrics, k.range=c(3,5))
 # Without plotting
 dataFrameList = qualityRange(data=metrics, k.range=c(2,6), getImages = FALSE)
-dataFrameList = qualityRange(data=metrics, k.range=c(2,6), label="Experiment 1:")
 
 }
 \references{

@@ -29,8 +29,6 @@
 #' @examples
 #' # Using example data from our package
 #' metrics = loadSample("ont-metrics")
-#' result = quality(data=metrics, k=5)
-#' result = quality(metrics, k=6, getImages=FALSE)
 #' result = quality(metrics, k=4, label="Experiment 1:")
 #'
 #' @references
@@ -102,10 +100,8 @@ quality <- function(data, k=5, getImages=TRUE,
 #' @examples
 #' # Using example data from our package
 #' metrics = loadSample("ont-metrics")
-#' dataFrameList = qualityRange(data=metrics, k.range=c(3,5))
 #' # Without plotting
 #' dataFrameList = qualityRange(data=metrics, k.range=c(2,6), getImages = FALSE)
-#' dataFrameList = qualityRange(data=metrics, k.range=c(2,6), label="Experiment 1:")
 #'
 #' @references
 #' \insertRef{kaufman2009finding}{evaluomeR}

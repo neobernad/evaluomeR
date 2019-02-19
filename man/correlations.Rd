@@ -37,8 +37,6 @@ and 1 (direct).
 \examples{
 # Using example data from our package
 metrics = loadSample("ont-metrics")
-cor = correlations(data=metrics, getImages = TRUE)
-# Changing figure margings
 cor = correlations(data=metrics, getImages = TRUE, margins = c(1,0,5,11))
 
 }
