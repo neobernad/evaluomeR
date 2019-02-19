@@ -1,6 +1,8 @@
+Changes in version 0.99.5 (2019-04-19)
+  + Removing some @examples so that they do not exceed the time limit of Bioconductor check
+
 Changes in version 0.99.4 (2019-04-16)
   + The `correlations` method also uses `SummarizedExperiment` as output object.
-
 
 Changes in version 0.99.3 (2019-04-16)
   + All methods depend on `SummarizedExperiment` as input/output object.
