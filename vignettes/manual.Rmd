@@ -152,13 +152,13 @@ data("bioMetrics")
 
 ## Correlations ##
 
-We provide the `correlations` function to evaluate the correlations among the
+We provide the `metricsCorrelations` function to evaluate the correlations among the
 metrics defined in the `SummarizedExperiment`:
 
 ```{r correlations-1, echo=TRUE}
 library(evaluomeR)
 data("rnaMetrics")
-correlationSE <- correlations(rnaMetrics, margins =  c(4,4,12,10))
+correlationSE <- metricsCorrelations(rnaMetrics, margins =  c(4,4,12,10))
 # Access the correlation matrix via its first assay:
 # assay(correlationSE,1)
 ```
@@ -310,7 +310,7 @@ the `quality` function to see further silhouette information on the plots.
 ## General functionality ##
 
 In this section we describe a series of parameters that are shared among our
-analysis functions: `correlations`, `stability`, `stabilityRange`, `quality`
+analysis functions: `metricsCorrelations`, `stability`, `stabilityRange`, `quality`
 and `qualityRange`.
 
 ### Disabling plotting ###

@@ -1,6 +1,6 @@
 #' @title Calculation of Pearson correlation coefficient.
-#' @name correlations
-#' @aliases correlations
+#' @name metricsCorrelations
+#' @aliases metricsCorrelations
 #' @description
 #' Calculation of Pearson correlation coefficient between every pair of
 #' metrics available in order to quantify their interrelationship degree.
@@ -16,9 +16,9 @@
 #' @examples
 #' # Using example data from our package
 #' data("ontMetrics")
-#' cor = correlations(ontMetrics, getImages = TRUE, margins = c(1,0,5,11))
+#' cor = metricsCorrelations(ontMetrics, getImages = TRUE, margins = c(1,0,5,11))
 #'
-correlations <- function(data, margins=c(0,10,9,11), getImages=TRUE) {
+metricsCorrelations <- function(data, margins=c(0,10,9,11), getImages=TRUE) {
 
   data <- getAssay(data, 1)
 

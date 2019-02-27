@@ -1,3 +1,6 @@
+Changes in version 0.99.7 (2019-02-19)
+  + The method 'correlations' is now 'metricsCorrelations'
+
 Changes in version 0.99.6 (2019-02-19)
   + Internal improvements according to Bioconductor reviews
 
