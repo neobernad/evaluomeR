@@ -1,28 +1,3 @@
-#' @title Sample input data loader
-#' @name loadSample
-#' @aliases loadSample
-#' @description
-#' This method is a wrapper to load sample input data located inside evaluomeR package.
-#'
-#' @param descriptor Sample file to load: "ont-metrics", "rna-metrics" or "biopathways-metrics".
-#'
-#' @return The \code{\link{SummarizedExperiment}} specified via \code{descriptor}.
-#'
-#' @examples
-#' # Using example data from our package
-#' metrics = loadSample("rna-metrics")
-#'
-loadSample <- function(descriptor) {
-  samples <- c('ont-metrics','rna-metrics','biopathways-metrics')
-  if (is.element(descriptor, samples)) {
-    dataFrame <- read.csv(file=system.file('extdata',descriptor, package="evaluomeR"), header=TRUE);
-    se <- createSE(dataFrame)
-    return(se)
-  } else {
-    stop("Invalid descriptor")
-  }
-}
-
 #' @title Dataframe getter for \code{qualityRange} function.
 #' @name getDataQualityRange
 #' @aliases getDataQualityRange
@@ -37,8 +12,8 @@ loadSample <- function(descriptor) {
 #'
 #' @examples
 #' # Using example data from our package
-#' metrics = loadSample("ont-metrics")
-#' qualityRangeData <- qualityRange(data=metrics, k.range=c(3,5), getImages = FALSE)
+#' data("ontMetrics")
+#' qualityRangeData <- qualityRange(ontMetrics, k.range=c(3,5), getImages = FALSE)
 #' # Getting dataframe that contains information about k=5
 #' k5Data = getDataQualityRange(qualityRangeData, 5)
 #'
@@ -47,7 +22,7 @@ getDataQualityRange <- function(data, k) {
   # From, e.g, k_4 to 4
   kValues = substr(dataNames, nchar(dataNames)-0, nchar(dataNames))
   kValues = as.integer(kValues)
-  kValues.length = length(kValues);
+  kValues.length = length(kValues)
 
   if (k >= kValues[1] && k <= kValues[kValues.length]) {
     column = paste("k_", k, sep="")
@@ -59,6 +34,19 @@ getDataQualityRange <- function(data, k) {
     stop(error)
   }
 }
+
+###############################
+## Package local environment/variables ##
+###############################
+
+pkg.env <- new.env()
+pkg.env$m.stab.global = NULL
+pkg.env$m.global = NULL
+pkg.env$e.global = NULL
+pkg.env$estable = NULL
+pkg.env$names.index = NULL
+pkg.env$names.metr = NULL
+
 
 #####################
 ## Private methods ##
@@ -116,7 +104,7 @@ getAssay <- function(SummarizedExperiment, position) {
                    position, sep="")
     stop(error)
   }
-  test = assay(se, position)
+  data = assay(se, position)
   # Datasets <- test[,1]
   # if (is.null(rownames(test))) {
   #   Datasets <- paste("Dataset_", c(1:length(test[,1])), sep="")
@@ -125,14 +113,17 @@ getAssay <- function(SummarizedExperiment, position) {
   # }
 
   # test <- data.frame(Datasets,test)
-  test <- data.frame(test)
-  names(test) <- colnames(test)
-  return(test)
+  data <- data.frame(data)
+  names(data) <- colnames(data)
+  return(data)
 }
 
 # data: One dataframe, thus one assay
 createSE <- function(data) {
-  nrows <- nrow(data); ncols <- ncol(data)
+  DataFrame = NULL
+  SimpleList = NULL
+  nrows <- nrow(data)
+  ncols <- ncol(data)
   counts <- data.matrix(data)
   colnames(counts) <- NULL
   colData <- DataFrame(metrics=colnames(data),

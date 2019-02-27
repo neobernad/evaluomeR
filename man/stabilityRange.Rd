@@ -4,8 +4,7 @@
 \alias{stabilityRange}
 \title{Stability index for a range of k clusters.}
 \usage{
-stabilityRange(data, k.range = c(2, 15), bs = 100, getImages = TRUE,
-  label = NULL, path = NULL)
+stabilityRange(data, k.range = c(2, 15), bs = 100, getImages = TRUE)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
@@ -24,10 +23,6 @@ contained in [2,15] range.}
 \item{bs}{Positive integer. Bootstrap value to perform the resampling.}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}
-
-\item{label}{String. If not NULL, the label will appear on the title of the plots.}
-
-\item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
 A \code{\link{SummarizedExperiment}} containing the stability measurements and
@@ -49,8 +44,8 @@ having the following meaning:
 }
 \examples{
 # Using example data from our package
-metrics <- loadSample("ont-metrics")
-result <- stabilityRange(metrics, k.range=c(2,3))
+data("ontMetrics")
+result <- stabilityRange(ontMetrics, k.range=c(2,3))
 
 }
 \references{

@@ -4,8 +4,7 @@
 \alias{correlations}
 \title{Calculation of Pearson correlation coefficient.}
 \usage{
-correlations(data, margins = c(0, 10, 9, 11), getImages = TRUE,
-  label = NULL, path = NULL)
+correlations(data, margins = c(0, 10, 9, 11), getImages = TRUE)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
@@ -19,10 +18,6 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{margins}{See \code{\link{par}}.}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}
-
-\item{label}{String. If not NULL, the label will appear on the title of the plots.}
-
-\item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
 The Pearson correlation matrix as an assay
@@ -36,7 +31,7 @@ and 1 (direct).
 }
 \examples{
 # Using example data from our package
-metrics = loadSample("ont-metrics")
-cor = correlations(data=metrics, getImages = TRUE, margins = c(1,0,5,11))
+data("ontMetrics")
+cor = correlations(ontMetrics, getImages = TRUE, margins = c(1,0,5,11))
 
 }

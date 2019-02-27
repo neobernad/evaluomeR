@@ -4,7 +4,7 @@
 \alias{quality}
 \title{Goodness of classifications.}
 \usage{
-quality(data, k = 5, getImages = TRUE, label = NULL, path = NULL)
+quality(data, k = 5, getImages = TRUE)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
@@ -18,10 +18,6 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{k}{Positive integer. Number of clusters between [2,15] range.}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}
-
-\item{label}{String. If not NULL, the label will appear on the title of the plots.}
-
-\item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
 A \code{\link{SummarizedExperiment}} containing the silhouette width measurements and
@@ -49,8 +45,8 @@ range [0,1], having the following meaning:
 }
 \examples{
 # Using example data from our package
-metrics = loadSample("ont-metrics")
-result = quality(metrics, k=4, label="Experiment 1:")
+data("ontMetrics")
+result = quality(ontMetrics, k=4)
 
 }
 \references{

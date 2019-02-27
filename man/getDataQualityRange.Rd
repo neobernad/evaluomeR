@@ -20,8 +20,8 @@ the object returned by \code{\link{qualityRange}} function.
 }
 \examples{
 # Using example data from our package
-metrics = loadSample("ont-metrics")
-qualityRangeData <- qualityRange(data=metrics, k.range=c(3,5), getImages = FALSE)
+data("ontMetrics")
+qualityRangeData <- qualityRange(ontMetrics, k.range=c(3,5), getImages = FALSE)
 # Getting dataframe that contains information about k=5
 k5Data = getDataQualityRange(qualityRangeData, 5)
 

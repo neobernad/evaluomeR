@@ -39,20 +39,43 @@ library(SummarizedExperiment)
 
 # Introduction #
 
-The **evaluomeR** package permits to evaluate the reliability of bioinformatic metrics by analysing the stability and goodness of the classifications of such metrics.  The method takes the measurements of the metrics for the dataset and evaluates the reliability of the metrics according to the following analyses: Correlations, Stability and Goodness of classifications.
+The **evaluomeR** package permits to evaluate the reliability of bioinformatic
+metrics by analysing the stability and goodness of the classifications of such
+metrics.  The method takes the measurements of the metrics for the dataset and
+evaluates the reliability of the metrics according to the following analyses:
+Correlations, Stability and Goodness of classifications.
 
-* **Correlations**: Calculation of Pearson correlation coefficient between every pair of metrics available in order to quantify their interrelationship degree. The score is in the range [-1,1].
+* **Correlations**: Calculation of Pearson correlation coefficient between
+every pair of metrics available in order to quantify their interrelationship
+degree. The score is in the range [-1,1].
 
     - Perfect correlations: -1 (inverse), and 1 (direct).
 
-* **Stability**: This analysis permits to estimate whether the clustering is meaningfully affected by small variations in the sample [@milligan1996measuring]. First, a clustering using the k-means algorithm is carried out. The value of K can be provided by the user. Then, the stability index is the mean of the Jaccard coefficient [@jaccard1901distribution] values of a number of bootstrap replicates. The values are in the range [0,1], having the following meaning:
+* **Stability**: This analysis permits to estimate whether the clustering is
+meaningfully affected by small variations in the sample
+[@milligan1996measuring]. First, a clustering using the k-means algorithm is
+carried out. The value of K can be provided by the user. Then, the stability
+index is the mean of the Jaccard coefficient [@jaccard1901distribution]
+values of a number of bootstrap replicates. The values are in the range [0,1],
+having the following meaning:
 
     - Unstable: [0, 0.60[.
     - Doubtful: [0.60, 0.75].
     - Stable: ]0.75, 0.85].
     - Highly Stable: ]0.85, 1].
     
-* **Goodness of classifications**: The goodness of the classifications are assessed by validating the clusters generated. For this purpose, we use the Silhouette width as validity index. This index computes and compares the quality of the clustering outputs found by the different metrics, thus enabling to measure the goodness of the classification for both instances and metrics. More precisely, this goodness measurement provides an assessment of how similar an instance is to other instances from the same cluster and dissimilar to the rest of clusters. The average on all the instances quantifies how the instances appropriately are clustered. Kaufman and Rousseeuw [@kaufman2009finding] suggested the interpretation of the global Silhouette width score as the effectiveness of the clustering structure. The values are in the range [0,1], having the following meaning:
+* **Goodness of classifications**: The goodness of the classifications are
+assessed by validating the clusters generated. For this purpose, we use the
+Silhouette width as validity index. This index computes and compares the
+quality of the clustering outputs found by the different metrics, thus
+enabling to measure the goodness of the classification for both instances and
+metrics. More precisely, this goodness measurement provides an assessment of
+how similar an instance is to other instances from the same cluster and
+dissimilar to the rest of clusters. The average on all the instances
+quantifies how the instances appropriately are clustered. Kaufman and
+Rousseeuw [@kaufman2009finding] suggested the interpretation of the global
+Silhouette width score as the effectiveness of the clustering structure. The
+values are in the range [0,1], having the following meaning:
 
     - There is no substantial clustering structure: [-1, 0.25].
     - The clustering structure is weak and could be artificial: ]0.25, 0.50].
@@ -69,12 +92,23 @@ BiocManager::install("evaluomeR")
 
 ## Prerequisites ##
 
-The package **evaluomeR** depends on the following CRAN packages for the calculus: *fpc* [@fpc2018], *cluster* [@cluster2018], *corrplot* [@corrplot2017]. Moreover, this package also depends on *grDevices*, *graphics*, *stats* and *utils* from R Core [@rcore] for plotting and on the Bioconductor package *SummarizedExperiment* [@summarizedExperiment] for input/output data.
+The package **evaluomeR** depends on the following CRAN packages for the
+calculus: *fpc* [@fpc2018], *cluster* [@cluster2018], *corrplot*
+[@corrplot2017]. Moreover, this package also depends on *grDevices*,
+*graphics*, *stats* and *utils* from R Core [@rcore] for plotting and on the
+Bioconductor package *SummarizedExperiment* [@summarizedExperiment] for
+input/output data.
 
 # Using evaluomeR #
 
 ## Creating an input SummarizedExperiment ##
-The input is a `SummarizedExperiment` object. The assay contained in `SummarizedExperiment` must follow a certain structure, see Table \@ref(tab:table): A valid header must be specified. The first column of the header is the ID or name of the instance of the dataset (e.g., ontology, pathway, etc.) on which the metrics are measured. The other  columns of the header contains the names of the metrics. The rows contains the measurements of the metrics for each instance in the dataset.
+The input is a `SummarizedExperiment` object. The assay contained in
+`SummarizedExperiment` must follow a certain structure, see Table
+\@ref(tab:table): A valid header must be specified. The first column of the
+header is the ID or name of the instance of the dataset (e.g., ontology,
+pathway, etc.) on which the metrics are measured. The other  columns of the
+header contains the names of the metrics. The rows contains the measurements
+of the metrics for each instance in the dataset.
 
 ID        | MetricNameA | MetricNameB | MetricNameC | ... |
 --------- | ----------- | ----------- | ----------- | --- | 
@@ -82,34 +116,48 @@ instance1 | 1.2         | 6.4         | 0.5         | ... |
 instance2 | 2.4         | 5.4         | 0.8         | ... |
 instance3 | 1.9         | 8.9         | 1.1         | ... |
   
-: (\#tab:table) Example of an input assay from a `SummarizedExperiment` for the **evaluomeR** package.
+: (\#tab:table) Example of an input assay from a `SummarizedExperiment` for
+the **evaluomeR** package.
 
 ## Using input sample data from evaluomeR ##
 
 In our package we provide three different sample input data:
 
-* **ont-metrics**: Structural ontology metrics, 19 metrics measuring structural aspects of bio-ontologies have been analysed on two different corpora of ontologies: OBO Foundry and AgroPortal [@ontoeval].
+* **ontMetrics**: Structural ontology metrics, 19 metrics measuring
+structural aspects of bio-ontologies have been analysed on two different
+corpora of ontologies: OBO Foundry and AgroPortal [@ontoeval].
 
-* **rna-metrics**: RNA quality metrics for the assessment of gene expression differences, 2 quality metrics from 16 aliquots of a unique batch of RNA Samples. The metrics are Degradation Factor (DegFact) and RNA Integrity Number (RIN) [@imbeaud2005towards].
+* **rnaMetrics**: RNA quality metrics for the assessment of gene expression
+differences, 2 quality metrics from 16 aliquots of a unique batch of RNA
+Samples. The metrics are Degradation Factor (DegFact) and RNA Integrity Number
+(RIN) [@imbeaud2005towards].
 
-* **biopathways-metrics**: Metrics for biological pathways, 2 metrics that quantitative characterizations of the importance of regulation in biochemical pathway systems, including systems designed for applications in synthetic biology or metabolic engineering. The metrics are reachability and efficiency [@davis2018metrics].
+* **bioMetrics**: Metrics for biological pathways, 2 metrics that
+quantitative characterizations of the importance of regulation in biochemical
+pathway systems, including systems designed for applications in synthetic
+biology or metabolic engineering. The metrics are reachability and efficiency
+[@davis2018metrics].
 
-The user shall run the `loadSample` method to load **evaluomeR** sample input data. This requires to provide the descriptor of the desired dataset. The descriptor can take the following values: "ont-metrics", "rna-metrics" or "biopathways-metrics".
+The user shall run the `data` built-in method to load **evaluomeR** sample input
+data. This requires to provide the descriptor of the desired dataset. The
+datasets availables can take the following values: "ontMetrics", "rnaMetrics" or
+"bioMetrics".
 
 ```{r sample-input}
 library(evaluomeR)
-ontMetrics <- loadSample("ont-metrics")
-rnaMetrics <- loadSample("rna-metrics")
-biopathwaysMetrics <- loadSample("biopathways-metrics")
+data("ontMetrics")
+data("rnaMetrics")
+data("bioMetrics")
 ```
 
 ## Correlations ##
 
-We provide the `correlations` function to evaluate the correlations among the metrics defined in the `SummarizedExperiment`:
+We provide the `correlations` function to evaluate the correlations among the
+metrics defined in the `SummarizedExperiment`:
 
 ```{r correlations-1, echo=TRUE}
 library(evaluomeR)
-rnaMetrics <- loadSample("rna-metrics")
+data("rnaMetrics")
 correlationSE <- correlations(rnaMetrics, margins =  c(4,4,12,10))
 # Access the correlation matrix via its first assay:
 # assay(correlationSE,1)
@@ -117,17 +165,23 @@ correlationSE <- correlations(rnaMetrics, margins =  c(4,4,12,10))
 
 ## Stability analysis ##
 
-The calculation of the stability indices is performed by `stability` and `stabilityRange` functions.
+The calculation of the stability indices is performed by `stability` and
+`stabilityRange` functions.
 
 ### Stability ###
 
-The stability index analysis is performed by the `stability` function. For instance, running a stability analysis for the metrics of `rnaMetrics` with a number of `100` bootstrap replicates with a k-means cluster whose `k` is 2 (note that `k` must be inside [2,15] range):
+The stability index analysis is performed by the `stability` function. For
+instance, running a stability analysis for the metrics of `rnaMetrics` with a
+number of `100` bootstrap replicates with a k-means cluster whose `k` is 2
+(note that `k` must be inside [2,15] range):
 
 ```{r stability-1, results='hide', echo=TRUE}
 stabilityData <- stability(rnaMetrics, k=2, bs = 100)
 ```
 
-The `stability` function returns the `stabilityData` object, a `SummarizedExperiment` that contains an assay with the information shown in the plot:
+The `stability` function returns the `stabilityData` object, a
+`SummarizedExperiment` that contains an assay with the information shown in
+the plot:
 
 ```{r stability-1-assay, results='hide', echo=TRUE, eval=FALSE}
 assay(stabilityData, 1)
@@ -139,35 +193,54 @@ kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
 
-The plot represents the stability mean from each metric for a given `k` value. This mean is calculated by performing the average of every stability index from `k`ranges [1,k] for each metric.
+The plot represents the stability mean from each metric for a given `k` value.
+This mean is calculated by performing the average of every stability index
+from `k`ranges [1,k] for each metric.
 
 ### Stability range ###  {#sec:stabilityrange}
 
-The `stabilityRange` function is an iterative method of `stability` function. It performs a stability analysis for a range of `k` values (`k.range`).
+The `stabilityRange` function is an iterative method of `stability` function.
+It performs a stability analysis for a range of `k` values (`k.range`).
 
-For instance, analyzing the stability of `rnaMetrics` in range [2,4], with `bs=100`:
+For instance, analyzing the stability of `rnaMetrics` in range [2,4], with
+`bs=100`:
 
 ```{r stabilityRange-1, results='hide', echo=TRUE}
 stabilityRangeData = stabilityRange(rnaMetrics, k.range=c(2,4), bs = 100)
 ```
 
-Two kind of graphs are plotted in `stabilityRange` function. The first type (titled as "*St. Indices for k=X across metrics*") shows, for every `k` value, the stability indices across the metrics. The second kind (titled as *St. Indices for metric 'X' in range [x,y]*), shows a plot of the behaviour of each metric across the `k` range.
+Two kind of graphs are plotted in `stabilityRange` function. The first type
+(titled as "*St. Indices for k=X across metrics*") shows, for every `k` value,
+the stability indices across the metrics. The second kind (titled as 
+*St. Indices for metric 'X' in range [x,y]*), shows a plot of the behaviour of
+each metric across the `k` range.
 
 ## Goodness of classifications ##
 
-There are two methods to calculate the goodness of classifications: `quality` and `qualityRange`.
+There are two methods to calculate the goodness of classifications: `quality`
+and `qualityRange`.
 
 ### Quality ###
-This method plots how the metrics behave for the current `k` value, according to the average silhouette width. Also, it will plot how the clusters are grouped for each metric (one plot per metric).
-For instance, running a quality analysis for the two metrics of `rnaMetrics` dataset, being `k=4`:
+This method plots how the metrics behave for the current `k` value, according
+to the average silhouette width. Also, it will plot how the clusters are
+grouped for each metric (one plot per metric).
+For instance, running a quality analysis for the two metrics of `rnaMetrics`
+dataset, being `k=4`:
 
 ```{r quality-1, results='hide', eval=TRUE, echo=TRUE}
 qualityData = quality(rnaMetrics, k = 4)
 ```
 
-The data of the first plot titled as "*Qual. Indices for k=4 across metrics*" according to *Silhouette avg. width*, is stored in *Avg_Silhouette_Width* column from the first assay of the `SummarizedExperiment`, `qualityData`. The other three plots titled by their metric name display the input rows grouped by colours for each cluster, along with their Silhouette width scores.
+The data of the first plot titled as "*Qual. Indices for k=4 across metrics*"
+according to *Silhouette avg. width*, is stored in *Avg_Silhouette_Width*
+column from the first assay of the `SummarizedExperiment`, `qualityData`. The
+other three plots titled by their metric name display the input rows grouped
+by colours for each cluster, along with their Silhouette width scores.
 
-The variable `qualityData` contains information about the clusters of each metric: The average silhouette width per cluster, the overall average sihouette width (taking into account all the clusters) and the number of individuals per cluster:
+The variable `qualityData` contains information about the clusters of each
+metric: The average silhouette width per cluster, the overall average
+sihouette width (taking into account all the clusters) and the number of
+individuals per cluster:
 
 ```{r quality-1-assay, results='hide', eval=FALSE, echo=TRUE}
 assay(qualityData,1)
@@ -182,25 +255,39 @@ kable(data) %>%
 
 ### Quality range ###
 
-The `qualityRange` function is an iterative method that uses the same functionality of `quality` for a range of values (`k.range`), instead for one unique `k` value. This methods allows to analyse the goodness of the classifications of the metric for different values of the range.
+The `qualityRange` function is an iterative method that uses the same
+functionality of `quality` for a range of values (`k.range`), instead for one
+unique `k` value. This methods allows to analyse the goodness of the
+classifications of the metric for different values of the range.
 
-In the next example we will keep using the `rnaMetrics` dataset, and a `k.range` set to [4,6].
+In the next example we will keep using the `rnaMetrics` dataset, and a
+`k.range` set to [4,6].
 
 ```{r quality-range-1, results='hide', eval=TRUE, echo=TRUE}
 k.range = c(4,6)
 qualityRangeData = qualityRange(rnaMetrics, k.range)
 ```
 
-The `qualityRange` function also returns two kind of plots, as seen in [Stability range](#sec:stabilityrange) section. One for each `k` in the `k.range`, showing the quality indices (goodness of the classification) across the metrics, and a second type of plot to show each metric with its respective quality index in each `k` value.
+The `qualityRange` function also returns two kind of plots, as seen in
+[Stability range](#sec:stabilityrange) section. One for each `k` in the
+`k.range`, showing the quality indices (goodness of the classification) across
+the metrics, and a second type of plot to show each metric with its respective
+quality index in each `k` value.
 
-The `qualityRangeData` object returned by `qualityRange` is list of `SummarizedExperiment`, whose size is `diff(k.range)+1`. In the example shown above, the size of `qualityRangeData` is 3, since the array length would contain the dataframes from `k=4` to `k=6`.
+The `qualityRangeData` object returned by `qualityRange` is list of
+`SummarizedExperiment`, whose size is `diff(k.range)+1`. In the example shown
+above, the size of `qualityRangeData` is 3, since the array length would
+contain the dataframes from `k=4` to `k=6`.
 
 ```{r quality-range-2, eval=TRUE, echo=TRUE}
 diff(k.range)+1
 length(qualityRangeData)
 ```
 
-The user can access a specific dataframe for a given `k` value in three different ways: by dollar notation, brackets notation or using our wrapper method `getDataQualityRange`. For instance, if the user wishes to retrieve the dataframe which contains information of `k=5`,  being the `k.range` [4,6]:
+The user can access a specific dataframe for a given `k` value in three
+different ways: by dollar notation, brackets notation or using our wrapper
+method `getDataQualityRange`. For instance, if the user wishes to retrieve the
+dataframe which contains information of `k=5`,  being the `k.range` [4,6]:
 
 ```{r quality-range-3, eval=FALSE, echo=TRUE}
 k5Data = qualityRangeData$k_5
@@ -217,46 +304,34 @@ kable(data) %>%
   scroll_box(width = "100%", height = "150px")
 ```
 
-Once the user believes to have found a proper `k` value, then the user can run the `quality` function to see further silhouette information on the plots.
+Once the user believes to have found a proper `k` value, then the user can run
+the `quality` function to see further silhouette information on the plots.
 
 ## General functionality ##
 
-In this section we describe a series of parameters that are shared among our analysis functions: `correlations`, `stability`, `stabilityRange`, `quality` and `qualityRange`.
+In this section we describe a series of parameters that are shared among our
+analysis functions: `correlations`, `stability`, `stabilityRange`, `quality`
+and `qualityRange`.
 
 ### Disabling plotting ###
 
-The generation of the images can be disabled by setting to `FALSE` the parameter `getImages`:
+The generation of the images can be disabled by setting to `FALSE` the
+parameter `getImages`:
 
 ```{r general-func-noplot, eval=FALSE, echo=TRUE}
 stabilityData <- stability(rnaMetrics, k=5, bs = 50, getImages = FALSE)
 ```
 
-This prevents from generating any graph, performing only the calculus. By default `getImages` is set to `TRUE`.
+This prevents from generating any graph, performing only the calculus. By
+default `getImages` is set to `TRUE`.
 
-### Saving the plots ###
-
-The plots can be stored in disk by setting a `path` to an existing directory:
-```{r general-func-path, eval=FALSE, echo=TRUE}
-location <- "/home/user/directory" # Set a path to a valid directory
-qualityRangeData <- qualityRange(data=rnaMetrics, k.range=c(2,3), getImages = FALSE, path=location)
-```
-
-The default value of `path` is `NULL`.
-
-### Labeling the plots ###
-
-The plots can be labeled by the `label` parameter. The value of `label` is put into the main title of the plots:
-```{r general-func-label, results='hide', eval=TRUE, echo=TRUE}
-stabilityRangeData <- stabilityRange(data=rnaMetrics, k.range=c(6,7), bs=20, getImages = TRUE, label="Experiment 1:")
-```
-
-Additionally, if the user establishes both `label` and `path` parameters, the `label` text is appended to the begining of name of the plot file. The default value of `label` is `NULL`.
 
 # Information #
 
 ## Contact ##
 
-The source code is available at **github**. For bug/error reports please refer to <joseantonio.bernabe1@um.es>. Questions regarding functionality can be sent to <joseantonio.bernabe1@um.es>, <mfranco@um.es> or <jmvivomo@um.es>.
+The source code is available at **github**. For bug/error reports please refer
+to evaluomeR github issues [https://github.com/neobernad/evaluomeR/issues](https://github.com/neobernad/evaluomeR/issues).
 
 ## License ##
 
@@ -264,10 +339,14 @@ The package 'evaluomeR' is licensed under GPL-3.
 
 ## How to cite ##
 
-Currently there is no literature for evaluomeR. Please cite the R package, the github or the website. This package will be updated as soon as a citation is available.
+Currently there is no literature for evaluomeR. Please cite the R package, the
+github or the website. This package will be updated as soon as a citation is
+available.
 
 ## Additional information ##
-The evaluomeR functionality can also be access through a web interface^[[Evaluome web ](http://sele.inf.um.es/evaluome/index.html)] an API REST^[[API documentation](https://documenter.getpostman.com/view/1705269/RznBMfbB)].
+The evaluomeR functionality can also be access through a web
+interface^[[Evaluome web ](http://sele.inf.um.es/evaluome/index.html)] an API
+REST^[[API documentation](https://documenter.getpostman.com/view/1705269/RznBMfbB)].
 
 ## Session information ##
 

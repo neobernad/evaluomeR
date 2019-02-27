@@ -25,16 +25,14 @@
 #' @param k Positive integer. Number of clusters between [2,15] range.
 #' @param bs Positive integer. Bootstrap value to perform the resampling.
 #' @param getImages Boolean. If true, a plot is displayed.
-#' @param label String. If not NULL, the label will appear on the title of the plots.
-#' @param path String. Path to a valid directory where plots are saved.
 #'
 #' @return A \code{\link{SummarizedExperiment}},
 #' containing an assay with the stability measurements and means for 1 to k clusters.
 #'
 #' @examples
 #' # Using example data from our package
-#' metrics <- loadSample("ont-metrics")
-#' result <- stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
+#' data("ontMetrics")
+#' result <- stability(ontMetrics, k=6, getImages=TRUE)
 #'
 #' @references
 #' \insertRef{milligan1996measuring}{evaluomeR}
@@ -42,29 +40,18 @@
 #' \insertRef{jaccard1901distribution}{evaluomeR}
 #'
 #'
-stability <- function(data, k=5, bs=100, getImages=TRUE,
-                      label=NULL, path=NULL) {
-
+stability <- function(data, k=5, bs=100, getImages=TRUE) {
   data <- getAssay(data, 1)
 
   checkKValue(k)
-  if (!is.null(label)) {
-    isString(label)
-  }
-
-  cur.env <- new.env()
 
   suppressWarnings(
-    runStabilityIndex(data, k.min=k, k.max=k, bs, cur.env))
+    runStabilityIndex(data, k.min=k, k.max=k, bs))
   stabilityDataFrame <- suppressWarnings(
-    runStabilityIndexTableRange(k.min=k, k.max=k, cur.env))
+    runStabilityIndexTableRange(k.min=k, k.max=k))
   if (getImages == TRUE) {
-    if (!is.null(path)) {
-      path <- checkDirectory(path)
-    }
     suppressWarnings(
-      runStabilityIndexK_IMG(bs, k.min = k, k.max = k,
-                           label, path, cur.env))
+      runStabilityIndexK_IMG(bs, k.min = k, k.max = k))
   }
   se <- createSE(stabilityDataFrame)
   return(se)
@@ -99,8 +86,8 @@ stability <- function(data, k=5, bs=100, getImages=TRUE,
 #'
 #' @examples
 #' # Using example data from our package
-#' metrics <- loadSample("ont-metrics")
-#' result <- stabilityRange(metrics, k.range=c(2,3))
+#' data("ontMetrics")
+#' result <- stabilityRange(ontMetrics, k.range=c(2,3))
 #'
 #' @references
 #' \insertRef{milligan1996measuring}{evaluomeR}
@@ -109,7 +96,7 @@ stability <- function(data, k=5, bs=100, getImages=TRUE,
 #'
 #'
 stabilityRange <- function(data, k.range=c(2,15), bs=100,
-                           getImages=TRUE, label=NULL, path=NULL) {
+                           getImages=TRUE) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -121,49 +108,41 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
   if (k.max < k.min) {
     stop("The first value of k.range cannot be greater than its second value")
   }
-  if (!is.null(label)) {
-    isString(label)
-  }
+
   data <- getAssay(data, 1)
 
-  cur.env <- new.env()
   suppressWarnings(
-    runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cur.env))
+    runStabilityIndex(data, k.min=k.min, k.max=k.max, bs))
   stabilityDataFrame <- suppressWarnings(
-    runStabilityIndexTableRange(k.min=k.min, k.max=k.max, cur.env))
+    runStabilityIndexTableRange(k.min=k.min, k.max=k.max))
 
   if (getImages == TRUE) {
-    if (!is.null(path)) {
-      path <- checkDirectory(path)
-    }
     suppressWarnings(
-      runStabilityIndexK_IMG(bs, k.min=k.min, k.max=k.max,
-                             label, path, cur.env))
+      runStabilityIndexK_IMG(bs, k.min=k.min, k.max=k.max))
     suppressWarnings(
-      runStabilityIndexMetric_IMG(bs, k.min=k.min, k.max=k.max,
-                                label, path, cur.env))
+      runStabilityIndexMetric_IMG(bs, k.min=k.min, k.max=k.max))
   }
   se <- createSE(stabilityDataFrame)
   return(se)
 }
 
-runStabilityIndex <- function(data, k.min, k.max, bs, env) {
-  directa=NULL; inversa=NULL;
+runStabilityIndex <- function(data, k.min, k.max, bs) {
+  directa=NULL
+  inversa=NULL
   datos.bruto=NULL
   names.metr=NULL
   names.index=NULL
 
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
-  assign('names.metr', names.metr, envir=env)
 
-  semilla=NULL
+  pkg.env$names.metr = names.metr
+
   contador=NULL
   m.jac=NULL
   m.stab.global=NULL
   bs.values=NULL
   todo.estable=NULL
-  semilla=15555
   bs.values=c(bs)
   contador=0
   i.min=k.min
@@ -180,19 +159,18 @@ runStabilityIndex <- function(data, k.min, k.max, bs, env) {
       m.jac[[i.metr]]=matrix(data=NA, nrow=length(bs.values), ncol=j.k)
       contador=contador+1
       i=i.metr+1
-      #set.seed(semilla)
       estable$n.metric=i.metr
       estable$name.metric=names.metr[i.metr]
       estable$n.k=j.k
       estable$name.ontology=names(datos.bruto[1])
 
-      km5=NULL;
+      km5=NULL
 
-      v.size=NULL;
+      v.size=NULL
       v.size=length(levels(as.factor(datos.bruto[,i])))
       if (v.size>=j.k) {
 
-        km5$cluster=quiet(clusterboot(datos.bruto[,i], B=bs, bootmethod="boot", clustermethod=kmeansCBI, krange=j.k, seed=semilla))
+        km5$cluster=quiet(clusterboot(datos.bruto[,i], B=bs, bootmethod="boot", clustermethod=kmeansCBI, krange=j.k))
         km5$bspart=km5$cluster$partition
         km5$jac=km5$cluster$bootmean
 
@@ -277,17 +255,18 @@ runStabilityIndex <- function(data, k.min, k.max, bs, env) {
     }
   }
 
-  assign('m.stab.global', m.stab.global, envir=env)
-  assign('e.stab.global', e.stab.global, envir=env)
+  pkg.env$m.stab.global = m.stab.global
+  pkg.env$e.stab.global = e.stab.global
   # return(stabilityDataFrame)
   return(NULL)
 }
 
-runStabilityIndexTableRange <- function(k.min, k.max, env) {
+runStabilityIndexTableRange <- function(k.min, k.max) {
   stabilityDataList = NULL
   stabilityDataList = list()
-  m.stab.global = get('m.stab.global', envir=env)
-  names.metr = get('names.metr', envir=env)
+
+  m.stab.global = pkg.env$m.stab.global
+  names.metr = pkg.env$names.metr
 
   # Build header
   header <- list("Metric")
@@ -315,8 +294,7 @@ runStabilityIndexTableRange <- function(k.min, k.max, env) {
 }
 
 # Stability index per K value (x values = matrics)
-runStabilityIndexK_IMG <- function(bs, k.min, k.max,
-                                   label, path, env) {
+runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
   ancho=NULL
   alto=NULL
   ajuste=NULL
@@ -339,24 +317,24 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max,
   #Pattern: GlobalStability_K_2, ..., GlobalStability_K_N
   figurename="GlobalStability_K_"
 
-
   colores <- c("black", "blue", "red", "darkgreen", "orange", "magenta", "gray")
   ltype <- c(1, 2, 3, 4, 3, 4, 6)
 
   stype <- c("o", "l")
   pchtype <- c(1, 2, 3, 4, 5, 5)
-  names.metr = get('names.metr', envir=env)
-  e.stab.global = get('e.stab.global', envir=env)
+
+  e.stab.global = pkg.env$e.stab.global
+  names.metr = pkg.env$names.metr
   i.min=k.min
   i.max=k.max
+  margins <- par(mar=c(5,5,3,3))
+  on.exit(par(margins))
   for (j.k in i.min:i.max) {
     cur.data = e.stab.global[[j.k]]
     cur.data = cur.data[!is.na(cur.data)]
-    par(new=FALSE,bg="white",fg="black")
-    par(mar=c(5,5,3,3))
     xnames=as.character(names.metr)
     ynames="Global Stability Indices"
-    g.main=paste(label, " St. Indices of the metrics for k=", j.k,sep="")
+    g.main=paste(" St. Indices of the metrics for k=", j.k,sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
          xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(0.5,1),
          ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
@@ -365,37 +343,11 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max,
     labels <- paste("b=", bs, sep = "")
     legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
     mtext(side=1, text="Metrics",line=4)
-    par(new=FALSE)
-
-    if (!is.null(path)) {
-
-      if (!is.null(label)) {
-        name <- paste(path, label, " - ", figurename, j.k, ".png", sep="")
-      } else {
-        name <- paste(path, label, figurename, j.k, ".png", sep="")
-      }
-
-      png(name)
-      par(new=FALSE,bg="white",fg="black")
-      par(mar=c(5,5,3,3))
-      plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-           xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(0.5,1),
-           ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
-      axis(1,at=1:length(xnames),labels=xnames,las=2,cex.axis=1)
-      axis(2,las=3,cex.axis=0.85)
-      labels <- paste("b=", bs, sep = "")
-      legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
-      mtext(side=1, text="Metrics",line=8)
-      par(new=FALSE)
-      dev.off()
-    }
   }
-
 }
 
 # Stability index per metric (x values = k range)
-runStabilityIndexMetric_IMG <- function(bs, k.min, k.max,
-                                        label, path, env) {
+runStabilityIndexMetric_IMG <- function(bs, k.min, k.max) {
   ancho=NULL
   alto=NULL
   ajuste=NULL
@@ -418,22 +370,23 @@ runStabilityIndexMetric_IMG <- function(bs, k.min, k.max,
   #Pattern: GlobalStability_MetricX, ..., GlobalStability_MetricN
   figurename="GlobalStability_"
 
-
   colores <- c("black", "blue", "red", "darkgreen", "orange", "magenta", "gray")
   ltype <- c(1, 2, 3, 4, 3, 4, 6)
 
   stype <- c("o", "l")
   pchtype <- c(1, 2, 3, 4, 5, 5)
-  names.metr = get('names.metr', envir=env)
-  m.stab.global = get('m.stab.global', envir=env)
+
+  m.stab.global = pkg.env$m.stab.global
+  names.metr = pkg.env$names.metr
+  margins <- par(mar=c(5,5,3,3))
+  on.exit(par(margins))
   for (i.metr in 1:length(names.metr)) {
     cur.data = m.stab.global[[i.metr]]
     cur.data = cur.data[!is.na(cur.data)]
-    par(new=FALSE,bg="white",fg="black")
-    par(mar=c(5,5,3,3))
+
     xnames=c(k.min:k.max)
     ynames="Global Stability Indices"
-    g.main=paste(label, " St. Indices of '", names.metr[i.metr], "' for k in [",
+    g.main=paste(" St. Indices of '", names.metr[i.metr], "' for k in [",
                  k.min, ",", k.max,"]",sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
          xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(0.5,1),
@@ -443,31 +396,6 @@ runStabilityIndexMetric_IMG <- function(bs, k.min, k.max,
     labels <- paste("b=", bs, sep = "")
     legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
     mtext(side=1, text="K values",line=3)
-
-    if (!is.null(path)) {
-
-      if (!is.null(label)) {
-        name <- paste(path, label, " - ", figurename, names.metr[i.metr], "_range[",
-                      k.min, ",", k.max,"].png", sep="")
-      } else {
-        name <- paste(path, label, figurename, names.metr[i.metr], "_range[",
-                      k.min, ",", k.max,"].png", sep="")
-      }
-
-      png(name)
-      par(new=FALSE,bg="white",fg="black")
-      par(mar=c(5,5,3,3))
-      plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-           xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(0.5,1),
-           ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
-      axis(1,at=1:length(k.min:k.max),labels=xnames,las=1,cex.axis=escalax)
-      axis(2,las=3,cex.axis=0.85)
-      labels <- paste("b=", bs, sep = "")
-      legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
-      mtext(side=1, text="K values",line=3)
-      par(new=FALSE)
-      dev.off()
-    }
   }
 
 }

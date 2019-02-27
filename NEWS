@@ -1,14 +1,17 @@
-Changes in version 0.99.5 (2019-04-19)
+Changes in version 0.99.6 (2019-02-19)
+  + Internal improvements according to Bioconductor reviews
+
+Changes in version 0.99.5 (2019-02-19)
   + Removing some @examples so that they do not exceed the time limit of Bioconductor check
 
-Changes in version 0.99.4 (2019-04-16)
+Changes in version 0.99.4 (2019-02-16)
   + The `correlations` method also uses `SummarizedExperiment` as output object.
 
-Changes in version 0.99.3 (2019-04-16)
+Changes in version 0.99.3 (2019-02-16)
   + All methods depend on `SummarizedExperiment` as input/output object.
 
-Changes in version 0.99.2 (2019-04-15)
+Changes in version 0.99.2 (2019-02-15)
 + SummarizedExperiment can be now processed via `seToDataFrame` method. Adding SummarizedExperiment and airway dependencies.
 
-Changes in version 0.99.1 (2019-04-11)
+Changes in version 0.99.1 (2019-02-11)
 + Submitted to Bioconductor

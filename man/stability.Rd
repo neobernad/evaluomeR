@@ -4,8 +4,7 @@
 \alias{stability}
 \title{Stability index.}
 \usage{
-stability(data, k = 5, bs = 100, getImages = TRUE, label = NULL,
-  path = NULL)
+stability(data, k = 5, bs = 100, getImages = TRUE)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
@@ -21,10 +20,6 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{bs}{Positive integer. Bootstrap value to perform the resampling.}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}
-
-\item{label}{String. If not NULL, the label will appear on the title of the plots.}
-
-\item{path}{String. Path to a valid directory where plots are saved.}
 }
 \value{
 A \code{\link{SummarizedExperiment}},
@@ -46,8 +41,8 @@ having the following meaning:
 }
 \examples{
 # Using example data from our package
-metrics <- loadSample("ont-metrics")
-result <- stability(metrics, k=6, getImages=TRUE, label="Experiment 1:")
+data("ontMetrics")
+result <- stability(ontMetrics, k=6, getImages=TRUE)
 
 }
 \references{
