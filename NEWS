@@ -1,3 +1,6 @@
+Changes in version 0.99.8 (2019-02-19)
+  + Removed dependency with orphaned 'fpc' CRAN package
+
 Changes in version 0.99.7 (2019-02-19)
   + The method 'correlations' is now 'metricsCorrelations'
 

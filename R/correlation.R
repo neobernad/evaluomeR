@@ -20,7 +20,7 @@
 #'
 metricsCorrelations <- function(data, margins=c(0,10,9,11), getImages=TRUE) {
 
-  data <- getAssay(data, 1)
+  data <- as.data.frame(assay(data))
 
   MatCorr <- cor(data[,2:length(data)])
 
@@ -32,27 +32,14 @@ metricsCorrelations <- function(data, margins=c(0,10,9,11), getImages=TRUE) {
 }
 
 runMetricsCorrelationIMG <- function(data, correlations, margins) {
-  datos.bruto=NULL
-  names.metr=NULL
-  names.index=NULL
-  k.min=NULL
-  k.max=NULL
+
   datos.bruto = data
   MatCorr = correlations
   names.metr=names(datos.bruto)[-c(1)]  #metric names
 
   ##########################################################
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  margenes=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
-  ancho=5 #dimension de gr?fica  (pulgadas)
-  alto=4 #dimension de gr?fica  (pulgadas)
+  ancho=5 #dimension de grafica  (pulgadas)
+  alto=4 #dimension de grafica  (pulgadas)
   escala=0.6 #reescalamiento de texto
   escalax=escala #reescalamiento de ejes
   escalal=0.8 #reescalamiento de etiquetas de ejes
@@ -74,8 +61,6 @@ runMetricsCorrelationIMG <- function(data, correlations, margins) {
   wb <- c("white","black")
   ##########################################################
 
-  listaFigurasCor=NULL
-  contadorFiguras=1
   #Pattern: Correlations_X_metrics
   figurename="Correlations_"
 
@@ -115,5 +100,4 @@ runMetricsCorrelationIMG <- function(data, correlations, margins) {
            #cl.pos = "n", #pos col labels: "r", "b", "n"
            #mar=margenes, #margenes del grafico
            add = TRUE)
-
 }

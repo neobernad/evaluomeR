@@ -93,7 +93,7 @@ BiocManager::install("evaluomeR")
 ## Prerequisites ##
 
 The package **evaluomeR** depends on the following CRAN packages for the
-calculus: *fpc* [@fpc2018], *cluster* [@cluster2018], *corrplot*
+calculus: *cluster* [@cluster2018], *corrplot*
 [@corrplot2017]. Moreover, this package also depends on *grDevices*,
 *graphics*, *stats* and *utils* from R Core [@rcore] for plotting and on the
 Bioconductor package *SummarizedExperiment* [@summarizedExperiment] for

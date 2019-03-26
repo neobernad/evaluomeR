@@ -38,7 +38,7 @@ quality <- function(data, k=5, getImages=TRUE) {
 
   checkKValue(k)
 
-  data <- getAssay(data, 1)
+  data <- as.data.frame(assay(data))
 
   suppressWarnings(
     runQualityIndicesSilhouette(data, k.min = k, k.max = k, bs = 1))
@@ -112,7 +112,7 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE) {
     stop("The first value of k.range cannot be greater than its second value")
   }
 
-  data <- getAssay(data, 1)
+  data <- as.data.frame(assay(data))
 
   suppressWarnings(
     runQualityIndicesSilhouette(data, k.min = k.min, k.max = k.max, bs = 1))
@@ -130,9 +130,6 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE) {
 }
 
 runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
-  datos.bruto=NULL
-  names.metr=NULL
-  names.index=NULL
 
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
@@ -142,13 +139,9 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
   k.min=k.min
   k.max=k.max
 
-
   estable=NULL
   m.global=NULL
   e.global=NULL
-  i.min=NULL
-  i.max=NULL
-  contador=NULL
   contador=0
   remuestreo=bs
 
@@ -162,13 +155,9 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
       cat("\tCalculation of k = ", j.k,"\n")
       e.res=NULL
       e.res.or=NULL
-      i=NULL
-      j=NULL
       contador=contador+1
       i=i.metr+1
-
       j=j.k
-      #e.res=ClusterStability(dat=datos.bruto[,i],k=j, replicate=remuestreo, type='kmeans')
 
       e.res$n=contador
       e.res$n.metric=i.metr
@@ -177,8 +166,7 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
       e.res$n.k=j.k
       e.res$name.ontology=datos.bruto$Description
 
-      e.res$km5.dynamic.bs <- quiet(clusterboot(datos.bruto[,i], B=remuestreo, bootmethod="boot",clustermethod=kmeansCBI,krange=5)$partition)
-      e.res$kmk.dynamic.bs <- quiet(clusterboot(datos.bruto[,i], B=remuestreo, bootmethod="boot",clustermethod=kmeansCBI,krange=j)$partition)
+      e.res$kmk.dynamic.bs <- boot.cluster(data=datos.bruto[,i], nk=j.k, B=bs)$partition
 
       e.res.or$centr=by(datos.bruto[,i],e.res$kmk.dynamic.bs,mean)
 
@@ -191,13 +179,17 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
       metric.onto=datos.bruto[,i.metr+1]
       part.onto=as.numeric(e.res$kmk.dynamic.bs.or)
       sil.w=silhouette(part.onto, dist(metric.onto))
-      sil.c=cluster.stats(dist(metric.onto), part.onto, noisecluster=TRUE)
+      sil.c = NULL
+      sil.c$n=length(sil.w[,1])
+      sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
+      sil.c$cluster.number=length(summary(sil.w)$cluster.size)
+      sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
+      sil.c$avg.silwidths=summary(sil.w)$avg.width
       e.res$sil.w = sil.w
       e.res$sil.c = sil.c
       estable[[contador]]=e.res
 
       m.global[[i.metr]][j.k,] = mean(sil.w[,"sil_width"])
-      #m.global[[i.metr]][j.k,] = e.res$ST_global_sil
     }
   }
   for (j.k in i.min:i.max) {
@@ -214,14 +206,7 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
 
 # Silhouette width per k (x values = metrics)
 runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
+
   ancho=6
   alto=4
   escala=0.75
@@ -230,17 +215,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   ajuste=0.5
   escalat=0.5
   escalap=0.4
-  listaFigurasGrafMtr=NULL
-  contadorFiguras=1
 
-  e.mat.global=NULL
-  nombres=NULL
-  i.min=NULL
-  i.max=NULL
-  x=NULL
-  x.label=NULL
-  x.name=NULL
-  y.label=NULL
   m.global = pkg.env$m.global
   e.global = pkg.env$e.global
   e.mat.global=e.global
@@ -248,7 +223,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   names.index = pkg.env$names.index
   i.min=1
   i.max=k.max-(k.min-1)
-
+  leg.g = NULL
   names.metr = pkg.env$names.metr
   x=seq(1,length(names.metr))
   x.label="Metrics"
@@ -262,19 +237,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   margins <- par(mar=c(5,5,3,3))
   on.exit(par(margins))
   for (m.g in i.min:i.max) {
-    g.main=NULL
-    leg.g=NULL
-    ymin=NULL
-    ymax=NULL
-    xmin=NULL
-    xmax=NULL
-    xleg=NULL
-    yleg=NULL
-    c.max=NULL
-    t.linea=NULL
-    t.color=NULL
-    ymarcas=NULL
-    k.classes=NULL
+
     xmin=min(x)-0.25
     xmax=max(x)+0.25
     xleg=((xmax-xmin)*escalal)+3.2
@@ -292,8 +255,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
     par(new=FALSE,bg="white",fg="black")
 
     for (m in length(names.index)) {
-      y=NULL
-      y.name=NULL
+
       y=e.mat.global[[m.g]][,m]
       y.name=names.index[m]
       leg.g[m] <- paste(y.name," avg. width",sep="")
@@ -312,14 +274,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
 
 # Silhouette width per metric (x values = k range)
 runQualityIndicesSilhouetteMetric_IMG <- function(k.min, k.max) {
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
+
   ancho=6
   alto=4
   escala=0.9
@@ -328,17 +283,7 @@ runQualityIndicesSilhouetteMetric_IMG <- function(k.min, k.max) {
   ajuste=0.5
   escalat=0.5
   escalap=0.4
-  listaFigurasGrafMtr=NULL
-  contadorFiguras=1
 
-  m.mat.global=NULL
-  nombres=NULL
-  i.min=NULL
-  i.max=NULL
-  x=NULL
-  x.label=NULL
-  x.name=NULL
-  y.label=NULL
   m.global = pkg.env$m.global
   m.mat.global=m.global
   names.index = pkg.env$names.index
@@ -359,19 +304,7 @@ runQualityIndicesSilhouetteMetric_IMG <- function(k.min, k.max) {
   for (m.g in 1:length(names.metr)) {
     cur.k.width = m.mat.global[[m.g]][,1]
     cur.k.width = cur.k.width[!is.na(cur.k.width)]
-    g.main=NULL
     leg.g=NULL
-    ymin=NULL
-    ymax=NULL
-    xmin=NULL
-    xmax=NULL
-    xleg=NULL
-    yleg=NULL
-    c.max=NULL
-    t.linea=NULL
-    t.color=NULL
-    ymarcas=NULL
-    k.classes=NULL
     xmin=min(x)-0.25
     xmax=max(x)+0.25
     xleg=((xmax-xmin)*escalal)+3.2
@@ -386,9 +319,6 @@ runQualityIndicesSilhouetteMetric_IMG <- function(k.min, k.max) {
     g.main=paste(" Qual. Indices of '", names.metr[m.g], "' for k in [",
                  k.min, ",", k.max,"]",sep="")
 
-    # par(new=FALSE,bg="white",fg="black")
-    y=NULL
-    y.name=NULL
     y=cur.k.width
     y.name=names.index[1]
     leg.g[1] <- paste(y.name," avg. width",sep="")
@@ -410,17 +340,6 @@ runSilhouetteIMG <- function(data, k) {
   datos.bruto = data
   estable = pkg.env$estable
 
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  figurename=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
-  listaFigurasSil=NULL
-
   ancho=7
   alto=6
   escala=1     #new 0.6
@@ -430,9 +349,7 @@ runSilhouetteIMG <- function(data, k) {
   escalat=0.5
   escalap=0.4
   par(new=FALSE,bg="white",fg="black", cex=1, mex=.6)
-  onto.matrix=NULL
   onto.matrix=matrix(data=NA, nrow=length(datos.bruto[,1]), ncol=(length(names.metr)+1))
-  #onto.matrix[,1]=levels(datos.bruto[,1])
   onto.matrix[,1]=as.character(datos.bruto[,1])
   colnames(onto.matrix)=c("Datasets",paste(names.metr,sep="."))
 
@@ -444,22 +361,9 @@ runSilhouetteIMG <- function(data, k) {
   colores=c(2:(k.cl+1)) # 2 to k.cl+1, avoid number 1 since it's black and it's not pretty
   #Pattern: Silhouette_K_N_MetricX, ..., Silhouette_K_N_MetricN
   figurename="Silhouette_K_"
-  contadorFiguras=1
 
   for (i.metr in 1:length(names.metr)) {
-    datos=NULL
-    i.datos=NULL
-    name.file=NULL
-    metric.onto=NULL
-    metric.name=NULL
-    part.onto=NULL
-    sil.w=NULL
 
-    sil.c=NULL
-    x.leyenda=NULL
-    t.leyenda=NULL
-    xleyenda=NULL
-    yleyenda=NULL
     x.leyenda=0.99
 
     metric.onto=datos.bruto[,i.metr+1]
@@ -470,9 +374,15 @@ runSilhouetteIMG <- function(data, k) {
       part.onto=as.numeric(estable[[i.datos]]$kmk.dynamic.bs.or)
       onto.matrix[,(i.metr+1)]=part.onto
 
-      sil.c=cluster.stats(dist(metric.onto), part.onto, noisecluster=TRUE)     #new
-
       sil.w=silhouette(part.onto, dist(metric.onto))
+      sil.c = NULL
+      sil.c$n=length(sil.w[,1])
+      sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
+      sil.c$cluster.number=length(summary(sil.w)$cluster.size)
+      sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
+      sil.c$avg.silwidths=summary(sil.w)$avg.width
+
+
       estable[[i.datos]]$kmk.dynamic.bs.or.numeric=part.onto
       estable[[i.datos]]$sil.width=sil.w
 
@@ -525,27 +435,15 @@ runSilhouetteTable <- function(data, k) {
   silhouetteData$header = unlist(silhouetteData$header, use.names=FALSE)
 
   ##
-  #  //Building table header
+  #  Building table header
   ##
 
-  onto.matrix=NULL
   onto.matrix=matrix(data=NA, nrow=length(datos.bruto[,1]), ncol=(length(names.metr)+1))
-  #onto.matrix[,1]=levels(datos.bruto[,1])
   onto.matrix[,1]=as.character(datos.bruto[,1])
   colnames(onto.matrix)=c("Datasets",paste(names.metr,sep="."))
 
   for (i.metr in 1:length(names.metr)) { # i.metr= n de metrica     i.metr=5
-    datos=NULL
-    i.datos=NULL
-    name.file=NULL
-    metric.onto=NULL
-    metric.name=NULL
-    part.onto=NULL
-    sil.w=NULL
-    sil.c=NULL
-    x.leyenda=NULL
-    xleyenda=NULL
-    yleyenda=NULL
+
     metric.onto=datos.bruto[,i.metr+1]
     metric.name=names(datos.bruto)[i.metr+1]
     x.leyenda=0.99
@@ -555,7 +453,12 @@ runSilhouetteTable <- function(data, k) {
       part.onto=as.numeric(estable[[i.datos]]$kmk.dynamic.bs.or)
       onto.matrix[,(i.metr+1)]=part.onto
       sil.w=silhouette(part.onto, dist(metric.onto))
-      sil.c=cluster.stats(dist(metric.onto), part.onto, noisecluster=TRUE)
+      sil.c = NULL
+      sil.c$n=length(sil.w[,1])
+      sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
+      sil.c$cluster.number=length(summary(sil.w)$cluster.size)
+      sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
+      sil.c$avg.silwidths=summary(sil.w)$avg.width
       ## Building body rows
       silhouetteData$body[[i.metr]]=c(metric.name, sil.c$clus.avg.silwidths, mean(sil.w[,"sil_width"]), sil.c$cluster.size)
       silhouetteData$body[[i.metr]]=unlist(silhouetteData$body[[i.metr]], use.names=FALSE)
@@ -593,7 +496,6 @@ runSilhouetteTableRange <- function(data, k.min, k.max) {
   k.min = k.min
   k.max = k.max
 
-  onto.matrix=NULL
   onto.matrix=matrix(data=NA, nrow=length(datos.bruto[,1]), ncol=(length(names.metr)+1))
   onto.matrix[,1]=as.character(datos.bruto[,1])
   colnames(onto.matrix)=c("Datasets",paste(names.metr,sep="."))

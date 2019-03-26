@@ -93,43 +93,10 @@ checkDirectory <- function(path) {
   return(path)
 }
 
-getAssay <- function(SummarizedExperiment, position) {
-  se=SummarizedExperiment
-  se.length <- length(assays(se))
-  if (se.length == 0) {
-    stop("SummarizedExperiment has no assays, length is 0")
-  }
-  if (position > se.length) {
-    error <- paste("SummarizedExperiment has no assay in position ",
-                   position, sep="")
-    stop(error)
-  }
-  data = assay(se, position)
-  # Datasets <- test[,1]
-  # if (is.null(rownames(test))) {
-  #   Datasets <- paste("Dataset_", c(1:length(test[,1])), sep="")
-  # } else {
-  #   Datasets <- rownames(test)
-  # }
-
-  # test <- data.frame(Datasets,test)
-  data <- data.frame(data)
-  names(data) <- colnames(data)
-  return(data)
-}
-
 # data: One dataframe, thus one assay
 createSE <- function(data) {
-  DataFrame = NULL
-  SimpleList = NULL
-  nrows <- nrow(data)
-  ncols <- ncol(data)
-  counts <- data.matrix(data)
-  colnames(counts) <- NULL
-  colData <- DataFrame(metrics=colnames(data),
-                       row.names=colnames(data))
-  se <- SummarizedExperiment(assays=SimpleList(counts),
-                              colData=colData)
+  se = SummarizedExperiment(assays = data.matrix(data),
+          colData = DataFrame(metrics = colnames(data)))
   return(se)
 }
 

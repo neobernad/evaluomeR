@@ -41,7 +41,8 @@
 #'
 #'
 stability <- function(data, k=5, bs=100, getImages=TRUE) {
-  data <- getAssay(data, 1)
+
+  data <- as.data.frame(assay(data))
 
   checkKValue(k)
 
@@ -109,7 +110,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
     stop("The first value of k.range cannot be greater than its second value")
   }
 
-  data <- getAssay(data, 1)
+  data <- as.data.frame(assay(data))
 
   suppressWarnings(
     runStabilityIndex(data, k.min=k.min, k.max=k.max, bs))
@@ -127,22 +128,14 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
 }
 
 runStabilityIndex <- function(data, k.min, k.max, bs) {
-  directa=NULL
   inversa=NULL
-  datos.bruto=NULL
-  names.metr=NULL
-  names.index=NULL
-
+  m.stab.global = NULL
+  todo.estable = NULL
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
 
   pkg.env$names.metr = names.metr
 
-  contador=NULL
-  m.jac=NULL
-  m.stab.global=NULL
-  bs.values=NULL
-  todo.estable=NULL
   bs.values=c(bs)
   contador=0
   i.min=k.min
@@ -155,8 +148,6 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
     for (j.k in i.min:i.max) {
       cat("\tCalculation of k = ", j.k,"\n")
       estable=NULL
-      i=NULL
-      m.jac[[i.metr]]=matrix(data=NA, nrow=length(bs.values), ncol=j.k)
       contador=contador+1
       i=i.metr+1
       estable$n.metric=i.metr
@@ -165,14 +156,12 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
       estable$name.ontology=names(datos.bruto[1])
 
       km5=NULL
-
-      v.size=NULL
       v.size=length(levels(as.factor(datos.bruto[,i])))
       if (v.size>=j.k) {
 
-        km5$cluster=quiet(clusterboot(datos.bruto[,i], B=bs, bootmethod="boot", clustermethod=kmeansCBI, krange=j.k))
+        km5$cluster=boot.cluster(data=datos.bruto[,i], nk=j.k, B=bs)
         km5$bspart=km5$cluster$partition
-        km5$jac=km5$cluster$bootmean
+        km5$jac=km5$cluster$means
 
         km5$centr=by(datos.bruto[,i],km5$bspart,mean)
         for (km5.i in 1:length(km5$centr)) {
@@ -193,7 +182,6 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
           km5$jac.stab=km5$jac.or
         }
 
-        m.jac[[i.metr]][which(bs.values==bs),]=km5$jac.stab
         m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
         estable[[which(bs.values==bs)]]=km5
       } else {
@@ -207,7 +195,6 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
         km5$jac.inv=km5$jac
         km5$partition=km5$bspart.inv
         km5$jac.stab=km5$jac.inv
-        m.jac[[i.metr]][which(bs.values==bs),]=km5$jac.stab
         m.stab.global[[i.metr]][j.k]=mean(km5$jac.stab)
         estable[[which(bs.values==bs)]]=km5
       }
@@ -215,37 +202,6 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
       todo.estable[[contador]]=estable
     }
   }
-
-  # rownames(m.stab.global)=names.metr
-  # colnames(m.stab.global)=paste("b=",bs.values,sep="")
-
-  # # For client's CSV
-  # stabilityDataList = NULL
-  # stabilityDataList$header <- list()
-  # stabilityDataList$data <- list()
-  #
-  # # Build header
-  # jacValuesLength = length(m.jac[[1]])
-  # stabilityDataList$header[1] = "Metric"
-  # for (i in 2:(jacValuesLength+1)) {
-  #   stabilityDataList$header[i] = capture.output(cat("Stability_category_", i-1, sep=""))
-  # }
-  # stabilityDataList$header[length(stabilityDataList$header)+1] = "Mean_stability"
-  # stabilityDataList$header = unlist(stabilityDataList$header, use.names=FALSE)
-
-  # Build rows
-  # for (i in 1:length(names.metr)) {
-  #   wrapper=NULL # Wrapper object to extract the data
-  #   wrapper$metric=names.metr[i]
-  #   wrapper$jac=m.jac[[i]]
-  #   wrapper$jacMean=m.stab.global[i]
-  #   stabilityDataList$data[[i]]=unlist(wrapper, use.names=FALSE)
-  # }  # end for i
-
-  # Transform into dataframe
-  # stabilityDataFrame = t(data.frame(stabilityDataList$data))
-  # colnames(stabilityDataFrame) = stabilityDataList$header
-  # rownames(stabilityDataFrame) <- NULL
 
   e.stab.global=NULL
   for (j.k in i.min:i.max) {
@@ -262,7 +218,6 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
 }
 
 runStabilityIndexTableRange <- function(k.min, k.max) {
-  stabilityDataList = NULL
   stabilityDataList = list()
 
   m.stab.global = pkg.env$m.stab.global
@@ -295,17 +250,6 @@ runStabilityIndexTableRange <- function(k.min, k.max) {
 
 # Stability index per K value (x values = matrics)
 runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
-  listaFiguras=NULL
-  figurename=NULL
-
   ancho=6
   alto=4
   escala=0.6
@@ -336,7 +280,7 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
     ynames="Global Stability Indices"
     g.main=paste(" St. Indices of the metrics for k=", j.k,sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-         xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(0.5,1),
+         xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(0.3,1),
          ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
     axis(1,at=1:length(xnames),labels=xnames,las=2,cex.axis=0.75)
     axis(2,las=3,cex.axis=0.85)
@@ -348,17 +292,6 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
 
 # Stability index per metric (x values = k range)
 runStabilityIndexMetric_IMG <- function(bs, k.min, k.max) {
-  ancho=NULL
-  alto=NULL
-  ajuste=NULL
-  escala=NULL
-  escalax=NULL
-  escalal=NULL
-  escalat=NULL
-  escalap=NULL
-  listaFiguras=NULL
-  figurename=NULL
-
   ancho=6
   alto=4
   escala=0.9
@@ -389,7 +322,7 @@ runStabilityIndexMetric_IMG <- function(bs, k.min, k.max) {
     g.main=paste(" St. Indices of '", names.metr[i.metr], "' for k in [",
                  k.min, ",", k.max,"]",sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-         xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(0.5,1),
+         xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(0.3,1),
          ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
     axis(1,at=1:length(k.min:k.max),labels=xnames,las=1,cex.axis=escalax)
     axis(2,las=3,cex.axis=0.85)
