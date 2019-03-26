@@ -11,7 +11,6 @@ Authors@R: c(
     person("Astrid", "Duque-Ramos", email = "asdur02@gmail.com", role = "aut"),
     person("Jesualdo Tomás", "Fernández-Breis", email = "jfernand@um.es", role = "aut")
     )
-Maintainer: José Antonio Bernabé-Díaz <joseantonio.bernabe1@um.es>
 BugReports: https://github.com/neobernad/evaluomeR/issues
 Description: Evaluating the reliability of your own metrics 
     and the measurements done on your own datasets by 
