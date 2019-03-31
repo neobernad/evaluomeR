@@ -2,6 +2,7 @@ library(evaluomeR)
 
 data("rnaMetrics")
 
+
 dataFrame <- stability(data=rnaMetrics, k=2, bs=20, getImages = FALSE)
 dataFrame <- stabilityRange(data=rnaMetrics, k.range=c(2,5), bs=20, getImages = FALSE)
 

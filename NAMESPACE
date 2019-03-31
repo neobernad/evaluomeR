@@ -8,6 +8,8 @@ importFrom("stats", "cor", "dist", "na.omit", "kmeans")
 importFrom("SummarizedExperiment", "assays")
 importFrom("SummarizedExperiment", "assay")
 importFrom("SummarizedExperiment", "SummarizedExperiment")
+importFrom("MultiAssayExperiment", "ExperimentList")
+importFrom("MultiAssayExperiment", "DataFrame")
 
 export(stability)
 export(stabilityRange)

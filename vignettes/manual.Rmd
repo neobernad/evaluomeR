@@ -96,7 +96,7 @@ The package **evaluomeR** depends on the following CRAN packages for the
 calculus: *cluster* [@cluster2018], *corrplot*
 [@corrplot2017]. Moreover, this package also depends on *grDevices*,
 *graphics*, *stats* and *utils* from R Core [@rcore] for plotting and on the
-Bioconductor package *SummarizedExperiment* [@summarizedExperiment] for
+Bioconductor packages *SummarizedExperiment* [@summarizedExperiment],  *MultiAssayExperiment* [@multiAssayExperiment] for
 input/output data.
 
 # Using evaluomeR #
@@ -274,10 +274,11 @@ The `qualityRange` function also returns two kind of plots, as seen in
 the metrics, and a second type of plot to show each metric with its respective
 quality index in each `k` value.
 
-The `qualityRangeData` object returned by `qualityRange` is list of
-`SummarizedExperiment`, whose size is `diff(k.range)+1`. In the example shown
-above, the size of `qualityRangeData` is 3, since the array length would
-contain the dataframes from `k=4` to `k=6`.
+The `qualityRangeData` object returned by `qualityRange` is a `ExperimentList` from
+`MultiAssayExperiment`, which is a list of `SummarizedExperiment`
+objects whose size is `diff(k.range)+1`. In the example shown above, the size of
+`qualityRangeData` is 3, since the array length would contain the dataframes from
+`k=4` to `k=6`.
 
 ```{r quality-range-2, eval=TRUE, echo=TRUE}
 diff(k.range)+1

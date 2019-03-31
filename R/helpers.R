@@ -96,11 +96,11 @@ checkDirectory <- function(path) {
 # data: One dataframe, thus one assay
 createSE <- function(data) {
   se = SummarizedExperiment(assays = data.matrix(data),
-          colData = DataFrame(metrics = colnames(data)))
+          colData = MultiAssayExperiment::DataFrame(metrics = colnames(data)))
   return(se)
 }
 
-# data: A list of dataframes
+# data: A list of SummarizedExperiment objects (ExperimentList)
 createSEList <- function(data) {
   if (!is.list(data)) {
     stop("Input variable is not a list")
@@ -118,5 +118,6 @@ createSEList <- function(data) {
     seList <- c(seList, se)
   }
   names(seList) <- names(data)
-  return(seList)
+  expList <- ExperimentList(seList)
+  return(expList)
 }
