@@ -276,11 +276,12 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
   for (j.k in i.min:i.max) {
     cur.data = e.stab.global[[j.k]]
     cur.data = cur.data[!is.na(cur.data)]
+    ymin = min(cur.data)
     xnames=as.character(names.metr)
     ynames="Global Stability Indices"
     g.main=paste(" St. Indices of the metrics for k=", j.k,sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-         xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(0.3,1),
+         xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(ymin,1),
          ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
     axis(1,at=1:length(xnames),labels=xnames,las=2,cex.axis=0.75)
     axis(2,las=3,cex.axis=0.85)
@@ -316,13 +317,13 @@ runStabilityIndexMetric_IMG <- function(bs, k.min, k.max) {
   for (i.metr in 1:length(names.metr)) {
     cur.data = m.stab.global[[i.metr]]
     cur.data = cur.data[!is.na(cur.data)]
-
+    ymin = min(cur.data)
     xnames=c(k.min:k.max)
     ynames="Global Stability Indices"
     g.main=paste(" St. Indices of '", names.metr[i.metr], "' for k in [",
                  k.min, ",", k.max,"]",sep="")
     plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-         xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(0.3,1),
+         xlim=c(0.75,length(k.min:k.max)+0.25), xlab="", ylim=c(ymin,1),
          ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
     axis(1,at=1:length(k.min:k.max),labels=xnames,las=1,cex.axis=escalax)
     axis(2,las=3,cex.axis=0.85)

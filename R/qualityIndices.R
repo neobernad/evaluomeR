@@ -382,11 +382,9 @@ runSilhouetteIMG <- function(data, k) {
       sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
       sil.c$avg.silwidths=summary(sil.w)$avg.width
 
-
       estable[[i.datos]]$kmk.dynamic.bs.or.numeric=part.onto
       estable[[i.datos]]$sil.width=sil.w
 
-      #DESDE AQUI new
       g.main=paste(metric.name,sep="")
 
       plot(sil.w, col=colores, main=g.main, border=NULL,
@@ -400,12 +398,14 @@ runSilhouetteIMG <- function(data, k) {
       legend(x=x.leyenda+0.1,y=sil.c$n+1, legend=expression(' s'['i']), col="black",
              xjust=0, yjust=0, bty="n", xpd=TRUE, inset=c(-0.1,0), cex=escalax)
       xleyenda=rep(x.leyenda,k.cl)
+      #yleyenda=(sil.c$cluster.size==1)*0.6*(sil.c$n-cumsum(sil.c$cluster.size))+
+      #  (sil.c$n-cumsum(sil.c$cluster.size))+sil.c$cluster.size*3/k.cl+2
       yleyenda=(sil.c$cluster.size==1)*0.6*(sil.c$n-cumsum(sil.c$cluster.size))+
-        (sil.c$n-cumsum(sil.c$cluster.size))+sil.c$cluster.size*3/k.cl+2
+        (sil.c$n-cumsum(sil.c$cluster.size))+sil.c$cluster.size/k.cl+2
       leyenda=paste(names(sil.c$clus.avg.silwidths),rep(": ",k.cl),
                     sil.c$cluster.size,"|",round(sil.c$clus.avg.silwidths,digits=2),sec="")
       for (i.leyenda in 1:k.cl){
-        legend(list(x=xleyenda[i.leyenda],y=yleyenda[i.leyenda]-0.7), legend=leyenda[i.leyenda], col="black",
+        legend(list(x=xleyenda[i.leyenda],y=yleyenda[i.leyenda]), legend=leyenda[i.leyenda], col="black",
                xjust=0, yjust=1, bty="n", xpd=TRUE, inset=c(-0.1,0), cex=escalal)
         }
     }
