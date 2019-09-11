@@ -1,3 +1,6 @@
+Changes in version 1.1.2 (2019-09-11)
+  + Bug fix. Plot did not work as intended when there was a metric without data
+
 Changes in version 0.99.81 (2019-02-26)
   + Updated DESCRIPTION metadata
 
