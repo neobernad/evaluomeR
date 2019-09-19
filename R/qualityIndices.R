@@ -93,7 +93,7 @@ quality <- function(data, k=5, getImages=TRUE) {
 #' # Using example data from our package
 #' data("ontMetrics")
 #' # Without plotting
-#' dataFrameList = qualityRange(ontMetrics, k.range=c(2,6), getImages = FALSE)
+#' dataFrameList = qualityRange(ontMetrics, k.range=c(2,3), getImages = FALSE)
 #'
 #' @references
 #' \insertRef{kaufman2009finding}{evaluomeR}
