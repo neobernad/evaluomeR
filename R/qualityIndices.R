@@ -230,7 +230,7 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   names.metr = pkg.env$names.metr
   x=seq(1,length(names.metr))
   x.label="Metrics"
-  x.name=names.metr
+  x.name=xnames=as.character(names.metr)
   y.label="Silhouette avg. width"
   #Pattern: QualityIndices_K_2, ..., QualityIndices_K_N
   figurename="QualityIndices_K_"
@@ -239,42 +239,50 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   i.max=k.max
   margins <- par(mar=c(5,5,3,3))
   on.exit(par(margins))
-  for (m.g in i.min:i.max) {
+  stype <- c(1:length(c(i.min:i.max)))
+  metrics_length = length(names.metr)
+  num_metrics_plot = 19
+  num_iterations = round(metrics_length/num_metrics_plot)
 
-    xmin=min(x)-0.25
-    xmax=max(x)+0.25
-    xleg=((xmax-xmin)*escalal)+3.2
-    c.max=dim(e.mat.global[[m.g]])[2]
-    ymin=min(e.mat.global[[m.g]])
-    if (is.na(ymin)) {
-      ymin = 0
+  for (iteration in 0:(num_iterations-1)) {
+    i = 1
+    labels = list()
+    rangeStart = (iteration*num_metrics_plot)+1
+    rangeEnd = rangeStart+num_metrics_plot
+    if (rangeEnd > metrics_length) {
+      rangeEnd = metrics_length
     }
-    ymax=1
-    ymarcas=round(seq(ymin,ymax,length.out=5),2)
-    yleg=ymin+((ymax-ymin)/2)*seq(c.max,1,-1)/(2*c.max)
-    t.linea=seq(1,c.max)
-    t.color=rep("black",c.max)
+    new_xnames = x.name[rangeStart:rangeEnd]
+    g.main=paste(" Qual. Indices of the metrics for k in [", i.min, ",", i.max, "]",sep="")
+    for (m.g in i.min:i.max) {
+      c.max=dim(e.mat.global[[m.g]])[2]
+      ymarcas=round(seq(0,1,length.out=5),2)
 
-    k.classes=m.g
-    g.main=paste(" Qual. Indices of the metrics for k=",k.classes,sep="")
+      k.classes=m.g
 
-    par(new=FALSE,bg="white",fg="black")
-
-    for (m in length(names.index)) {
-
-      y=e.mat.global[[m.g]][,m]
-      y.name=names.index[m]
-      leg.g[m] <- paste(y.name," avg. width",sep="")
-      plot(x,y, type="l", xaxt="n", yaxt="n", xlab="", ylab="", main=g.main, xlim=c(xmin,xmax), ylim=c(ymin,ymax), lty=t.linea[m], col=t.color[m])
-      par(new=TRUE)
-      plot(x,y, type="o", xaxt="n", yaxt="n", xlab="", ylab="", main=g.main, xlim=c(xmin,xmax), ylim=c(ymin,ymax), lty=t.linea[m], col=t.color[m])
+      for (m in length(names.index)) {
+        y=e.mat.global[[m.g]][,m]
+        y = y[rangeStart:rangeEnd]
+        y.name=names.index[m]
+        #leg.g[m] <- paste(y.name," avg. width",sep="")
+        plot(y, main=g.main, axes=TRUE, col.axis="white",
+             xlim=c(0.75,length(new_xnames)+0.25), xlab="", ylim=c(0,1),
+             ylab="", col="black", type="o", lwd=1, lty=stype[i], pch=stype[i])
+        #par(new=TRUE)
+        labels = c(labels,(paste0("k=", m.g)))
+        i = i + 1
+        par(new=TRUE)
+      }
       par(new=TRUE)
     }
     mtext(side=1, text=x.label,line=4)
     mtext(side=2, text=y.label,line=3)
-    axis(side=1, at=x, labels=x.name, las=3, cex.axis=escalax)
-    axis(side=2, at=ymarcas, labels=ymarcas, cex.axis=escalal)
+    axis(1,at=1:length(new_xnames),labels=new_xnames,las=2,cex.axis=0.75)
+    axis(2,las=3,cex.axis=0.85)
+    legend("bottomright", legend=labels, inset=.01, lwd=1, lty=stype, col="black", cex=0.7, pch=stype)
+
     par(new=FALSE)
+
   }
 }
 

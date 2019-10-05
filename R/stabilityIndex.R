@@ -266,35 +266,49 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
 
   colores <- c("black", "blue", "red", "darkgreen", "orange", "magenta", "gray")
   ltype <- c(1, 2, 3, 4, 3, 4, 6)
+  i.min=k.min
+  i.max=k.max
 
-  stype <- c("o", "l")
-  pchtype <- c(1, 2, 3, 4, 5, 5)
+  stype <- c(1:length(c(i.min:i.max)))
 
   e.stab.global = pkg.env$e.stab.global
   names.metr = pkg.env$names.metr
-  i.min=k.min
-  i.max=k.max
   margins <- par(mar=c(5,5,3,3))
   on.exit(par(margins))
-  for (j.k in i.min:i.max) {
-    cur.data = e.stab.global[[j.k]]
-    #cur.data = cur.data[!is.na(cur.data)]
-    #cur.data = cur.data[c(i.min:i.max)
-    ymin = min(!is.na(cur.data))
-    if (is.na(ymin)) {
-      ymin = 0
+  xnames=as.character(names.metr)
+  ynames="Global Stability Indices"
+  g.main=paste(" St. Indices of the metrics for k in [", i.min, ",", i.max, "]",sep="")
+
+  metrics_length = length(names.metr)
+  num_metrics_plot = 19
+  num_iterations = round(metrics_length/num_metrics_plot)
+  for (iteration in 0:(num_iterations-1)) {
+    i = 1
+    labels = list()
+    rangeStart = (iteration*num_metrics_plot)+1
+    rangeEnd = rangeStart+num_metrics_plot
+    if (rangeEnd > metrics_length) {
+      rangeEnd = metrics_length
     }
-    xnames=as.character(names.metr)
-    ynames="Global Stability Indices"
-    g.main=paste(" St. Indices of the metrics for k=", j.k,sep="")
-    plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
-         xlim=c(0.75,length(xnames)+0.25), xlab="", ylim=c(ymin,1),
-         ylab=ynames, col=colores[1],type="o", lwd=1, lty=ltype[1])
-    axis(1,at=1:length(xnames),labels=xnames,las=2,cex.axis=0.75)
+    new_xnames = xnames[rangeStart:rangeEnd]
+    for (j.k in i.min:i.max) {
+      cur.data = e.stab.global[[j.k]]
+      cur.data = cur.data[rangeStart:rangeEnd]
+      #cur.data = cur.data[!is.na(cur.data)]
+      #cur.data = cur.data[c(i.min:i.max)
+      plot(cur.data, main=g.main, axes=TRUE, col.axis="white",
+           xlim=c(0.75,length(new_xnames)+0.25), xlab="", ylim=c(0,1),
+           ylab=ynames, col="black", type="o", lwd=1, lty=stype[i], pch=stype[i])
+      labels = c(labels,(paste0("k=", j.k)))
+      i = i + 1
+      par(new=TRUE)
+    }
+    axis(1,at=1:length(new_xnames),labels=new_xnames,las=2,cex.axis=0.75)
     axis(2,las=3,cex.axis=0.85)
-    labels <- paste("b=", bs, sep = "")
-    legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
+    legend("bottomright", legend=labels, inset=.01, lwd=1, lty=stype,
+           col="black", cex=0.7, pch=stype)
     mtext(side=1, text="Metrics",line=4)
+    par(new=FALSE)
   }
 }
 
