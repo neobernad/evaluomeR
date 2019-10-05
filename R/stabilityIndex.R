@@ -280,9 +280,13 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
   g.main=paste(" St. Indices of the metrics for k in [", i.min, ",", i.max, "]",sep="")
 
   metrics_length = length(names.metr)
+
   num_metrics_plot = 19
   num_iterations = round(metrics_length/num_metrics_plot)
-  for (iteration in 0:(num_iterations-1)) {
+  if (num_iterations > 0) {
+    num_iterations = num_iterations - 1
+  }
+  for (iteration in 0:num_iterations) {
     i = 1
     labels = list()
     rangeStart = (iteration*num_metrics_plot)+1
@@ -352,7 +356,7 @@ runStabilityIndexMetric_IMG <- function(bs, k.min, k.max) {
     axis(1,at=1:length(k.min:k.max),labels=xnames,las=1,cex.axis=escalax)
     axis(2,las=3,cex.axis=0.85)
     labels <- paste("b=", bs, sep = "")
-    legend("bottomright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
+    legend("topright", legend=labels, inset=.01, lwd=1, lty=ltype[1:4], col=colores[1:4], cex=0.7, pch=pchtype[1:4])
     mtext(side=1, text="K values",line=3)
   }
 

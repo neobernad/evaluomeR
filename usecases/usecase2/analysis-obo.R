@@ -1,8 +1,8 @@
 library(evaluomeR)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
-inputPath=paste0(wd,"data/agro.csv")
-outputDir=paste0(wd,"results-agro")
+inputPath=paste0(wd,"data/obo-119.csv")
+outputDir=paste0(wd,"results-obo")
 
 inputData = read.csv(inputPath, header = TRUE)
 
@@ -22,5 +22,5 @@ for (i in 2:6) {
 
 # Correlations
 dataFrame <- metricsCorrelations(inputData, margins=c(0,6,6,5), getImages=TRUE)
-csvPath = paste0(outputDir, "/obo.correlation",".csv")
+csvPath = paste0(outputDir, "/agro.correlation",".csv")
 write.csv(assay(dataFrame, 1), csvPath, row.names = FALSE)

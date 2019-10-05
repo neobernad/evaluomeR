@@ -243,8 +243,10 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
   metrics_length = length(names.metr)
   num_metrics_plot = 19
   num_iterations = round(metrics_length/num_metrics_plot)
-
-  for (iteration in 0:(num_iterations-1)) {
+  if (num_iterations > 0) {
+    num_iterations = num_iterations - 1
+  }
+  for (iteration in 0:num_iterations) {
     i = 1
     labels = list()
     rangeStart = (iteration*num_metrics_plot)+1
