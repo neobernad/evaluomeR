@@ -36,7 +36,9 @@ jaccard.cluster <- function(clust1,clust2) {
 #     stability cluster based on Jaccard by clustering bootstrap
 
 boot.cluster <- function(data, nk=5, B=10, seed=NULL, prnt=FALSE) {
-  #if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
   data <- as.matrix(data)
   n.data <- nrow(data)
   cluster1 <- kmeans(x=data, centers=nk, iter.max=100)

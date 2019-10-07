@@ -25,6 +25,7 @@
 #' @param k Positive integer. Number of clusters between [2,15] range.
 #' @param bs Positive integer. Bootstrap value to perform the resampling.
 #' @param getImages Boolean. If true, a plot is displayed.
+#' @param seed Positive integer. A seed for internal bootstrap.
 #'
 #' @return A \code{\link{SummarizedExperiment}},
 #' containing an assay with the stability measurements and means for 1 to k clusters.
@@ -40,14 +41,15 @@
 #' \insertRef{jaccard1901distribution}{evaluomeR}
 #'
 #'
-stability <- function(data, k=5, bs=100, getImages=TRUE) {
+stability <- function(data, k=5, bs=100,
+                      getImages=TRUE, seed=NULL) {
 
   data <- as.data.frame(assay(data))
 
   checkKValue(k)
 
   suppressWarnings(
-    runStabilityIndex(data, k.min=k, k.max=k, bs))
+    runStabilityIndex(data, k.min=k, k.max=k, bs, seed=seed))
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(k.min=k, k.max=k))
   if (getImages == TRUE) {
@@ -97,7 +99,7 @@ stability <- function(data, k=5, bs=100, getImages=TRUE) {
 #'
 #'
 stabilityRange <- function(data, k.range=c(2,15), bs=100,
-                           getImages=TRUE) {
+                           getImages=TRUE, seed=NULL) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -113,7 +115,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
   suppressWarnings(
-    runStabilityIndex(data, k.min=k.min, k.max=k.max, bs))
+    runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, seed=seed))
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(k.min=k.min, k.max=k.max))
 
@@ -127,7 +129,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
   return(se)
 }
 
-runStabilityIndex <- function(data, k.min, k.max, bs) {
+runStabilityIndex <- function(data, k.min, k.max, bs, seed) {
   inversa=NULL
   m.stab.global = NULL
   todo.estable = NULL
@@ -160,7 +162,8 @@ runStabilityIndex <- function(data, k.min, k.max, bs) {
       v.size=length(levels(as.factor(datos.bruto[,i])))
       if (v.size>=j.k) {
 
-        km5$cluster=boot.cluster(data=datos.bruto[,i], nk=j.k, B=bs)
+        km5$cluster=boot.cluster(data=datos.bruto[,i],
+                                 nk=j.k, B=bs, seed=seed)
         km5$bspart=km5$cluster$partition
         km5$jac=km5$cluster$means
 

@@ -34,14 +34,15 @@
 #' @references
 #' \insertRef{kaufman2009finding}{evaluomeR}
 #'
-quality <- function(data, k=5, getImages=TRUE) {
+quality <- function(data, k=5, getImages=TRUE, seed=NULL) {
 
   checkKValue(k)
 
   data <- as.data.frame(assay(data))
 
   suppressWarnings(
-    runQualityIndicesSilhouette(data, k.min = k, k.max = k, bs = 1))
+    runQualityIndicesSilhouette(data, k.min = k,
+                                k.max = k, bs = 1, seed=seed))
   silhouetteDataFrame = suppressWarnings(
     runSilhouetteTable(data, k = k))
   if (getImages == TRUE) {
@@ -98,7 +99,7 @@ quality <- function(data, k=5, getImages=TRUE) {
 #' @references
 #' \insertRef{kaufman2009finding}{evaluomeR}
 #'
-qualityRange <- function(data, k.range=c(3,5), getImages=TRUE) {
+qualityRange <- function(data, k.range=c(3,5), getImages=TRUE, seed=NULL) {
 
   k.range.length = length(k.range)
   if (k.range.length != 2) {
@@ -115,7 +116,8 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE) {
   data <- as.data.frame(assay(data))
 
   suppressWarnings(
-    runQualityIndicesSilhouette(data, k.min = k.min, k.max = k.max, bs = 1))
+    runQualityIndicesSilhouette(data, k.min = k.min,
+                                k.max = k.max, bs = 1, seed=seed))
   silhouetteData =  suppressWarnings(
     runSilhouetteTableRange(data, k.min = k.min, k.max = k.max))
 
@@ -129,7 +131,7 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE) {
   return(seList)
 }
 
-runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
+runQualityIndicesSilhouette <- function(data, k.min, k.max, bs, seed) {
 
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
@@ -170,7 +172,9 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs) {
         estable[[contador]] = NA
         m.global[[i.metr]][j.k,] = NA
       } else {
-        e.res$kmk.dynamic.bs <- boot.cluster(data=datos.bruto[,i], nk=j.k, B=bs)$partition
+        e.res$kmk.dynamic.bs <-
+          boot.cluster(data=datos.bruto[,i],
+                       nk=j.k, B=bs, seed=seed)$partition
         e.res.or$centr=by(datos.bruto[,i],e.res$kmk.dynamic.bs,mean)
         for (e.res.or.i in 1:length(e.res.or$centr)) {
           e.res.or$means[which(e.res$kmk.dynamic.bs==e.res.or.i)]=e.res.or$centr[e.res.or.i]}
