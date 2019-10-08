@@ -19,11 +19,14 @@ Description: Evaluating the reliability of your own metrics
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.6), SummarizedExperiment, MultiAssayExperiment, cluster (>= 2.0.7-1),
+Depends: R (>= 3.6), SummarizedExperiment, MultiAssayExperiment, cluster (>= 2.0.7-1), 
 Imports:
     corrplot (>= 0.84),
     grDevices,
     graphics,
+    reshape2,
+    ggplot2,
+    ggdendro,
     stats,
     Rdpack
 Suggests: BiocStyle, knitr, rmarkdown, kableExtra, magrittr
@@ -38,3 +41,4 @@ Collate:
     'stabilityIndex.R'
     'qualityIndices.R'
     'correlation.R'
+    'metricsAnalysis.R'
