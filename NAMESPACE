@@ -13,6 +13,7 @@ importFrom("MultiAssayExperiment", "DataFrame")
 importFrom("ggdendro", "ggdendrogram")
 importFrom("reshape2", "melt")
 importFrom("ggplot2", "ggplot", "guides", "scale_y_continuous", "position_dodge", "geom_errorbar", "element_line", "geom_point", "geom_linerange", "theme_set", "labs", "aes", "geom_boxplot", "theme_bw", "theme", "element_text")
+importFrom("matrixStats", "colMaxs", "colMins", "colSds")
 
 export(stability)
 export(stabilityRange)

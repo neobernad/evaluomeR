@@ -4,14 +4,13 @@
 #' @description
 #' Global statistic analysis.
 #'
-#' @param margins See \code{\link{par}}.
+#' @inheritParams stability
 #'
-#' @return A dataframe.
 #'
 #' @examples
 #' # Using example data from our package
 #' data("ontMetrics")
-#' cor = metricsAnalysis(ontMetrics, getImages = TRUE, margins = c(1,0,5,11))
+#' cor = metricsAnalysis(ontMetrics)
 #'
 metricsAnalysis <- function(data) {
 
@@ -31,10 +30,10 @@ plotMinMax <- function(data) {
   # Prepare data for plotting
   # Data matrix without descritive column
   matrix = data.matrix(data[,-1])
-  maxs = colMaxs(matrix)
-  mins = colMins(matrix)
+  maxs = matrixStats::colMaxs(matrix)
+  mins = matrixStats::colMins(matrix)
   means = colMeans(matrix)
-  sd = colSds(matrix)
+  sd = matrixStats::colSds(matrix)
 
   dataStats = matrix(NA, nrow=5, ncol = length(data[,-1]), byrow=TRUE,
                   dimnames = list(c("Metric", "Min","Max","Mean","Sd"),
