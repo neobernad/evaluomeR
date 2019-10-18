@@ -25,8 +25,8 @@ plotMetricsMinMax <- function(data) {
   sd = matrixStats::colSds(matrix)
 
   dataStats = matrix(NA, nrow=5, ncol = length(data[,-1]), byrow=TRUE,
-                  dimnames = list(c("Metric", "Min","Max","Mean","Sd"),
-                  c(colnames(data[,-1]))))
+                     dimnames = list(c("Metric", "Min","Max","Mean","Sd"),
+                                     c(colnames(data[,-1]))))
   dataStats["Metric",] = colnames(data[,-1])
   dataStats["Min",] = mins
   dataStats["Max",] = maxs
@@ -59,13 +59,13 @@ plotMetricsMinMax <- function(data) {
                       ymax=(dataStats.df.t$Min+dataStats.df.t$Sd)), width=.2,
                   position=position_dodge(.9)) +
     scale_y_continuous(breaks=seq(min(dataStats.df.t$Min-dataStats.df.t$Sd), # 15 ticks across min - max range
-                  max(dataStats.df.t$Max+dataStats.df.t$Sd),
-                  round((max(dataStats.df.t$Max)-min(dataStats.df.t$Min)))/15),
-                  labels=function(x) sprintf("%.2f", x)) + # Two decimals
+                                  max(dataStats.df.t$Max+dataStats.df.t$Sd),
+                                  round((max(dataStats.df.t$Max)-min(dataStats.df.t$Min)))/15),
+                       labels=function(x) sprintf("%.2f", x)) + # Two decimals
     labs(x = "Metrics", y = "Metric value", title = "Min/max/sd values across metrics") +
     guides(fill=TRUE)
 
-    print(p)
+  print(p)
 }
 
 
@@ -85,7 +85,7 @@ plotMetricsMinMax <- function(data) {
 #' data("ontMetrics")
 #' plotMetricsBloxplot(ontMetrics)
 #'
-plotMetricsBloxplot <- function(data) {
+plotMetricsBoxplot <- function(data) {
   data <- as.data.frame(assay(data))
   num_metrics_plot=10
   data.metrics = data[,-1] # Removing Description column
@@ -114,7 +114,7 @@ plotMetricsBloxplot <- function(data) {
       ) +
       theme_bw() +
       theme(axis.text.x = element_text(angle = 90)) +
-      labs(x = "Metrics", y="Metric value")
+      labs(x = "Metrics", y="Metric value", fill="Metrics")
     print(p)
   }
 }
@@ -222,7 +222,7 @@ getOptimalKValue <- function(stabData, qualData) {
       k = stabMaxKFormatted
       cat("\tMaximum stability and quality values matches the same K value: '", k ,"'\n")
       optimalKs = append(optimalKs, k)
-    # CASE 2
+      # CASE 2
     } else if ((stabMaxVal >= STABLE_CLASS && stabDf[metric, qualMaxK] >= STABLE_CLASS) ||
                (stabMaxVal < STABLE_CLASS && stabDf[metric, qualMaxK] < STABLE_CLASS)) {
       if (stabMaxVal >= STABLE_CLASS && stabDf[metric, qualMaxK] >= STABLE_CLASS) {
@@ -235,7 +235,7 @@ getOptimalKValue <- function(stabData, qualData) {
       k = getLargestSilWidth(qualDf, metric, stabMaxK, qualMaxK)
       cat("\tUsing '", k, "' since it provides higher silhouette width\n")
       optimalKs = append(optimalKs, k)
-    # CASE 3
+      # CASE 3
     } else if (stabMaxVal >= STABLE_CLASS && stabDf[metric, qualMaxK] < STABLE_CLASS) {
       cat("\tStability k '", stabMaxKFormatted, "' is stable but quality k '",
           qualMaxKFormatted,"' is not\n")
@@ -248,7 +248,7 @@ getOptimalKValue <- function(stabData, qualData) {
         cat("\tUsing '", k, "' since it provides higher silhouette width\n")
         optimalKs = append(optimalKs, k)
       }
-    # CASE 4
+      # CASE 4
     } else if (stabMaxVal < STABLE_CLASS && stabDf[metric, qualMaxK] >= STABLE_CLASS) {
       cat("\t Quality k '", qualMaxKFormatted, "' is stable but stability k '",
           stabMaxKFormatted,"' is not\n")
