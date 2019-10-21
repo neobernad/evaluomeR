@@ -5,7 +5,7 @@
 \title{Calculating the optimal value of k.
 getOptimalKValue}
 \usage{
-getOptimalKValue(stabData, qualData)
+getOptimalKValue(stabData, qualData, k.range = NULL)
 }
 \arguments{
 \item{stabData}{An output \code{\link{SummarizedExperiment}} from
@@ -13,6 +13,9 @@ a \code{\link{stabilityRange}} execution.}
 
 \item{qualData}{An output \code{\link{SummarizedExperiment}} from
 a \code{\link{qualityRange}} execution.}
+
+\item{k.range}{A range of K values to limit the scope of the
+analysis.}
 }
 \value{
 It returns a dataframe following the schema:
