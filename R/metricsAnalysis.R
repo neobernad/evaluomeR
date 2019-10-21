@@ -185,6 +185,9 @@ getFormattedK <- function(k) {
 #' @param qualData An output \code{\link{SummarizedExperiment}} from
 #' a \code{\link{qualityRange}} execution.
 #'
+#' @param k.range A range of K values to limit the scope of the
+#' analysis.
+#'
 #' @return It returns a dataframe following the schema:
 #' \code{metric}, \code{optimal_k}.
 #'
@@ -195,11 +198,27 @@ getFormattedK <- function(k) {
 #' qualityData <- qualityRange(data=rnaMetrics, k.range=c(2,4), getImages = FALSE)
 #' kOptTable = getOptimalKValue(stabilityData, qualityData)
 #'
-getOptimalKValue <- function(stabData, qualData) {
+getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
   checkStabilityQualityData(stabData, qualData)
 
-  stabDf = standardizeStabilityData(stabData)
-  qualDf = standardizeQualityData(qualData)
+  if (!is.null(k.range)) {
+    k.range.length = length(k.range)
+    if (k.range.length != 2) {
+      stop("k.range length must be 2")
+    }
+    k.min = k.range[1]
+    k.max = k.range[2]
+    checkKValue(k.min)
+    checkKValue(k.max)
+    if (k.max < k.min) {
+      stop("The first value of k.range cannot be greater than its second value")
+    } else if (k.min == k.max) {
+      stop("Range start point and end point are equals")
+    }
+  }
+
+  stabDf = standardizeStabilityData(stabData, k.range)
+  qualDf = standardizeQualityData(qualData, k.range)
 
   metrics = rownames(stabDf)
   STABLE_CLASS = 0.75
@@ -302,7 +321,7 @@ checkStabilityQualityData <- function(stabData, qualData) {
 # standardized dataframe to process.
 #
 
-standardizeQualityData <- function(qualData) {
+standardizeQualityData <- function(qualData, k.range=NULL) {
   lengthQuality = length(qualData)
   qualRangeStart = getFormattedK(names(qualData)[1])
   qualRangeEnd = getFormattedK(names(qualData)[lengthQuality])
@@ -319,8 +338,19 @@ standardizeQualityData <- function(qualData) {
   for (i in seq(qualRangeStart, qualRangeEnd, 1)) {
     values = kValues[[i]]
     newColname = paste0("k_", i)
+    k = as.numeric(getFormattedK(newColname))
+    if (!is.null(k.range) && (k < k.range[1] || k > k.range[2])) {
+      next
+    }
     qualDf[[newColname]] = values
   }
+
+  if (!is.null(k.range) && (k.range[1] < qualRangeStart || k.range[2] > qualRangeEnd)) {
+    # Input k.range is not a subset of the stabData k ranges
+    stop("Input k.range [", k.range[1], ", ", k.range[2], "] is not a subset of range [",
+         qualRangeStart, ", ", qualRangeEnd, "]")
+  }
+
   rownames(qualDf) = qualDf$Metric
   qualDf = qualDf[, -1] # Remove "Metric" column, metrics are rownames now
   qualDf <- qualDf[ order(row.names(qualDf)), ]
@@ -336,17 +366,37 @@ standardizeQualityData <- function(qualData) {
 # So that the input of getOptimalKValue has always a
 # standardized dataframe to process.
 #
-standardizeStabilityData <- function(stabData) {
+standardizeStabilityData <- function(stabData, k.range=NULL) {
   stabDf = as.data.frame(assay(stabData))
   lengthColnames = length(colnames(stabDf))
+  toRemove = list()
   for (i in seq(1, lengthColnames, 1)) {
     colname = colnames(stabDf)[i]
     newColname = gsub("^.*_.*_.*_","k_", colname)
     colnames(stabDf)[i] = newColname
     if (i != 1) { # Skip Metric column
+      k = as.numeric(getFormattedK(newColname))
+      if (!is.null(k.range) && (k < k.range[1] || k > k.range[2])) {
+        toRemove = append(toRemove, newColname)
+        next
+      }
       stabDf[newColname] = as.numeric(as.character(stabDf[[newColname]]))
     }
   }
+
+  for (columnName in toRemove) {
+    stabDf[, columnName] = list(NULL)
+    lengthColnames = lengthColnames-1
+  }
+
+  inputStartRange = as.numeric(getFormattedK(colnames(stabDf)[2]))
+  inputEndRange = as.numeric(getFormattedK(colnames(stabDf)[lengthColnames]))
+  if (!is.null(k.range) && (k.range[1] < inputStartRange || k.range[2] > inputEndRange)) {
+    # Input k.range is not a subset of the stabData k ranges
+    stop("Input k.range [", k.range[1], ", ", k.range[2], "] is not a subset of data range [",
+         inputStartRange, ", ", inputEndRange, "]")
+  }
+
   rownames(stabDf) = stabDf$Metric
   stabDf = stabDf[, -1] # Remove "Metric" column, metrics are rownames now
   stabDf <- stabDf[ order(row.names(stabDf)), ]

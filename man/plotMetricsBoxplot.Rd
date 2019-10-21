@@ -2,10 +2,9 @@
 % Please edit documentation in R/metricsAnalysis.R
 \name{plotMetricsBoxplot}
 \alias{plotMetricsBoxplot}
-\alias{plotMetricsBloxplot}
 \title{Metric values as a boxplot.}
 \usage{
-plotMetricsBloxplot(data)
+plotMetricsBoxplot(data)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
