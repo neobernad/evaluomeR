@@ -227,6 +227,12 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
   rownames(outputTable) = metrics
   outputTable = outputTable[, -1]
   optimalKs = list()
+  stabMaxKs = list() # List of maximum K for the stability of metric X
+  stabMaxKsStability = list() # Stability of the current K in stabMaxKs
+  stabMaxKsQuality = list() # Quality of the current K in stabMaxKs
+  qualMaxKs = list() # List of maximum K for the quality of metric X
+  qualMaxKsStability = list() # Stability of the current K in qualMaxKs
+  qualMaxKsQuality = list() # Quality of the current K in qualMaxKs
 
   for (metric in metrics) {
     cat("Processing metric: ", metric, "\n")
@@ -236,6 +242,15 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
     qualMaxK = colnames(qualDf[metric, ])[apply(qualDf[metric, ],1,which.max)] # k2
     qualMaxVal = qualDf[metric, qualMaxK]
     qualMaxKFormatted = getFormattedK(qualMaxK)
+    ## Info for output table
+    stabMaxKs = append(stabMaxKs, stabMaxKFormatted)
+    stabMaxKsStability = append(stabMaxKsStability, stabDf[metric, stabMaxK]);
+    stabMaxKsQuality = append(stabMaxKsQuality, qualDf[metric, stabMaxK]);
+
+    qualMaxKs = append(qualMaxKs, qualMaxKFormatted)
+    qualMaxKsStability = append(qualMaxKsStability, stabDf[metric, qualMaxK]);
+    qualMaxKsQuality = append(qualMaxKsQuality, qualDf[metric, qualMaxK]);
+    ##
     # CASE 1
     if (length(stabMaxK) >= 1 && length(qualMaxK) >= 1 && identical(stabMaxK, qualMaxK)) {
       k = stabMaxKFormatted
@@ -285,7 +300,15 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
     }
   }
 
-  outputTable["Optimal_k"] = unlist(optimalKs)
+  outputTable["Stability_max_k"] = unlist(stabMaxKs)
+  outputTable["Stability_max_k_stab"] = unlist(stabMaxKsStability)
+  outputTable["Stability_max_k_qual"] = unlist(stabMaxKsQuality)
+
+  outputTable["Quality_max_k"] = unlist(qualMaxKs)
+  outputTable["Quality_max_k_stab"] = unlist(qualMaxKsStability)
+  outputTable["Quality_max_k_qual"] = unlist(qualMaxKsQuality)
+
+  outputTable["Global_optimal_k"] = unlist(optimalKs)
 
   return(outputTable)
 }
