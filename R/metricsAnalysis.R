@@ -49,6 +49,7 @@ plotMetricsMinMax <- function(data) {
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90),
           #axis.text.y = element_blank(),
+          text = element_text(size=15),
           axis.line = element_line(colour = "black",
                                    size = 1, linetype = "solid")
     ) +
@@ -58,9 +59,9 @@ plotMetricsMinMax <- function(data) {
     geom_errorbar(aes(ymin=(dataStats.df.t$Min-dataStats.df.t$Sd),
                       ymax=(dataStats.df.t$Min+dataStats.df.t$Sd)), width=.2,
                   position=position_dodge(.9)) +
-    scale_y_continuous(breaks=seq(min(dataStats.df.t$Min-dataStats.df.t$Sd), # 15 ticks across min - max range
-                                  max(dataStats.df.t$Max+dataStats.df.t$Sd),
-                                  round((max(dataStats.df.t$Max)-min(dataStats.df.t$Min)))/15),
+    scale_y_continuous(breaks=seq(round(min(dataStats.df.t$Min-dataStats.df.t$Sd)), # 10 ticks across min - max range
+                                  round(max(dataStats.df.t$Max+dataStats.df.t$Sd)),
+                                  round((max(dataStats.df.t$Max)-min(dataStats.df.t$Min)))/10),
                        labels=function(x) sprintf("%.2f", x)) + # Two decimals
     labs(x = "Metrics", y = "Metric value", title = "Min/max/sd values across metrics") +
     guides(fill=TRUE)
@@ -87,7 +88,7 @@ plotMetricsMinMax <- function(data) {
 #'
 plotMetricsBoxplot <- function(data) {
   data <- as.data.frame(assay(data))
-  num_metrics_plot=10
+  num_metrics_plot=20
   data.metrics = data[,-1] # Removing Description column
 
   metrics_length = length(colnames(data.metrics))
@@ -98,23 +99,39 @@ plotMetricsBoxplot <- function(data) {
   for (iteration in 0:num_iterations) {
     i = 1
     rangeStart = (iteration*num_metrics_plot)+1
-    rangeEnd = rangeStart+num_metrics_plot
+    rangeEnd = rangeStart+num_metrics_plot-1
     if (rangeEnd > metrics_length) {
       rangeEnd = metrics_length
     }
     suppressMessages({
       data.melt = melt(data.metrics[,rangeStart:rangeEnd])
     })
+    # Melting 1 variable (e.g: data.metrics[,11:11])
+    # won't create $variable column in data.melt.
+    if (rangeStart == rangeEnd) {
+      metricName = data[rangeStart, "Description"]
+      data.melt$variable = rep(metricName, length(data.melt$value))
+    }
     p <- ggplot(data.melt, aes(x=data.melt$variable, y=data.melt$value)) +
       geom_boxplot(
-        aes(fill=data.melt$variable),
+        #aes(fill=data.melt$variable), # Colors
         outlier.colour = "black",
         outlier.alpha = 0.7,
-        outlier.shape = 21
+        outlier.shape = 21,
+        show.legend = FALSE
       ) +
+      #scale_y_continuous(limits = quantile(data.melt$value, c(0.1, 0.9))) +
+      scale_color_grey() +
       theme_bw() +
-      theme(axis.text.x = element_text(angle = 90)) +
+      theme(
+        text = element_text(size=20),
+        axis.text.x = element_text(angle = 90)
+      ) +
       labs(x = "Metrics", y="Metric value", fill="Metrics")
+    # compute lower and upper whiskers
+    #ylim1 = boxplot.stats(data.melt$value)$stats[c(1, 5)]
+    # scale y limits based on ylim1
+    #p1 = p + coord_cartesian(ylim = ylim1*1.05)
     print(p)
   }
 }
@@ -142,9 +159,73 @@ plotMetricsCluster <- function(data) {
   fit <- hclust(d, method="ward.D2")
   theme_set(theme_bw())
   p <- ggdendrogram(fit, rotate = FALSE, size = 2) + # display dendogram
+    theme(
+      text = element_text(size=15)
+    ) +
     labs(title="Metrics dendrogram")
   print(p)
 }
+
+#' @title Metric values as violin plot.
+#' @name plotMetricsViolin
+#' @aliases plotMetricsViolin
+#' @description
+#' It plots the value of the metrics in a \code{\link{SummarizedExperiment}}
+#' object as a violin plot.
+#'
+#' @inheritParams stability
+#'
+#' @return Nothing.
+#'
+#' @examples
+#' # Using example data from our package
+#' data("ontMetrics")
+#' plotMetricsViolin(ontMetrics)
+#'
+plotMetricsViolin <- function(data) {
+  data <- as.data.frame(assay(data))
+  data.metrics = data[,-1] # Removing Description column
+  num_metrics_plot=20
+
+  metrics_length = length(colnames(data.metrics))
+  num_iterations = round(metrics_length/num_metrics_plot)
+  if (num_iterations > 0) {
+    num_iterations = num_iterations - 1
+  }
+  for (iteration in 0:num_iterations) {
+      i = 1
+      rangeStart = (iteration*num_metrics_plot)+1
+      rangeEnd = rangeStart+num_metrics_plot-1
+      if (rangeEnd > metrics_length) {
+        rangeEnd = metrics_length
+      }
+    suppressMessages({
+      data.melt = melt(data.metrics[,rangeStart:rangeEnd])
+    })
+    # Melting 1 variable (11:11), won't create $variable column in data.melt.
+    if (rangeStart == rangeEnd) {
+      metricName = data[rangeStart, "Description"]
+      data.melt$variable = rep(metricName, length(data.melt$value))
+    }
+    p <- ggplot(data.melt, aes(x=data.melt$variable, y=data.melt$value)) +
+      geom_violin(trim=FALSE) +
+      geom_boxplot(width=0.1) +
+      #scale_y_continuous(limits = quantile(data.melt$value, c(0.1, 0.9))) +
+      scale_color_grey() +
+      theme_bw() +
+      theme(
+        text = element_text(size=20),
+        axis.text.x = element_text(angle = 90)
+      ) +
+      labs(x = "Metrics", y="Metric value", fill="Metrics")
+    # compute lower and upper whiskers
+    #ylim1 = boxplot.stats(data.melt$value)$stats[c(1, 5)]
+    # scale y limits based on ylim1
+    #p1 = p + coord_cartesian(ylim = ylim1*1.05)
+    print(p)
+  }
+}
+
 
 #
 # It returns true if value is in range (0.5, 0.7]
@@ -327,7 +408,7 @@ checkStabilityQualityData <- function(stabData, qualData) {
   }
   stabMetricsList = as.character(stabDf[,"Metric"])
   qualMetricsList = as.character(
-    assay(getDataQualityRange(qualData, qualRangeStart))[,"Metric"]
+    assay(getDataQualityRange(qualData, as.numeric(qualRangeStart)))[,"Metric"]
   )
   if (!identical(stabMetricsList, qualMetricsList)) {
     stop("Stability data and quality data have different metrics")

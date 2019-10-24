@@ -4,6 +4,7 @@ data("rnaMetrics")
 plotMetricsMinMax(rnaMetrics)
 plotMetricsBoxplot(rnaMetrics)
 plotMetricsCluster(rnaMetrics)
+plotMetricsViolin(rnaMetrics)
 
 set.seed(100)
 stabilityData <- stabilityRange(data=rnaMetrics, k.range=c(2,4), bs=20, getImages = FALSE)
