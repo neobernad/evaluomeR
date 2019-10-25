@@ -180,7 +180,6 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs, seed) {
           e.res.or$means[which(e.res$kmk.dynamic.bs==e.res.or.i)]=e.res.or$centr[e.res.or.i]}
 
         e.res$kmk.dynamic.bs.or=ordered(e.res.or$means,labels=seq(1,length(e.res.or$centr)))
-
         ## Using Silhouette width as index
         metric.onto=datos.bruto[,i.metr+1]
         part.onto=as.numeric(e.res$kmk.dynamic.bs.or)
@@ -394,7 +393,7 @@ runSilhouetteIMG <- function(data, k) {
     metric.name=names(datos.bruto)[i.metr+1]
 
     i.datos=i.metr
-    if (is.na(estable[[i.datos]])) {
+    if (!is.list(estable[[i.datos]]) && is.na(estable[[i.datos]])) {
       next
     }
     for (estable.content in estable[[i.datos]]) {
@@ -408,13 +407,8 @@ runSilhouetteIMG <- function(data, k) {
       part.onto=as.numeric(estable[[i.datos]]$kmk.dynamic.bs.or)
       onto.matrix[,(i.metr+1)]=part.onto
 
-      sil.w=silhouette(part.onto, dist(metric.onto))
-      sil.c = NULL
-      sil.c$n=length(sil.w[,1])
-      sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
-      sil.c$cluster.number=length(summary(sil.w)$cluster.size)
-      sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
-      sil.c$avg.silwidths=summary(sil.w)$avg.width
+      sil.w = estable[[i.datos]]$sil.w
+      sil.c = estable[[i.datos]]$sil.c
 
       estable[[i.datos]]$kmk.dynamic.bs.or.numeric=part.onto
       estable[[i.datos]]$sil.width=sil.w
@@ -481,7 +475,7 @@ runSilhouetteTable <- function(data, k) {
     x.leyenda=0.99
     #
     i.datos=i.metr
-    if (is.na(estable[[i.datos]])) {
+    if (!is.list(estable[[i.datos]]) && is.na(estable[[i.datos]])) {
       next
     }
     for (estable.content in estable[[i.datos]]) {
@@ -495,13 +489,10 @@ runSilhouetteTable <- function(data, k) {
         estable[[i.datos]]$name.metric==metric.name) {
         part.onto=as.numeric(estable[[i.datos]]$kmk.dynamic.bs.or)
         onto.matrix[,(i.metr+1)]=part.onto
-        sil.w=silhouette(part.onto, dist(metric.onto))
-        sil.c = NULL
-        sil.c$n=length(sil.w[,1])
-        sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
-        sil.c$cluster.number=length(summary(sil.w)$cluster.size)
-        sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
-        sil.c$avg.silwidths=summary(sil.w)$avg.width
+
+        sil.w = estable[[i.datos]]$sil.w
+        sil.c = estable[[i.datos]]$sil.c
+
         ## Building body rows
         silhouetteData$body[[i.metr]]=c(metric.name, sil.c$clus.avg.silwidths, mean(sil.w[,"sil_width"]), sil.c$cluster.size)
         silhouetteData$body[[i.metr]]=unlist(silhouetteData$body[[i.metr]], use.names=FALSE)
