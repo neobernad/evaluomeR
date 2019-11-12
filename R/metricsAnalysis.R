@@ -84,7 +84,7 @@ plotMetricsMinMax <- function(data) {
 #' @examples
 #' # Using example data from our package
 #' data("ontMetrics")
-#' plotMetricsBloxplot(ontMetrics)
+#' plotMetricsBoxplot(ontMetrics)
 #'
 plotMetricsBoxplot <- function(data) {
   data <- as.data.frame(assay(data))

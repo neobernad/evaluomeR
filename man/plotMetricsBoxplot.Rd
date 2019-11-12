@@ -25,6 +25,6 @@ object as a boxplot.
 \examples{
 # Using example data from our package
 data("ontMetrics")
-plotMetricsBloxplot(ontMetrics)
+plotMetricsBoxplot(ontMetrics)
 
 }

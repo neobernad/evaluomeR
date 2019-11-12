@@ -552,9 +552,8 @@ runSilhouetteTableRange <- function(data, k.min, k.max) {
 
     cur.metr = as.integer(abs(i.metr-(names.metrLength*offset)))
     cur.data = estable[[i.metr]]
-    if (!is.null(cur.data) && !is.na(cur.data)) {
+    if (is.list(cur.data) && !is.null(cur.data)) {
       cur.k = cur.data$n.k
-
       cur.row <- list(cur.data$name.metric)
       cur.row <- c(cur.row, cur.data$sil.c$clus.avg.silwidths)
       #cur.row <- c(cur.row, cur.data$sil.c$avg.silwidth)
