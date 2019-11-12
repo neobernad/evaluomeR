@@ -47,7 +47,6 @@ stability <- function(data, k=5, bs=100,
   data <- as.data.frame(assay(data))
 
   checkKValue(k)
-
   suppressWarnings(
     runStabilityIndex(data, k.min=k, k.max=k, bs, seed=seed))
   stabilityDataFrame <- suppressWarnings(
@@ -218,7 +217,7 @@ runStabilityIndex <- function(data, k.min, k.max, bs, seed) {
   pkg.env$m.stab.global = m.stab.global
   pkg.env$e.stab.global = e.stab.global
   pkg.env$names.metr = names.metr
-  # return(stabilityDataFrame)
+  #return(stabilityDataFrame)
   return(NULL)
 }
 
