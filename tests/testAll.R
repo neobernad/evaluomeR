@@ -11,3 +11,4 @@ assay(getDataQualityRange(dataFrame, 2), 1)
 
 dataFrame <- metricsCorrelations(data=rnaMetrics, getImages = FALSE, margins = c(4,4,11,10))
 assay(dataFrame, 1)
+

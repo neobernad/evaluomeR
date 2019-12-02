@@ -1,5 +1,8 @@
 importFrom("Rdpack","reprompt")
 importFrom("corrplot","corrplot")
+importFrom("fpc","clusterboot")
+importFrom("fpc","kmeansCBI")
+importFrom("fpc","cluster.stats")
 importFrom("cluster","silhouette")
 importFrom("grDevices", "colorRampPalette")
 importFrom("grDevices", "dev.off")

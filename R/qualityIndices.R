@@ -132,6 +132,9 @@ qualityRange <- function(data, k.range=c(3,5), getImages=TRUE, seed=NULL) {
 }
 
 runQualityIndicesSilhouette <- function(data, k.min, k.max, bs, seed) {
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
 
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
