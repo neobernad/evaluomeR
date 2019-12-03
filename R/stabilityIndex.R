@@ -264,8 +264,8 @@ runStabilityIndexTableRange <- function(k.min, k.max) {
   # Key = Dataframe name - Value = Header name for each k
   measures["mean"]= c("Mean_stability_k_")
   measures["cluster_mean"]= c("Cluster_mean_k_")
-  measures["cluster_betweenss"]= c("Cluster_totss_k_")
-  measures["cluster_totss"]= c("Cluster_anova_k_")
+  measures["cluster_betweenss"]= c("Cluster_betweenss_k_")
+  measures["cluster_totss"]= c("Cluster_totss_k_")
   measures["cluster_tot.withinss"]= c("Cluster_tot.withinss_k_")
   measures["cluster_anova"]= c("Cluster_anova_k_")
 
@@ -370,6 +370,14 @@ runStabilityIndexK_IMG <- function(bs, k.min, k.max) {
     legend("bottomright", legend=labels, inset=.01, lwd=1, lty=stype,
            col="black", cex=0.7, pch=stype)
     mtext(side=1, text="Metrics",line=4)
+    text(0.75, 0.9, "H.stab", cex=0.6, col = "black")
+    abline(h = 0.85, col="black", lwd=1, lty=1) # Highly Stable: (0.85, 1]
+    text(0.74, 0.8, "Stab", cex=0.6, col = "black")
+    abline(h = 0.75, col="black", lwd=1, lty=2) # Stable: (0.75, 0.85]
+    text(0.76, 0.65, "Doubt.", cex=0.6, col = "black")
+    abline(h = 0.60, col="black", lwd=1, lty=3) # Doubtful: [0.60, 0.75]
+    text(0.76, 0.05, "Unstab.", cex=0.6, col = "black")
+    abline(h = 0, col="black", lwd=1, lty=4) # Unstable: [0, 0.60)
     par(new=FALSE)
   }
 }

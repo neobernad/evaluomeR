@@ -78,7 +78,17 @@ boot.cluster <- function(data, nk=5, B=10, seed=NULL, prnt=FALSE) {
 #     Custom anova computation: F function.
 
 fAnova <- function(clusterResult, k, n) {
-  return ((clusterResult$betweenss/(k-1))/(clusterResult$tot.withinss)/(n-k))
+  #cat("k: ", k, "\n")
+  #cat("clusterResult$betweenss: ", clusterResult$betweenss, "\n")
+  #cat("clusterResult$tot.withinss: ", clusterResult$tot.withinss, "\n")
+  #cat("(k-1): ", (k-1), "\n")
+  #cat("(n-k): ", (n-k), "\n")
+  #cat("d1: ", clusterResult$betweenss/(k-1), "\n")
+  #cat("d2: ", (clusterResult$tot.withinss)/(n-k), "\n")
+  #cat("r: ", (clusterResult$betweenss/(k-1))/(clusterResult$tot.withinss)/(n-k), "\n")
+  #("r: ", (clusterResult$betweenss/(k-1))/((clusterResult$tot.withinss)/(n-k)), "\n")
+
+  return ((clusterResult$betweenss/(k-1))/((clusterResult$tot.withinss)/(n-k)))
 }
 ######################################################
 

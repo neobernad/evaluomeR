@@ -288,7 +288,14 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min, k.max) {
     axis(1,at=1:length(new_xnames),labels=new_xnames,las=2,cex.axis=0.75)
     axis(2,las=3,cex.axis=0.85)
     legend("bottomright", legend=labels, inset=.01, lwd=1, lty=stype, col="black", cex=0.7, pch=stype)
-
+    text(0.76, 0.75, "Strong", cex=0.6, col = "black")
+    abline(h = 0.7, col="black", lwd=1, lty=1) # Strong clust. strct.: (0.70, 1
+    text(0.76, 0.55, "Reasn.", cex=0.6, col = "black")
+    abline(h = 0.5, col="black", lwd=1, lty=2) # Reasonable clust. strct.: (0.50, 0.70]
+    text(0.76, 0.3, "Weak", cex=0.6, col = "black")
+    abline(h = 0.25, col="black", lwd=1, lty=3) # Weak clust. strct.: (0.25, 0.50]
+    text(0.77, 0.05, "No.strct", cex=0.6, col = "black")
+    abline(h = -1, col="black", lwd=1, lty=4) # No clust. strct.: [-1, 0.25]
     par(new=FALSE)
 
   }
