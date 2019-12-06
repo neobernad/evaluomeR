@@ -148,14 +148,14 @@ runStabilityIndex <- function(data, k.min, k.max, bs, seed) {
   k.range.length = length(i.min:i.max)+1
   num.metrics = length(names.metr)
   for (i.metr in 1:num.metrics) {
-    cat("Processing metric: ", names.metr[i.metr],"(", i.metr,")\n")
+    message("Processing metric: ", names.metr[i.metr],"(", i.metr,")")
     m.stab.global[[i.metr]]=matrix(data=NA, nrow=1,
                                    ncol=k.range.length)
     m.stab.global.csv[[i.metr]]=matrix(data=NA, nrow=1,
                                        ncol=k.range.length)
 
     for (j.k in i.min:i.max) {
-      cat("\tCalculation of k = ", j.k,"\n")
+      message("\tCalculation of k = ", j.k,"")
       estable=NULL
       contador=contador+1
       i=i.metr+1

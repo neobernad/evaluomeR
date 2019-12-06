@@ -154,10 +154,10 @@ runQualityIndicesSilhouette <- function(data, k.min, k.max, bs, seed) {
   i.max=k.max
 
   for (i.metr in 1:length(names.metr)) {
-    cat("Processing metric: ", names.metr[i.metr],"(", i.metr,")\n")
+    message("Processing metric: ", names.metr[i.metr],"(", i.metr,")")
     m.global[[i.metr]]=matrix(data=NA, nrow=i.max, ncol=length(i.min:i.max))
     for (j.k in i.min:i.max) {
-      cat("\tCalculation of k = ", j.k,"\n")
+      message("\tCalculation of k = ", j.k,"")
       e.res=NULL
       e.res.or=NULL
       contador=contador+1
