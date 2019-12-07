@@ -395,7 +395,7 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
 }
 
 checkStabilityQualityData <- function(stabData, qualData) {
-  stabDf = assay(stabData, "mean")
+  stabDf = assay(stabData, "stability_mean")
   lengthStabDf = length(colnames(stabDf[,-1]))
   stabRangeStart = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[1]) # Mean_stability_k_2 -> 2
   stabRangeEnd = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[lengthStabDf])

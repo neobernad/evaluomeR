@@ -180,6 +180,8 @@ runStabilityIndex <- function(data, k.min, k.max, bs, seed) {
 
         km5$csv = NULL
         km5$csv$cluster_mean = km5$cluster$bootmean
+        km5$csv$cluster_centers = km5$cluster$result$result$centers
+        km5$csv$cluster_size = km5$cluster$result$result$size
         km5$csv$cluster_betweenss = km5$cluster$result$result$betweenss
         km5$csv$cluster_totss = km5$cluster$result$result$totss
         km5$csv$cluster_tot.withinss = km5$cluster$result$result$tot.withinss
@@ -221,6 +223,8 @@ runStabilityIndex <- function(data, k.min, k.max, bs, seed) {
 
         km5$csv = NULL
         km5$csv$cluster_mean = NULL
+        km5$csv$cluster_centers = NULL
+        km5$csv$cluster_size = NULL
         km5$csv$cluster_betweenss = NULL
         km5$csv$cluster_totss = NULL
         km5$csv$cluster_tot.withinss = NULL
@@ -262,8 +266,10 @@ runStabilityIndexTableRange <- function(k.min, k.max) {
 
   measures = NULL
   # Key = Dataframe name - Value = Header name for each k
-  measures["mean"]= c("Mean_stability_k_")
+  measures["stability_mean"]= c("Mean_stability_k_")
   measures["cluster_mean"]= c("Cluster_mean_k_")
+  measures["cluster_centers"]= c("Cluster_centers_k_")
+  measures["cluster_size"]= c("Cluster_size_k_")
   measures["cluster_betweenss"]= c("Cluster_betweenss_k_")
   measures["cluster_totss"]= c("Cluster_totss_k_")
   measures["cluster_tot.withinss"]= c("Cluster_tot.withinss_k_")
@@ -284,7 +290,7 @@ runStabilityIndexTableRange <- function(k.min, k.max) {
       measure.data.list = list()
       wrapper=NULL # Wrapper object to extract the measure data
       wrapper$metric=names.metr[i.metr]
-      if (measure == "mean") {
+      if (measure == "stability_mean") {
         jacMean = m.stab.global[[i.metr]]
         cur.value = jacMean[c(k.min:k.max)]
         measure.data.list = c(measure.data.list, cur.value)
