@@ -395,7 +395,7 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
 }
 
 checkStabilityQualityData <- function(stabData, qualData) {
-  stabDf = assay(stabData, "stability_mean")
+  stabDf = assay(stabData) # Getting first assay, which is 'stabData$stability_mean'
   lengthStabDf = length(colnames(stabDf[,-1]))
   stabRangeStart = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[1]) # Mean_stability_k_2 -> 2
   stabRangeEnd = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[lengthStabDf])
@@ -471,7 +471,7 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 # standardized dataframe to process.
 #
 standardizeStabilityData <- function(stabData, k.range=NULL) {
-  stabDf = as.data.frame(assay(stabData), "mean")
+  stabDf = as.data.frame(assay(stabData)) # Getting first assay, which is 'stabData$stability_mean'
   lengthColnames = length(colnames(stabDf))
   toRemove = list()
   for (i in seq(1, lengthColnames, 1)) {
