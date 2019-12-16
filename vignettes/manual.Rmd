@@ -189,11 +189,11 @@ stabilityData
 The stability indices plots shown when `getImages = TRUE` are generated with the values of the stability mean:
 
 ```{r stability-1-assay, results='hide', echo=TRUE, eval=FALSE}
-assay(stabilityData, "mean")
+assay(stabilityData, "stability_mean")
 ```
 
 ```{r stability-1-table, results='asis', echo=FALSE}
-data <- assay(stabilityData, "mean")
+data <- assay(stabilityData, "stability_mean")
 kable(data) %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"))
 ```
