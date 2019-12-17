@@ -523,7 +523,7 @@ runStabilityIndexMetric_IMG <- function(bs, k.min=NULL, k.max=NULL, k.set=NULL) 
     k.range.length = length(k.set)
   } else {
     k.range = k.min:k.max
-    k.range.length = length(k.min:k.max)+1
+    k.range.length = length(k.min:k.max)
   }
 
   m.stab.global = pkg.env$m.stab.global
