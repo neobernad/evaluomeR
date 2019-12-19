@@ -446,8 +446,6 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) 
     checkKValue(k.vector2[i])
   }
 
-
-
   data.metrics=NULL; names.metr=NULL; names.index=NULL;
   k.cl=NULL; k.min=NULL; k.max=NULL;
   data.metrics=NULL; datos.csv=NULL; datos.raw=NULL;
