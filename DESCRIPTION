@@ -28,6 +28,7 @@ Imports:
     reshape2,
     ggplot2,
     ggdendro,
+    plotrix,
     stats,
     matrixStats,
     Rdpack

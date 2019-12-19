@@ -469,8 +469,8 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) 
   kcolors=c("black","red","blue","green","magenta","pink","yellow","orange","brown","cyan","gray","darkgreen")
 
   par(mar=c(4,6,3,3))
-  plot(0,0, xlim=range(data.ms), ylim=c(1,length(names.metr)),
-       lwd=NULL, xlab="", ylab="", xaxt="n", yaxt="n")
+  plot(0,0, xlim=range(data.ms), ylim=c(0,length(names.metr)+1),
+       lwd=NULL, xlab="", ylab="", xaxt="n", yaxt="n", type="n")
   axis(side=2, at = seq(1,length(names.metr)), labels=names.metr, las=2, cex.axis=.7)
   title(xlab=paste("Scaled raw scores", sep=""), line=1)
   title(ylab="Metrics", line=5)
