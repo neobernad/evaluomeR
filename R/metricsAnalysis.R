@@ -439,9 +439,6 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) 
   numMetrics = length(colnames(data))-1
   if (numMetrics != length(k.vector1) || numMetrics != length(k.vector2)
       || length(k.vector1) != length(k.vector2)) {
-    cat("numMetrics", numMetrics,"\n")
-    cat("length(k.vector1)", length(k.vector1),"\n")
-    cat("length(k.vector2)", length(k.vector2),"\n")
     stop("Input parameters have different lengths")
   }
   for (i in 1:length(k.vector1)) {
