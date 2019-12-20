@@ -1,23 +1,24 @@
 library(evaluomeR)
 library(DataCombine)
+library(ggplot2)
+library(reshape2)
+library(gridExtra)
+library(grid)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
 source(paste0(wd,"agro.R"))
 source(paste0(wd,"obo.R"))
 outputDir=paste0(wd,"results-k")
 
-# Tabla con s?lo los k ?ptimos de Agro y OBO
+# Table with optimal k values for Agro and OBO
 optimalKs=NULL
 optimalKs$Agro = as.numeric(kOptTableAgro$Global_optimal_k)
 optimalKs$Obo = as.numeric(kOptTableObo$Global_optimal_k)
 optimalKs = as.data.frame(optimalKs)
 rownames(optimalKs) = rownames(kOptTableObo)
 
-# Number of metrics whose optimal k = 3:
-length(which(kOptTableAgro["Global_optimal_k"] == 3))
-length(which(kOptTableObo["Global_optimal_k"] == 3))
 
-# Tabla con K sub?ptimos y ?ptimos de Agro y OBO:
+# Table with suboptimal and optimal k values for Agro and OBO
 table = NULL
 table$Agro_stability_max_k = as.integer(kOptTableAgro$Stability_max_k)
 table$Agro_quality_max_k = as.integer(kOptTableAgro$Quality_max_k)
@@ -33,97 +34,13 @@ rownames(table) = rownames(kOptTableObo)
 csvPath = paste0(outputDir, "/both_repo_k_values",".csv")
 #write.csv(table, csvPath, row.names = TRUE)
 
-# Tabla con los valores cualitativos de los k sub?ptimos de Agro y OBO:
-# Optimal k is 3
-optimal_k = "k_3"
-
-stabilityTableAgroLabels = stabilityTableAgro[optimal_k]
-stabilityTableAgroLabels[
-  which(stabilityTableAgro[optimal_k] > 0.85 & stabilityTableAgro[optimal_k] <= 1), optimal_k
-  ] = "Highly stable"
-stabilityTableAgroLabels[
-  which(stabilityTableAgro[optimal_k] > 0.75 & stabilityTableAgro[optimal_k] <= 0.85), optimal_k
-  ] = "Stable"
-stabilityTableAgroLabels[
-  which(stabilityTableAgro[optimal_k] >= 0.60 & stabilityTableAgro[optimal_k] <= 0.75), optimal_k
-  ] = "Doubtful"
-stabilityTableAgroLabels[
-  which(stabilityTableAgro[optimal_k] >= 0 & stabilityTableAgro[optimal_k] < 0.60), optimal_k
-  ] = "Unstable"
-
-stabilityTableOboLabels = stabilityTableObo[optimal_k]
-stabilityTableOboLabels[
-  which(stabilityTableObo[optimal_k] > 0.85 & stabilityTableObo[optimal_k] <= 1), optimal_k
-  ] = "Highly stable"
-stabilityTableOboLabels[
-  which(stabilityTableObo[optimal_k] > 0.75 & stabilityTableObo[optimal_k] <= 0.85), optimal_k
-  ] = "Stable"
-stabilityTableOboLabels[
-  which(stabilityTableObo[optimal_k] >= 0.60 & stabilityTableObo[optimal_k] <= 0.75), optimal_k
-  ] = "Doubtful"
-stabilityTableOboLabels[
-  which(stabilityTableObo[optimal_k] >= 0 & stabilityTableObo[optimal_k] < 0.60), optimal_k
-  ] = "Unstable"
-
-
-# Goodness
-silhouetteTableAgroLabels = silhouetteTableAgro[optimal_k]
-silhouetteTableAgroLabels[
-  which(silhouetteTableAgro[optimal_k] > 0.7 & silhouetteTableAgro[optimal_k] <= 1), optimal_k
-  ] = "Strong clust. struct."
-silhouetteTableAgroLabels[
-  which(silhouetteTableAgro[optimal_k] > 0.5 & silhouetteTableAgro[optimal_k] <= 0.7), optimal_k
-  ] = "Reasonable clust. struct."
-silhouetteTableAgroLabels[
-  which(silhouetteTableAgro[optimal_k] > 0.25 & silhouetteTableAgro[optimal_k] <= 0.50), optimal_k
-  ] = "Weak clust. struct."
-silhouetteTableAgroLabels[
-  which(silhouetteTableAgro[optimal_k] >= -1 & silhouetteTableAgro[optimal_k] <= 0.25), optimal_k
-  ] = "No substantial clust. struct."
-
-
-silhouetteTableOboLabels = silhouetteTableObo[optimal_k]
-silhouetteTableOboLabels[
-  which(silhouetteTableObo[optimal_k] > 0.7 & silhouetteTableObo[optimal_k] <= 1), optimal_k
-  ] = "Strong clust. struct."
-silhouetteTableOboLabels[
-  which(silhouetteTableObo[optimal_k] > 0.5 & silhouetteTableObo[optimal_k] <= 0.7), optimal_k
-  ] = "Reasonable clust. struct."
-silhouetteTableOboLabels[
-  which(silhouetteTableObo[optimal_k] > 0.25 & silhouetteTableObo[optimal_k] <= 0.50), optimal_k
-  ] = "Weak clust. struct."
-silhouetteTableOboLabels[
-  which(silhouetteTableObo[optimal_k] >= -1 & silhouetteTableObo[optimal_k] <= 0.25), optimal_k
-  ] = "No substantial clust. struct."
-
-tableLabels = NULL
-#tableLabels$Agro_stability_values = stabilityTableAgro[, optimal_k]
-tableLabels$Agro_stability_labels = stabilityTableAgroLabels[, optimal_k]
-#tableLabels$Agro_quality_values = silhouetteTableAgro[, optimal_k]
-tableLabels$Agro_quality_labels = silhouetteTableAgroLabels[, optimal_k]
-
-#tableLabels$Obo_stability_values = stabilityTableObo[, optimal_k]
-tableLabels$Obo_stability_labels = stabilityTableOboLabels[, optimal_k]
-#tableLabels$Obo_quality_values = silhouetteTableObo[, optimal_k]
-tableLabels$Obo_quality_labels = silhouetteTableOboLabels[, optimal_k]
-
-tableLabels = as.data.frame(tableLabels)
-rownames(tableLabels) = rownames(silhouetteTableOboLabels)
-
-#csvPath = paste0(outputDir, "/both_repo_k_values_cualitative",".csv")
-#write.csv(tableLabels, csvPath, row.names = TRUE)
-
-# Data frame con m?tricas cuyos k ?ptimos coinciden
+# Data frame with metrics whose k value matches
 sameKIndexes = which(optimalKs$Agro == optimalKs$Obo)
 sameKMetrics = rownames(optimalKs)[sameKIndexes]
 sameKDf = optimalKs[sameKMetrics,]
 
-# ANOnto
-stability(data=inputDataAgro, k=3, getImages = T, seed=13606)
-#assay(getDataQualityRange(qualityDataAgro, 5))[19,]
-
 #####################################################################################
-# Tabla de valores de k ?ptimos vs K=5
+# Table with stab./qual. scores of optimal k values vs K=5
 #####################################################################################
 
 stabilityComparison = setNames(data.frame(matrix(ncol = 4, nrow = 0)), c("repository", "metric", "k opt.", "k=5"))
@@ -140,8 +57,6 @@ for (metric in rownames(table)) {
   obo_k_stability = as.numeric(stabilityTableObo[metric, obo_colname])
   agro_k_silhouette = as.numeric(silhouetteTableAgro[metric, agro_colname])
   obo_k_silhouette = as.numeric(silhouetteTableObo[metric, obo_colname])
-  #cat("Agro:", metric, agro_colname, agro_k_stability, "\n")
-  #cat("Obo:", metric, obo_colname, obo_k_stability, "\n")
 
   # Agro Stability
   new_row = c("Agroportal", metric, as.numeric(agro_k_stability), stabilityTableAgro[metric, "k_5"])
@@ -164,20 +79,9 @@ for (metric in rownames(table)) {
   silCount = silCount + 1
 
 }
-library(ggplot2)
-library(reshape2)
-library(gridExtra)
-library(grid)
-
 
 stabilityComparison = na.omit(stabilityComparison)
 qualityComparison = na.omit(qualityComparison)
-
-
-
-######################
-# K opt.
-######################
 
 kOptTable = NULL
 kOptTable$agro_stab = stabilityComparison[stabilityComparison$repository == "Agroportal", ]$`k opt.`
@@ -189,97 +93,6 @@ rownames(kOptTable) = stabilityComparison[stabilityComparison$repository=="Agrop
 
 csvPath = paste0(outputDir, "/stability_qualityKopt",".csv")
 #write.csv(kOptTable, csvPath, row.names = TRUE)
-
-# Stability Agro
-
-agroStabilityComparison = stabilityComparison[stabilityComparison$repository=="Agroportal", ]
-agroStabilityComparison$repository <- NULL
-agroStabilityComparison = melt(agroStabilityComparison, id="metric", measure.vars = c("k opt."))
-agroStabilityComparison$value = as.numeric(agroStabilityComparison$value)
-
-agro_sta <- ggplot(data=agroStabilityComparison, aes(x=metric, y=value, group = variable)) +
-  geom_line(aes(color=variable, linetype=variable)) +
-  geom_point(aes(color=variable, shape=variable)) +
-  geom_point(aes(color=variable)) +
-  scale_colour_grey(start = 0, end = 0.5) +
-  coord_cartesian(ylim = c(0.5, 1)) +
-  scale_y_continuous(name="Stability") +
-  theme(axis.text.x = element_text(angle = 90, hjust=1),
-        legend.title = element_blank(),
-        text = element_text(size=26)
-  ) +
-  labs(title="Agroportal", subtitle="Stability scores for k opt.",
-       x="Metrics")
-
-# Stability Obo
-
-oboStabilityComparison = stabilityComparison[stabilityComparison$repository=="OBO Foundry", ]
-oboStabilityComparison$repository <- NULL
-oboStabilityComparison = melt(oboStabilityComparison, id="metric", measure.vars = c("k opt."))
-oboStabilityComparison$value = as.numeric(oboStabilityComparison$value)
-
-obo_sta <- ggplot(data=oboStabilityComparison, aes(x=metric, y=value, group = variable)) +
-  geom_line(aes(color=variable, linetype=variable)) +
-  geom_point(aes(color=variable, shape=variable)) +
-  geom_point(aes(color=variable)) +
-  scale_colour_grey(start = 0, end = 0.5) +
-  coord_cartesian(ylim = c(0.5, 1)) +
-  scale_y_continuous(name="Stability") +
-  theme(axis.text.x = element_text(angle = 90, hjust=1),
-        legend.title = element_blank(),
-        text = element_text(size=26)
-  ) +
-  labs(title="OBO Foundry", subtitle="Stability scores for k opt.",
-       x="Metrics")
-
-
-# Silhouette Agro
-
-agroSilhouetteComparison = qualityComparison[qualityComparison$repository=="Agroportal", ]
-agroSilhouetteComparison$repository <- NULL
-agroSilhouetteComparison = melt(agroSilhouetteComparison, id="metric", measure.vars = c("k opt."))
-agroSilhouetteComparison$value = as.numeric(agroSilhouetteComparison$value)
-
-agro_sil <- ggplot(data=agroSilhouetteComparison, aes(x=metric, y=value, group = variable)) +
-  geom_line(aes(color=variable, linetype=variable)) +
-  geom_point(aes(color=variable, shape=variable)) +
-  geom_point(aes(color=variable)) +
-  scale_colour_grey(start = 0, end = 0.5) +
-  scale_y_continuous(name="Goodness") +
-  coord_cartesian(ylim = c(0.5, 1)) +
-  theme(axis.text.x = element_text(angle = 90, hjust=1),
-        legend.title = element_blank(),
-        text = element_text(size=26)
-  ) +
-  labs(title="Agroportal", subtitle="Goodness scores for k opt.",
-       x="Metrics")
-
-# Silhouette Obo
-
-oboSilhouetteComparison = qualityComparison[qualityComparison$repository=="OBO Foundry", ]
-oboSilhouetteComparison$repository <- NULL
-oboSilhouetteComparison = melt(oboSilhouetteComparison, id="metric", measure.vars = c("k opt."))
-oboSilhouetteComparison$value = as.numeric(oboSilhouetteComparison$value)
-
-obo_sil <- ggplot(data=oboSilhouetteComparison, aes(x=metric, y=value, group = variable)) +
-  geom_line(aes(color=variable, linetype=variable)) +
-  geom_point(aes(color=variable, shape=variable)) +
-  geom_point(aes(color=variable)) +
-  scale_colour_grey(start = 0, end = 0.5) +
-  scale_y_continuous(name="Goodness") + # col="# of cylinders"
-  coord_cartesian(ylim = c(0.5, 1)) +
-  theme(axis.text.x = element_text(angle = 90, hjust=1),
-        legend.title = element_blank(),
-        text = element_text(size=26)
-  ) +
-  labs(title="OBO Foundry", subtitle="Goodness scores for k opt.",
-       x="Metrics")
-
-grid.arrange(agro_sta, obo_sta, agro_sil, obo_sil, ncol=1)
-
-######################
-# K opt. vs K = 5
-######################
 
 # Stability Agro
 
@@ -366,10 +179,11 @@ obo_sil <- ggplot(data=oboSilhouetteComparison, aes(x=metric, y=value, group = v
   labs(title="OBO Foundry", subtitle="Goodness scores for k opt. and k=5",
        x="Metrics")
 
+# Huge plot!
 grid.arrange(agro_sta, obo_sta, agro_sil, obo_sil, ncol=1)
 
 ####################################################
-# Generar table de labels con High stability, etc..
+# Table with the classification of each stab./qual. score
 ####################################################
 
 optimal_k = "k opt."
@@ -461,14 +275,3 @@ length(which(stabilityComparison[stabilityComparison$repository=="Agroportal", "
 length(which(stabilityComparison[stabilityComparison$repository=="OBO Foundry", "k opt."] > 0.75))
 length(which(qualityComparison[qualityComparison$repository=="Agroportal", "k opt."] > 0.5))
 length(which(qualityComparison[qualityComparison$repository=="OBO Foundry", "k opt."] > 0.5))
-
-# Para generar una gr?fica de los valores de K optimo (k=3) a lo largo de las m?tricas
-# Agroportal
-a = stability(data=inputDataAgro, k=3, b=500, getImages = T, seed=13606)
-b = quality(data=inputDataAgro, k=3, getImages = T,
-            seed=13606)
-# OBO Foundry
-a = stability(data=inputDataObo, k=3, b=500, getImages = T, seed=13606)
-b = quality(data=inputDataObo, k=10, getImages = T,
-            seed=13606)
-
