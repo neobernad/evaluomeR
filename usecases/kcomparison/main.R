@@ -57,27 +57,27 @@ for (metric in rownames(table)) {
   obo_k_stability = as.numeric(stabilityTableObo[metric, obo_colname])
   agro_k_silhouette = as.numeric(silhouetteTableAgro[metric, agro_colname])
   obo_k_silhouette = as.numeric(silhouetteTableObo[metric, obo_colname])
-
+  
   # Agro Stability
   new_row = c("Agroportal", metric, as.numeric(agro_k_stability), stabilityTableAgro[metric, "k_5"])
   stabilityComparison <- InsertRow(stabilityComparison, NewRow = new_row, RowNum = stabCount)
   stabCount = stabCount + 1
-
+  
   # Agro Silhouette
   new_row = c("Agroportal", metric, agro_k_silhouette, silhouetteTableAgro[metric, "k_5"])
   qualityComparison <- InsertRow(qualityComparison, NewRow = new_row, RowNum = silCount)
   silCount = silCount + 1
-
+  
   # Obo Stability
   new_row = c("OBO Foundry", metric, obo_k_stability, stabilityTableObo[metric, "k_5"])
   stabilityComparison <- InsertRow(stabilityComparison, NewRow = new_row, RowNum = stabCount)
   stabCount = stabCount + 1
-
+  
   # Obo Silhouette
   new_row = c("OBO Foundry", metric, obo_k_silhouette, silhouetteTableObo[metric, "k_5"])
   qualityComparison <- InsertRow(qualityComparison, NewRow = new_row, RowNum = silCount)
   silCount = silCount + 1
-
+  
 }
 
 stabilityComparison = na.omit(stabilityComparison)
@@ -181,6 +181,75 @@ obo_sil <- ggplot(data=oboSilhouetteComparison, aes(x=metric, y=value, group = v
 
 # Huge plot!
 grid.arrange(agro_sta, obo_sta, agro_sil, obo_sil, ncol=1)
+
+#####################################################################################
+# Table with stab./qual. scores of optimal k in AgroPortal and OBo Foundry
+#####################################################################################
+
+# Stability Agro
+
+agroStabilityComparison = stabilityComparison[stabilityComparison$repository=="Agroportal", ]
+agroStabilityComparison$`k=5` <- NULL
+agroStabilityComparison = melt(agroStabilityComparison, id="metric", measure.vars = c("k opt."))
+agroStabilityComparison$value = as.numeric(agroStabilityComparison$value)
+agroStabilityComparison$variable = rep("AgroPortal", length(agroStabilityComparison$variable))
+
+# Stability OBO
+
+oboStabilityComparison = stabilityComparison[stabilityComparison$repository=="OBO Foundry", ]
+oboStabilityComparison$`k=5` <- NULL
+oboStabilityComparison = melt(oboStabilityComparison, id="metric", measure.vars = c("k opt."))
+oboStabilityComparison$value = as.numeric(oboStabilityComparison$value)
+oboStabilityComparison$variable = rep("OBO Foundry", length(oboStabilityComparison$variable))
+
+toPlot = rbind(agroStabilityComparison, oboStabilityComparison)
+
+stabPlot = ggplot(data=toPlot, aes(x=metric, y=value, group = variable)) +
+  geom_line(aes(color=variable, linetype=variable)) +
+  geom_point(aes(color=variable, shape=variable)) +
+  scale_colour_grey(start = 0, end = 0.5) +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_y_continuous(name="Stability") +
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        legend.title = element_blank(),
+        text = element_text(size=26)
+  ) +
+  labs(title=NULL, subtitle=NULL,
+       x="Metrics")
+
+# Goodness Agro
+
+agroSilhouetteComparison = qualityComparison[qualityComparison$repository=="Agroportal", ]
+agroSilhouetteComparison$`k=5` <- NULL
+agroSilhouetteComparison = melt(agroSilhouetteComparison, id="metric", measure.vars = c("k opt."))
+agroSilhouetteComparison$value = as.numeric(agroSilhouetteComparison$value)
+agroSilhouetteComparison$variable = rep("AgroPortal", length(agroStabilityComparison$variable))
+
+# Goodness OBO
+
+oboSilhouetteComparison = qualityComparison[qualityComparison$repository=="OBO Foundry", ]
+oboSilhouetteComparison$`k=5` <- NULL
+oboSilhouetteComparison = melt(oboSilhouetteComparison, id="metric", measure.vars = c("k opt."))
+oboSilhouetteComparison$value = as.numeric(oboSilhouetteComparison$value)
+oboSilhouetteComparison$variable = rep("OBO Foundry", length(oboStabilityComparison$variable))
+
+toPlot = rbind(agroSilhouetteComparison, oboSilhouetteComparison)
+
+goodnessPlot <- ggplot(data=toPlot, aes(x=metric, y=value, group = variable)) +
+  geom_line(aes(color=variable, linetype=variable)) +
+  geom_point(aes(color=variable, shape=variable)) +
+  geom_point(aes(color=variable)) +
+  scale_colour_grey(start = 0, end = 0.5) +
+  coord_cartesian(ylim = c(0.5, 1)) +
+  scale_y_continuous(name="Goodness") +
+  theme(axis.text.x = element_text(angle = 90, hjust=1),
+        legend.title = element_blank(),
+        text = element_text(size=26)
+  ) +
+  labs(title=NULL, subtitle=NULL,
+       x="Metrics")
+
+grid.arrange(stabPlot, goodnessPlot, ncol=1)
 
 ####################################################
 # Table with the classification of each stab./qual. score
