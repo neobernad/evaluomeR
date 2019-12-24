@@ -344,3 +344,13 @@ length(which(stabilityComparison[stabilityComparison$repository=="Agroportal", "
 length(which(stabilityComparison[stabilityComparison$repository=="OBO Foundry", "k opt."] > 0.75))
 length(which(qualityComparison[qualityComparison$repository=="Agroportal", "k opt."] > 0.5))
 length(which(qualityComparison[qualityComparison$repository=="OBO Foundry", "k opt."] > 0.5))
+
+##
+# Plotting signatures of Agro and OBO for their optimal k value vs k = 5
+##
+
+agroVector = as.integer(kOptTableAgro$Global_optimal_k)
+oboVector = as.integer(kOptTableObo$Global_optimal_k)
+k5Vector = rep(5, length(agroVector))
+plotMetricsClusterComparison(inputDataAgro, agroVector, k5Vector, seed = 13606)
+plotMetricsClusterComparison(inputDataObo, oboVector, k5Vector, seed = 13606)
