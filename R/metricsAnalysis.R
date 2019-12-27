@@ -534,9 +534,9 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) 
 
 checkStabilityQualityData <- function(stabData, qualData) {
   stabDf = assay(stabData) # Getting first assay, which is 'stabData$stability_mean'
-  lengthStabDf = length(colnames(stabDf[,-1]))
-  stabRangeStart = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[1]) # Mean_stability_k_2 -> 2
-  stabRangeEnd = gsub("^.*_.*_.*_","", colnames(stabDf[,-1])[lengthStabDf])
+  lengthStabDf = length(colnames(stabDf)[-1])
+  stabRangeStart = gsub("^.*_.*_.*_","", colnames(stabDf)[-1][1]) # Mean_stability_k_2 -> 2
+  stabRangeEnd = gsub("^.*_.*_.*_","", colnames(stabDf)[-1][lengthStabDf])
   lengthQual = length(qualData)
   namesQual = names(qualData)
   qualRangeStart = getFormattedK(namesQual[1]) # k_2 -> 2
