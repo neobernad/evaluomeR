@@ -595,7 +595,7 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 
   rownames(qualDf) = qualDf$Metric
   qualDf = qualDf[, -1] # Remove "Metric" column, metrics are rownames now
-  qualDf <- qualDf[ order(row.names(qualDf)), ]
+  qualDf <- qualDf[ row.names(qualDf), ]
   return(qualDf)
 }
 
@@ -641,7 +641,7 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
 
   rownames(stabDf) = stabDf$Metric
   stabDf = stabDf[, -1] # Remove "Metric" column, metrics are rownames now
-  stabDf <- stabDf[ order(row.names(stabDf)), ]
+  stabDf <- stabDf[ row.names(stabDf), ]
   return(stabDf)
 }
 
