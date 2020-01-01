@@ -302,7 +302,7 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
   stabDf = standardizeStabilityData(stabData, k.range)
   qualDf = standardizeQualityData(qualData, k.range)
 
-  metrics = rownames(stabDf)
+  metrics = as.character(as.data.frame(assay(stabData))$Metric)
   STABLE_CLASS = 0.75
 
   outputTable = as.data.frame(metrics)
@@ -572,7 +572,7 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
   for (i in seq(qualRangeStart, qualRangeEnd, 1)) {
     curQual = as.data.frame(assay(getDataQualityRange(qualData, i)))
     if (i == qualRangeStart) {
-      Metric = as.character(levels(curQual$Metric))
+      Metric = as.character(curQual$Metric)
     }
     kValues[[i]] = as.numeric(as.character(curQual$Avg_Silhouette_Width))
   }
@@ -595,7 +595,7 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 
   rownames(qualDf) = qualDf$Metric
   qualDf = qualDf[, -1] # Remove "Metric" column, metrics are rownames now
-  qualDf <- qualDf[ row.names(qualDf), ]
+  qualDf <- qualDf[ order(row.names(qualDf)), ]
   return(qualDf)
 }
 
@@ -641,7 +641,7 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
 
   rownames(stabDf) = stabDf$Metric
   stabDf = stabDf[, -1] # Remove "Metric" column, metrics are rownames now
-  stabDf <- stabDf[ row.names(stabDf), ]
+  stabDf <- stabDf[ order(row.names(stabDf)), ]
   return(stabDf)
 }
 
