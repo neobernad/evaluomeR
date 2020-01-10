@@ -1,5 +1,8 @@
 library(evaluomeR)
 library(ggplot2)
+library(stringr)
+library(reshape2)
+library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
 #### Data loading ----
@@ -29,17 +32,17 @@ inputMultimc16 = read.csv(multimc16Path, header = TRUE)
 inputMultimc17 = read.csv(multimc17Path, header = TRUE)
 
 #### Stability [2,15] ----
-stabMatcomp15 <- stabilityRange(data=inputMatcomp15, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
+stabMatcomp15 <- stabilityRange(data=inputMatcomp15, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
 
-stabMulti15 <- stabilityRange(data=inputMulti15, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMulti16 <- stabilityRange(data=inputMulti16, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
+stabMulti15 <- stabilityRange(data=inputMulti15, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMulti16 <- stabilityRange(data=inputMulti16, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
 
-stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
-stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=c(2,15), bs=100, getImages = TRUE, seed=13606)
+stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
+stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=c(2,15), bs=100, getImages = FALSE, seed=13606)
 
 #### Stability SE to DF ----
 
@@ -128,4 +131,7 @@ for (stabDf in stabDfList) {
 stabPlot +
   scale_x_continuous(name="k", breaks=1:14, labels=2:15) +
   scale_y_continuous(name="Stability", limits = c(0.5,1)) +
-  scale_colour_grey(start = 0, end = 0)
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_hc()
+
+
