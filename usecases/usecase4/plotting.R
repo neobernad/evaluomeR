@@ -5,7 +5,6 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
-outputDir=paste0(wd,"plots")
 
 getFormattedK <- function(k) {
   return(gsub("^.*_","", k))
@@ -178,14 +177,11 @@ for (stabDf in stabDfList) {
   }
 }
 
-stabPlot = stabPlot +
+stabPlot +
   scale_x_continuous(name="k", breaks=1:13, labels=3:15) +
   scale_y_continuous(name="Stability", limits = c(min,max), breaks = seq(0.5, 1, 0.05), labels=seq(0.5, 1, 0.05)) +
   scale_colour_grey(start = 0.7, end = 0) +
-  theme_calc(base_family = "sans")
-
-ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_impact_factor.png"),
-       device="png", units="cm", width = 20, height = 10, dpi="retina")
+  theme_calc()
 
 #### Quality [3,15] ----
 qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=c(3,15), getImages = FALSE, seed=13606)
@@ -282,12 +278,9 @@ for (silDf in silDfList) {
   }
 }
 
-silPlot = silPlot +
+silPlot +
   scale_x_continuous(name="k", breaks=1:13, labels=3:15) +
   scale_y_continuous(name="Quality", limits = c(min,max), breaks = seq(0.5, 1, 0.05), labels=seq(0.5, 1, 0.05)) +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
-
-ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_impact_factor.png"),
-       device="png", units="cm", width = 20, height = 10, dpi="retina")
 
