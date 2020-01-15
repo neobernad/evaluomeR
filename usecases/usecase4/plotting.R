@@ -95,12 +95,12 @@ bothData = rbind(agroData, oboData)
 
 
 #### Stability [2,6] ----
-stabAgro <- stabilityRange(data=agroData, k.range=c(2,6), bs=100, getImages = FALSE, seed=13606)
-stabObo <- stabilityRange(data=oboData, k.range=c(2,6), bs=100, getImages = FALSE, seed=13606)
-stabBoth <- stabilityRange(data=bothData, k.range=c(2,6), bs=100, getImages = FALSE, seed=13606)
+k.range=c(2,6)
+stabAgro <- stabilityRange(data=agroData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabObo <- stabilityRange(data=oboData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabBoth <- stabilityRange(data=bothData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
 
 #### Stability SE to DF ----
-k.range=c(2,6)
 meanStabAgro = standardizeStabilityData(stabAgro, k.range)
 meanStabAgro$Metric = rownames(meanStabAgro)
 meanStabAgro$Repository = "AGRO"
@@ -117,22 +117,24 @@ meanStabBoth$Repository = "AGRO+OBO"
 colnames(meanStabBoth) = str_remove_all(colnames(meanStabBoth), "k_")
 
 #### Stability plotting ----
-
 stabDfList = list(meanStabAgro, meanStabObo, meanStabBoth)
 
 stabPlot = ggplot()
 min = Inf
 max = -Inf
 for (stabDf in stabDfList) {
-  stabDf = stabDf[which(stabDf$Metric == "ANOnto" | stabDf$Metric == "CBOOnto"), ]
+  stabDf = stabDf[which(stabDf$Metric == "ANOnto" |
+                          stabDf$Metric == "CBOOnto" |
+                          stabDf$Metric == "NOCOnto"
+                          ), ]
   stabDf_melt = melt(stabDf, id.vars = c("Metric", "Repository"))
   stabDf_melt$variable = as.integer(stabDf_melt$variable)
-  for (metric in c("ANOnto", "CBOOnto")) {
+  for (metric in c("ANOnto", "CBOOnto", "NOCOnto")) {
     current_melt = stabDf_melt[which(stabDf_melt$Metric == metric), ]
     stabPlot = stabPlot +
       geom_line(current_melt,
                 mapping = aes(x=variable, y=value, group = 1, linetype=Metric, colour=Metric)) +
-      geom_point(stabDf_melt,
+      geom_point(current_melt,
                 mapping = aes(x=variable, y=value, group = 1, shape=Repository))
   }
 
@@ -144,10 +146,74 @@ for (stabDf in stabDfList) {
   }
 }
 
-stabPlot +
+stabPlot = stabPlot +
   scale_x_continuous(name="k", breaks=1:5, labels=2:6) +
-  scale_y_continuous(name="Stability", limits = c(min,max), breaks = seq(0.5, 1, 0.025), labels=seq(0.5, 1, 0.025)) +
+  scale_y_continuous(name="Stability", limits = c(min,max), breaks = c(0.6, 0.75, 0.85), labels=c(0.6, 0.75, 0.85)) +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
+ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_agro_obo_both.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
+#### Quality [2,6] ----
+qualAgro <- qualityRange(data=agroData, k.range=k.range, getImages = FALSE, seed=13606)
+qualObo <- qualityRange(data=oboData, k.range=k.range, getImages = FALSE, seed=13606)
+qualBoth <- qualityRange(data=bothData, k.range=k.range, getImages = FALSE, seed=13606)
+
+#### Quality SE to DF ----
+silAgro = standardizeQualityData(qualAgro, k.range)
+silAgro$Metric = rownames(silAgro)
+silAgro$Repository = "AGRO"
+colnames(silAgro) = str_remove_all(colnames(silAgro), "k_")
+
+silObo = standardizeQualityData(qualObo, k.range)
+silObo$Metric = rownames(silObo)
+silObo$Repository = "OBO"
+colnames(silObo) = str_remove_all(colnames(silObo), "k_")
+
+silBoth = standardizeQualityData(qualBoth, k.range)
+silBoth$Metric = rownames(silBoth)
+silBoth$Repository = "AGRO+OBO"
+colnames(silBoth) = str_remove_all(colnames(silBoth), "k_")
+
+#### Quality plotting ----
+
+silDfList = list(silAgro, silObo, silBoth)
+
+
+silPlot = ggplot()
+min = Inf
+max = -Inf
+for (silDf in silDfList) {
+  silDf = silDf[which(silDf$Metric == "ANOnto" |
+                        silDf$Metric == "CBOOnto" |
+                        silDf$Metric == "NOCOnto"
+  ), ]
+  silDf_melt = melt(silDf, id.vars = c("Metric", "Repository"))
+  silDf_melt$variable = as.integer(silDf_melt$variable)
+
+  for (metric in c("ANOnto", "CBOOnto", "NOCOnto")) {
+    current_melt = silDf_melt[which(silDf_melt$Metric == metric), ]
+    silPlot = silPlot +
+      geom_line(current_melt,
+                mapping = aes(x=variable, y=value, group = 1, linetype=Metric, colour=Metric)) +
+      geom_point(current_melt,
+                 mapping = aes(x=variable, y=value, group = 1, shape=Repository))
+  }
+
+  if (min > min(silDf_melt$value)) {
+    min = min(silDf_melt$value)
+  }
+  if (max < max(silDf_melt$value)) {
+    max = max(silDf_melt$value)
+  }
+}
+
+silPlot = silPlot +
+  scale_x_continuous(name="k", breaks=1:5, labels=2:6) +
+  scale_y_continuous(name="Quality", limits = c(min,max), breaks = c(0.25, 0.5, 0.7), labels=c(0.25, 0.5, 0.7)) +
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_calc()
+
+ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_agro_obo_both.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")

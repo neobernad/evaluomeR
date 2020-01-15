@@ -11,6 +11,43 @@ getFormattedK <- function(k) {
   return(gsub("^.*_","", k))
 }
 
+standardizeStabilityData <- function(stabData, k.range=NULL) {
+  stabDf = as.data.frame(assay(stabData)) # Getting first assay, which is 'stabData$stability_mean'
+  lengthColnames = length(colnames(stabDf))
+  toRemove = list()
+  for (i in seq(1, lengthColnames, 1)) {
+    colname = colnames(stabDf)[i]
+    newColname = gsub("^.*_.*_.*_","k_", colname)
+    colnames(stabDf)[i] = newColname
+    if (i != 1) { # Skip Metric column
+      k = as.numeric(getFormattedK(newColname))
+      if (!is.null(k.range) && (k < k.range[1] || k > k.range[2])) {
+        toRemove = append(toRemove, newColname)
+        next
+      }
+      stabDf[newColname] = as.numeric(as.character(stabDf[[newColname]]))
+    }
+  }
+
+  for (columnName in toRemove) {
+    stabDf[, columnName] = list(NULL)
+    lengthColnames = lengthColnames-1
+  }
+
+  inputStartRange = as.numeric(getFormattedK(colnames(stabDf)[2]))
+  inputEndRange = as.numeric(getFormattedK(colnames(stabDf)[lengthColnames]))
+  if (!is.null(k.range) && (k.range[1] < inputStartRange || k.range[2] > inputEndRange)) {
+    # Input k.range is not a subset of the stabData k ranges
+    stop("Input k.range [", k.range[1], ", ", k.range[2], "] is not a subset of data range [",
+         inputStartRange, ", ", inputEndRange, "]")
+  }
+
+  rownames(stabDf) = stabDf$Metric
+  stabDf = stabDf[, -1] # Remove "Metric" column, metrics are rownames now
+  stabDf <- stabDf[ order(row.names(stabDf)), ]
+  return(stabDf)
+}
+
 standardizeQualityData <- function(qualData, k.range=NULL) {
   lengthQuality = length(qualData)
   qualRangeStart = getFormattedK(names(qualData)[1])
@@ -75,82 +112,73 @@ inputMultimc16 = read.csv(multimc16Path, header = TRUE)
 inputMultimc17 = read.csv(multimc17Path, header = TRUE)
 
 #### Stability [2,15] ----
-stabMatcomp15 <- stabilityRange(data=inputMatcomp15, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
+k.range=c(2,15)
+stabMatcomp15 <- stabilityRange(data=inputMatcomp15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
 
-stabMulti15 <- stabilityRange(data=inputMulti15, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMulti16 <- stabilityRange(data=inputMulti16, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
+stabMulti15 <- stabilityRange(data=inputMulti15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMulti16 <- stabilityRange(data=inputMulti16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
 
-stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
-stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=c(3,15), bs=100, getImages = FALSE, seed=13606)
+stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
 
 #### Stability SE to DF ----
-
-meanStabMatcomp15 = as.data.frame(assay(stabMatcomp15, "stability_mean"))
-meanStabMatcomp15[2:14] <- lapply(meanStabMatcomp15[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMatcomp15 = standardizeStabilityData(stabMatcomp15, k.range)
 meanStabMatcomp15$Metric = "Matcomp15"
 meanStabMatcomp15$category = "MCB"
 meanStabMatcomp15$year = "2015"
-colnames(meanStabMatcomp15) = str_remove_all(colnames(meanStabMatcomp15), "Mean_stability_k_")
+colnames(meanStabMatcomp15) = str_remove_all(colnames(meanStabMatcomp15), "k_")
 
-meanStabMatcomp16 = as.data.frame(assay(stabMatcomp16, "stability_mean"))
-meanStabMatcomp16[2:14] <- lapply(meanStabMatcomp16[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMatcomp16 = standardizeStabilityData(stabMatcomp16, k.range)
 meanStabMatcomp16$Metric = "Matcomp16"
 meanStabMatcomp16$category = "MCB"
 meanStabMatcomp16$year = "2016"
-colnames(meanStabMatcomp16) = str_remove_all(colnames(meanStabMatcomp16), "Mean_stability_k_")
+colnames(meanStabMatcomp16) = str_remove_all(colnames(meanStabMatcomp16), "k_")
 
-meanStabMatcomp17 = as.data.frame(assay(stabMatcomp17, "stability_mean"))
-meanStabMatcomp17[2:14] <- lapply(meanStabMatcomp17[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMatcomp17 = standardizeStabilityData(stabMatcomp17, k.range)
 meanStabMatcomp17$Metric = "Matcomp17"
 meanStabMatcomp17$category = "MCB"
 meanStabMatcomp17$year = "2017"
-colnames(meanStabMatcomp17) = str_remove_all(colnames(meanStabMatcomp17), "Mean_stability_k_")
+colnames(meanStabMatcomp17) = str_remove_all(colnames(meanStabMatcomp17), "k_")
 
-meanStabMulti15 = as.data.frame(assay(stabMulti15, "stability_mean"))
-meanStabMulti15[2:14] <- lapply(meanStabMulti15[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMulti15 = standardizeStabilityData(stabMulti15, k.range)
 meanStabMulti15$Metric = "Multi15"
 meanStabMulti15$category = "MS"
 meanStabMulti15$year = "2015"
-colnames(meanStabMulti15) = str_remove_all(colnames(meanStabMulti15), "Mean_stability_k_")
+colnames(meanStabMulti15) = str_remove_all(colnames(meanStabMulti15), "k_")
 
-meanStabMulti16 = as.data.frame(assay(stabMulti16, "stability_mean"))
-meanStabMulti16[2:14] <- lapply(meanStabMulti16[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMulti16 = standardizeStabilityData(stabMulti16, k.range)
 meanStabMulti16$Metric = "Multi16"
 meanStabMulti16$category = "MS"
 meanStabMulti16$year = "2016"
-colnames(meanStabMulti16) = str_remove_all(colnames(meanStabMulti16), "Mean_stability_k_")
+colnames(meanStabMulti16) = str_remove_all(colnames(meanStabMulti16), "k_")
 
-meanStabMulti17 = as.data.frame(assay(stabMulti17, "stability_mean"))
-meanStabMulti17[2:14] <- lapply(meanStabMulti17[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMulti17 = standardizeStabilityData(stabMulti17, k.range)
 meanStabMulti17$Metric = "Multi17"
 meanStabMulti17$category = "MS"
 meanStabMulti17$year = "2017"
-colnames(meanStabMulti17) = str_remove_all(colnames(meanStabMulti17), "Mean_stability_k_")
+colnames(meanStabMulti17) = str_remove_all(colnames(meanStabMulti17), "k_")
 
-meanStabMultimc15 = as.data.frame(assay(stabMultimc15, "stability_mean"))
-meanStabMultimc15[2:14] <- lapply(meanStabMultimc15[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMultimc15 = standardizeStabilityData(stabMultimc15, k.range)
 meanStabMultimc15$Metric = "Multimc15"
 meanStabMultimc15$category = "MCB+MS"
 meanStabMultimc15$year = "2015"
-colnames(meanStabMultimc15) = str_remove_all(colnames(meanStabMultimc15), "Mean_stability_k_")
+colnames(meanStabMultimc15) = str_remove_all(colnames(meanStabMultimc15), "k_")
 
-meanStabMultimc16 = as.data.frame(assay(stabMultimc16, "stability_mean"))
-meanStabMultimc16[2:14] <- lapply(meanStabMultimc16[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMultimc16 = standardizeStabilityData(stabMultimc16, k.range)
 meanStabMultimc16$Metric = "Multimc16"
 meanStabMultimc16$category = "MCB+MS"
 meanStabMultimc16$year = "2016"
-colnames(meanStabMultimc16) = str_remove_all(colnames(meanStabMultimc16), "Mean_stability_k_")
+colnames(meanStabMultimc16) = str_remove_all(colnames(meanStabMultimc16), "k_")
 
-meanStabMultimc17 = as.data.frame(assay(stabMultimc17, "stability_mean"))
-meanStabMultimc17[2:14] <- lapply(meanStabMultimc17[2:14], function(x) {if(is.factor(x)) as.numeric(as.character(x)) else x})
+meanStabMultimc17 = standardizeStabilityData(stabMultimc17, k.range)
 meanStabMultimc17$Metric = "Multimc17"
 meanStabMultimc17$category = "MCB+MS"
 meanStabMultimc17$year = "2017"
-colnames(meanStabMultimc17) = str_remove_all(colnames(meanStabMultimc17), "Mean_stability_k_")
+colnames(meanStabMultimc17) = str_remove_all(colnames(meanStabMultimc17), "k_")
 
 #### Stability plotting ----
 
@@ -179,29 +207,28 @@ for (stabDf in stabDfList) {
 }
 
 stabPlot = stabPlot +
-  scale_x_continuous(name="k", breaks=1:13, labels=3:15) +
-  scale_y_continuous(name="Stability", limits = c(min,max), breaks = seq(0.5, 1, 0.05), labels=seq(0.5, 1, 0.05)) +
+  scale_x_continuous(name="k", breaks=1:14, labels=2:15) +
+  scale_y_continuous(name="Stability", limits = c(min,max), breaks = c(0.6, 0.75, 0.85), labels=c(0.6, 0.75, 0.85)) +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc(base_family = "sans")
 
-ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_impact_factor.png"),
-       device="png", units="cm", width = 20, height = 10, dpi="retina")
+ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_impact_factor.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
-#### Quality [3,15] ----
-qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMatcomp16 <- qualityRange(data=inputMatcomp16, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMatcomp17 <- qualityRange(data=inputMatcomp17, k.range=c(3,15), getImages = FALSE, seed=13606)
+#### Quality [2,15] ----
+qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=k.range, getImages = FALSE, seed=13606)
+qualMatcomp16 <- qualityRange(data=inputMatcomp16, k.range=k.range, getImages = FALSE, seed=13606)
+qualMatcomp17 <- qualityRange(data=inputMatcomp17, k.range=k.range, getImages = FALSE, seed=13606)
 
-qualMulti15 <- qualityRange(data=inputMulti15, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMulti16 <- qualityRange(data=inputMulti16, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMulti17 <- qualityRange(data=inputMultimc17, k.range=c(3,15), getImages = FALSE, seed=13606)
+qualMulti15 <- qualityRange(data=inputMulti15, k.range=k.range, getImages = FALSE, seed=13606)
+qualMulti16 <- qualityRange(data=inputMulti16, k.range=k.range, getImages = FALSE, seed=13606)
+qualMulti17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=13606)
 
-qualMultimc15 <- qualityRange(data=inputMultimc15, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMultimc16 <- qualityRange(data=inputMultimc16, k.range=c(3,15), getImages = FALSE, seed=13606)
-qualMultimc17 <- qualityRange(data=inputMultimc17, k.range=c(3,15), getImages = FALSE, seed=13606)
+qualMultimc15 <- qualityRange(data=inputMultimc15, k.range=k.range, getImages = FALSE, seed=13606)
+qualMultimc16 <- qualityRange(data=inputMultimc16, k.range=k.range, getImages = FALSE, seed=13606)
+qualMultimc17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=13606)
 
 #### Quality SE to DF ----
-k.range=c(3,15)
 silMatcomp15 = standardizeQualityData(qualMatcomp15, k.range)
 silMatcomp15$Metric = "Matcomp15"
 silMatcomp15$category = "MCB"
@@ -283,11 +310,11 @@ for (silDf in silDfList) {
 }
 
 silPlot = silPlot +
-  scale_x_continuous(name="k", breaks=1:13, labels=3:15) +
-  scale_y_continuous(name="Quality", limits = c(min,max), breaks = seq(0.5, 1, 0.05), labels=seq(0.5, 1, 0.05)) +
+  scale_x_continuous(name="k", breaks=1:14, labels=2:15) +
+  scale_y_continuous(name="Quality", limits = c(min,max), breaks = c(0.25, 0.5, 0.7), labels=c(0.25, 0.5, 0.7)) +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_impact_factor.png"),
-       device="png", units="cm", width = 20, height = 10, dpi="retina")
+ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_impact_factor.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
