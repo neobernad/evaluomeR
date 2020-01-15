@@ -5,7 +5,11 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
-outputDir=paste0(wd,"plots")
+plotDir=paste0(wd,"plots")
+dataDir=paste0(wd,"results-csv")
+
+dir.create(file.path(plotDir))
+dir.create(file.path(dataDir))
 
 getFormattedK <- function(k) {
   return(gsub("^.*_","", k))
@@ -97,7 +101,6 @@ multi17Path=paste0(wd,"data/data-multi17.csv")
 multimc15Path=paste0(wd,"data/data-multimc15.csv")
 multimc16Path=paste0(wd,"data/data-multimc16.csv")
 multimc17Path=paste0(wd,"data/data-multimc17.csv")
-outputDir=paste0(wd,"plots")
 
 inputMatcomp15 = read.csv(matcomp15Path, header = TRUE)
 inputMatcomp16 = read.csv(matcomp16Path, header = TRUE)
@@ -212,7 +215,7 @@ stabPlot = stabPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc(base_family = "sans")
 
-ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_impact_factor.pdf"),
+ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
 #### Quality [2,15] ----
@@ -315,6 +318,40 @@ silPlot = silPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_impact_factor.pdf"),
+ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_impact_factor.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
+
+
+#### CSV generation ----
+
+# MC Stab
+write.csv(standardizeStabilityData(stabMatcomp15, k.range), paste0(dataDir, "/stabilityMatcomp15.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMatcomp16, k.range), paste0(dataDir, "/stabilityMatcomp16.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMatcomp17, k.range), paste0(dataDir, "/stabilityMatcomp17.csv"), row.names = TRUE)
+
+# MC Qual
+write.csv(standardizeQualityData(qualMatcomp15, k.range), paste0(dataDir, "/qualityMatcomp15.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMatcomp16, k.range), paste0(dataDir, "/qualityMatcomp16.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMatcomp17, k.range), paste0(dataDir, "/qualityMatcomp17.csv"), row.names = TRUE)
+
+# Multi Stab
+write.csv(standardizeStabilityData(stabMulti15, k.range), paste0(dataDir, "/stabilityMulti15.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMulti16, k.range), paste0(dataDir, "/stabilityMulti16.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMulti17, k.range), paste0(dataDir, "/stabilityMulti17.csv"), row.names = TRUE)
+
+# Multi Qual
+write.csv(standardizeQualityData(qualMulti15, k.range), paste0(dataDir, "/qualityMulti15.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMulti16, k.range), paste0(dataDir, "/qualityMulti16.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMulti17, k.range), paste0(dataDir, "/qualityMulti17.csv"), row.names = TRUE)
+
+# Multi + MC Stab
+write.csv(standardizeStabilityData(stabMultimc15, k.range), paste0(dataDir, "/stabilityMultimc15.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMultimc16, k.range), paste0(dataDir, "/stabilityMultimc16.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabMultimc17, k.range), paste0(dataDir, "/stabilityMultimc17.csv"), row.names = TRUE)
+
+# Multi + MC Qual
+write.csv(standardizeQualityData(qualMultimc15, k.range), paste0(dataDir, "/qualityMultimc15.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMultimc16, k.range), paste0(dataDir, "/qualityMultimc16.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualMultimc17, k.range), paste0(dataDir, "/qualityMultimc17.csv"), row.names = TRUE)
+
 

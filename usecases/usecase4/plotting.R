@@ -5,6 +5,8 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
+outputDir=paste0(wd,"plots")
+dir.create(file.path(outputDir))
 
 getFormattedK <- function(k) {
   return(gsub("^.*_","", k))
@@ -87,7 +89,6 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 #### Data loading ----
 inputAgroPath=paste0(wd,"data/agro.csv")
 inputOboPath=paste0(wd,"data/obo-119.csv")
-outputDir=paste0(wd,"plots")
 
 agroData = read.csv(inputAgroPath, header = TRUE)
 oboData = read.csv(inputOboPath, header = TRUE)
