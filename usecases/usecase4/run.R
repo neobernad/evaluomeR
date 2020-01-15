@@ -5,8 +5,11 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
-outputDir=paste0(wd,"plots")
-dir.create(file.path(outputDir))
+plotDir=paste0(wd,"plots")
+dataDir=paste0(wd,"results-csv")
+
+dir.create(file.path(plotDir))
+dir.create(file.path(dataDir))
 
 getFormattedK <- function(k) {
   return(gsub("^.*_","", k))
@@ -153,7 +156,7 @@ stabPlot = stabPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = stabPlot, filename=paste0(outputDir, "/stability_agro_obo_both.pdf"),
+ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_agro_obo_both.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
 #### Quality [2,6] ----
@@ -216,5 +219,20 @@ silPlot = silPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = silPlot, filename=paste0(outputDir, "/silhouette_agro_obo_both.pdf"),
+ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_agro_obo_both.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
+
+
+#### CSV generation ----
+
+# Stab
+write.csv(standardizeStabilityData(stabAgro, k.range), paste0(dataDir, "/stabilityAgro.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabObo, k.range), paste0(dataDir, "/stabilityObo.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabBoth, k.range), paste0(dataDir, "/stabilityAgro_Obo.csv"), row.names = TRUE)
+
+# Qual
+write.csv(standardizeQualityData(qualAgro, k.range), paste0(dataDir, "/qualityAgro.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualObo, k.range), paste0(dataDir, "/qualityObo.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualBoth, k.range), paste0(dataDir, "/qualityAgro_Obo.csv"), row.names = TRUE)
+
+
