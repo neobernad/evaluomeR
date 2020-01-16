@@ -5,6 +5,7 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
+seed = 13606
 plotDir=paste0(wd,"plots")
 dataDir=paste0(wd,"results-csv")
 
@@ -100,9 +101,9 @@ bothData = rbind(agroData, oboData)
 
 #### Stability [2,6] ----
 k.range=c(2,6)
-stabAgro <- stabilityRange(data=agroData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabObo <- stabilityRange(data=oboData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabBoth <- stabilityRange(data=bothData, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabAgro <- stabilityRange(data=agroData, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabObo <- stabilityRange(data=oboData, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabBoth <- stabilityRange(data=bothData, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
 #### Stability SE to DF ----
 meanStabAgro = standardizeStabilityData(stabAgro, k.range)
@@ -160,9 +161,9 @@ ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_agro_obo_both.pdf")
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
 #### Quality [2,6] ----
-qualAgro <- qualityRange(data=agroData, k.range=k.range, getImages = FALSE, seed=13606)
-qualObo <- qualityRange(data=oboData, k.range=k.range, getImages = FALSE, seed=13606)
-qualBoth <- qualityRange(data=bothData, k.range=k.range, getImages = FALSE, seed=13606)
+qualAgro <- qualityRange(data=agroData, k.range=k.range, getImages = FALSE, seed=seed)
+qualObo <- qualityRange(data=oboData, k.range=k.range, getImages = FALSE, seed=seed)
+qualBoth <- qualityRange(data=bothData, k.range=k.range, getImages = FALSE, seed=seed)
 
 #### Quality SE to DF ----
 silAgro = standardizeQualityData(qualAgro, k.range)

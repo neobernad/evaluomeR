@@ -5,6 +5,7 @@ library(reshape2)
 library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
+seed = 13000
 plotDir=paste0(wd,"plots")
 dataDir=paste0(wd,"results-csv")
 
@@ -88,7 +89,6 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
   return(qualDf)
 }
 
-
 #### Data loading ----
 matcomp15Path=paste0(wd,"data/data-matcomp15.csv")
 matcomp16Path=paste0(wd,"data/data-matcomp16.csv")
@@ -116,17 +116,18 @@ inputMultimc17 = read.csv(multimc17Path, header = TRUE)
 
 #### Stability [2,15] ----
 k.range=c(2,15)
-stabMatcomp15 <- stabilityRange(data=inputMatcomp15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMatcomp15 <- stabilityRange(data=inputMatcomp15,
+                                k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMatcomp16 <- stabilityRange(data=inputMatcomp16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMatcomp17 <- stabilityRange(data=inputMatcomp17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
-stabMulti15 <- stabilityRange(data=inputMulti15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMulti16 <- stabilityRange(data=inputMulti16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMulti15 <- stabilityRange(data=inputMulti15, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMulti16 <- stabilityRange(data=inputMulti16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMulti17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
-stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
-stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=13606)
+stabMultimc15 <- stabilityRange(data=inputMultimc15, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMultimc16 <- stabilityRange(data=inputMultimc16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabMultimc17 <- stabilityRange(data=inputMultimc17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
 #### Stability SE to DF ----
 meanStabMatcomp15 = standardizeStabilityData(stabMatcomp15, k.range)
@@ -219,17 +220,17 @@ ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf")
        device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
 #### Quality [2,15] ----
-qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=k.range, getImages = FALSE, seed=13606)
-qualMatcomp16 <- qualityRange(data=inputMatcomp16, k.range=k.range, getImages = FALSE, seed=13606)
-qualMatcomp17 <- qualityRange(data=inputMatcomp17, k.range=k.range, getImages = FALSE, seed=13606)
+qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=k.range, getImages = FALSE, seed=seed)
+qualMatcomp16 <- qualityRange(data=inputMatcomp16, k.range=k.range, getImages = FALSE, seed=seed)
+qualMatcomp17 <- qualityRange(data=inputMatcomp17, k.range=k.range, getImages = FALSE, seed=seed)
 
-qualMulti15 <- qualityRange(data=inputMulti15, k.range=k.range, getImages = FALSE, seed=13606)
-qualMulti16 <- qualityRange(data=inputMulti16, k.range=k.range, getImages = FALSE, seed=13606)
-qualMulti17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=13606)
+qualMulti15 <- qualityRange(data=inputMulti15, k.range=k.range, getImages = FALSE, seed=seed)
+qualMulti16 <- qualityRange(data=inputMulti16, k.range=k.range, getImages = FALSE, seed=seed)
+qualMulti17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=seed)
 
-qualMultimc15 <- qualityRange(data=inputMultimc15, k.range=k.range, getImages = FALSE, seed=13606)
-qualMultimc16 <- qualityRange(data=inputMultimc16, k.range=k.range, getImages = FALSE, seed=13606)
-qualMultimc17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=13606)
+qualMultimc15 <- qualityRange(data=inputMultimc15, k.range=k.range, getImages = FALSE, seed=seed)
+qualMultimc16 <- qualityRange(data=inputMultimc16, k.range=k.range, getImages = FALSE, seed=seed)
+qualMultimc17 <- qualityRange(data=inputMultimc17, k.range=k.range, getImages = FALSE, seed=seed)
 
 #### Quality SE to DF ----
 silMatcomp15 = standardizeQualityData(qualMatcomp15, k.range)
