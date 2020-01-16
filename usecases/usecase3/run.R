@@ -354,4 +354,27 @@ write.csv(standardizeQualityData(qualMultimc15, k.range), paste0(dataDir, "/qual
 write.csv(standardizeQualityData(qualMultimc16, k.range), paste0(dataDir, "/qualityMultimc16.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualMultimc17, k.range), paste0(dataDir, "/qualityMultimc17.csv"), row.names = TRUE)
 
+#### Optimal k values ----
+k.range=c(3,15)
 
+# MC
+kOptMC15 = getOptimalKValue(stabMatcomp15, qualMatcomp15, k.range=k.range)$Global_optimal_k
+kOptMC16 = getOptimalKValue(stabMatcomp16, qualMatcomp16, k.range=k.range)$Global_optimal_k
+kOptMC17 = getOptimalKValue(stabMatcomp17, qualMatcomp17, k.range=k.range)$Global_optimal_k
+
+# Multi
+kOptMulti15 = getOptimalKValue(stabMulti15, qualMulti15, k.range=k.range)$Global_optimal_k
+kOptMulti16 = getOptimalKValue(stabMulti16, qualMulti16, k.range=k.range)$Global_optimal_k
+kOptMulti17 = getOptimalKValue(stabMulti17, qualMulti17, k.range=k.range)$Global_optimal_k
+
+# Multi + MC
+kOptMultimc15 = getOptimalKValue(stabMultimc15, qualMultimc15, k.range=k.range)$Global_optimal_k
+kOptMultimc16 = getOptimalKValue(stabMultimc16, qualMultimc16, k.range=k.range)$Global_optimal_k
+kOptMultimc17 = getOptimalKValue(stabMultimc17, qualMultimc17, k.range=k.range)$Global_optimal_k
+
+tableKOpt = setNames(as.data.frame(matrix(nrow=3,ncol=3)), c("2015","2016","2017"))
+rownames(tableKOpt) <- c("MC", "Multi", "Multimc")
+tableKOpt["2015"] <- c(kOptMC15, kOptMulti15, kOptMultimc15)
+tableKOpt["2016"] <- c(kOptMC16, kOptMulti16, kOptMultimc16)
+tableKOpt["2017"] <- c(kOptMC17, kOptMulti17, kOptMultimc17)
+tableKOpt

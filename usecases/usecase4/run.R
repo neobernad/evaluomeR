@@ -235,4 +235,20 @@ write.csv(standardizeQualityData(qualAgro, k.range), paste0(dataDir, "/qualityAg
 write.csv(standardizeQualityData(qualObo, k.range), paste0(dataDir, "/qualityObo.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualBoth, k.range), paste0(dataDir, "/qualityAgro_Obo.csv"), row.names = TRUE)
 
+#### Optimal k values ----
+k.range=c(3,6)
+
+# Agro
+kOptAgro = getOptimalKValue(stabAgro, qualAgro, k.range=k.range)$Global_optimal_k
+# Agro
+kOptObo = getOptimalKValue(stabObo, qualObo, k.range=k.range)$Global_optimal_k
+# Agro
+kOptBoth = getOptimalKValue(stabBoth, qualBoth, k.range=k.range)$Global_optimal_k
+
+tableKOpt = setNames(as.data.frame(matrix(nrow=19,ncol=3)), c("AgroPortal","OBO Foundry","AgroPortal + OBO Foundry"))
+rownames(tableKOpt) <- meanStabAgro$Metric
+tableKOpt["AgroPortal"] <- kOptAgro
+tableKOpt["OBO Foundry"] <- kOptObo
+tableKOpt["AgroPortal + OBO Foundry"] <- kOptBoth
+tableKOpt
 
