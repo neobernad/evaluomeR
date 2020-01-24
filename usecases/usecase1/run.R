@@ -1,5 +1,7 @@
 library(evaluomeR)
 library(ggplot2)
+library(gridExtra)
+library(cowplot)
 library(stringr)
 library(reshape2)
 library(ggthemes)
@@ -217,7 +219,7 @@ stabPlot = stabPlot +
   theme_calc(base_family = "sans")
 
 ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
+       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 #### Quality [2,15] ----
 qualMatcomp15 <- qualityRange(data=inputMatcomp15, k.range=k.range, getImages = FALSE, seed=seed)
@@ -320,8 +322,11 @@ silPlot = silPlot +
   theme_calc()
 
 ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_impact_factor.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
+       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
+pg = plot_grid(stabPlot, silPlot, align = "v", nrow = 2, rel_heights = c(1/2, 1/2), labels=c("A", "B"))
+save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.pdf"), pg, nrow=2, dpi="print")
+save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=2, dpi="print", device="tiff")
 
 #### CSV generation ----
 
