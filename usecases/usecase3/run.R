@@ -1,5 +1,8 @@
 library(evaluomeR)
+library(ggplot2)
 library(stringr)
+library(reshape2)
+library(ggthemes)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
 seed = 13606
@@ -118,6 +121,38 @@ meanStabMolloy$Metric = rownames(meanStabMolloy)
 meanStabMolloy$Repository = "Molloy"
 colnames(meanStabMolloy) = str_remove_all(colnames(meanStabMolloy), "k_")
 
+#### Stability plotting ----
+
+stabDfList = list(meanStabBangert, meanStabLi, meanStabMolloy)
+
+stabPlot = ggplot()
+min = Inf
+max = -Inf
+for (stabDf in stabDfList) {
+  stabDf_melt = melt(stabDf, id.vars = c("Metric", "Repository"))
+  stabDf_melt$variable = as.integer(stabDf_melt$variable)
+  stabPlot = stabPlot +
+    geom_line(stabDf_melt,
+              mapping = aes(x=variable, y=value, group = 1, linetype=Metric, colour=Metric)) +
+    geom_point(stabDf_melt,
+               mapping = aes(x=variable, y=value, group = 1, shape=Repository))
+  if (min > min(stabDf_melt$value)) {
+    min = min(stabDf_melt$value)
+  }
+  if (max < max(stabDf_melt$value)) {
+    max = max(stabDf_melt$value)
+  }
+}
+
+stabPlot = stabPlot +
+  scale_x_continuous(name="k", breaks=1:14, labels=2:15) +
+  scale_y_continuous(name="Stability", limits = c(min,max), breaks = c(0.6, 0.75, 0.85), labels=c(0.6, 0.75, 0.85)) +
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_calc(base_family = "sans")
+
+ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_metafor.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
+
 #### Quality [2,6] ----
 qualBangert <- qualityRange(data=bangertData, k.range=k.range, getImages = FALSE, seed=seed)
 qualLi <- qualityRange(data=liData, k.range=k.range, getImages = FALSE, seed=seed)
@@ -138,6 +173,38 @@ silMolloy = standardizeQualityData(qualMolloy, k.range)
 silMolloy$Metric = rownames(silMolloy)
 silMolloy$Repository = "Molloy"
 colnames(silMolloy) = str_remove_all(colnames(silMolloy), "k_")
+
+#### Quality plotting ----
+
+silDfList = list(silBangert, silLi, silMolloy)
+
+silPlot = ggplot()
+min = Inf
+max = -Inf
+for (silDf in silDfList) {
+  silDf_melt = melt(silDf, id.vars = c("Metric", "Repository"))
+  silDf_melt$variable = as.integer(silDf_melt$variable)
+  silPlot = silPlot +
+    geom_line(silDf_melt,
+              mapping = aes(x=variable, y=value, group = 1, linetype=Metric, colour=Metric)) +
+    geom_point(silDf_melt,
+               mapping = aes(x=variable, y=value, group = 1, shape=Repository))
+  if (min > min(silDf_melt$value)) {
+    min = min(silDf_melt$value)
+  }
+  if (max < max(silDf_melt$value)) {
+    max = max(silDf_melt$value)
+  }
+}
+
+silPlot = silPlot +
+  scale_x_continuous(name="k", breaks=1:14, labels=2:15) +
+  scale_y_continuous(name="Quality", limits = c(min,max), breaks = c(0.25, 0.5, 0.7), labels=c(0.25, 0.5, 0.7)) +
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_calc()
+
+ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_metafor.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="retina")
 
 #### CSV generation ----
 
