@@ -47,6 +47,7 @@ pkg.env$estable = NULL
 pkg.env$names.index = NULL
 pkg.env$names.metr = NULL
 pkg.env$seed = 13606
+pkg.env$cbi = c("kmeans", "clara", "hclust", "pamk") # Supported CBIs
 
 
 #####################
@@ -127,4 +128,33 @@ createSEList <- function(data) {
   names(seList) <- names(data)
   expList <- ExperimentList(seList)
   return(expList)
+}
+
+## Returns a cluterboot interface (CBI) depending on the input string,
+## with its specific function parameters in an list as in:
+## list("method" = CBI Method, "args" = Lit of Specific arguments for this CBI)
+helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
+  cbi <- match.arg(cbi)
+  switch(cbi,
+         kmeans={
+           args = list("krange" = krange)
+           return(list("method" = fpc::kmeansCBI, "args" = args))
+         },
+         clara={
+           args = list("k" = krange)
+           return(list("method" = fpc::claraCBI, "args" = args))
+         },
+         hclust={
+           args = list("k" = krange, "method"="ward.D2")
+           return(list("method" = fpc::hclustCBI, "args" = args))
+         },
+         pamk={
+           args = list("k" = krange)
+           return(list("method" = fpc::pamkCBI, "args" = args))
+         },
+         {
+           error=paste("Input CBI '", cbi, "' is not defined in the package", sep="")
+           stop(error)
+         }
+  )
 }

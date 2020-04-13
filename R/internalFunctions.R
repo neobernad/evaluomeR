@@ -105,3 +105,37 @@ getMeasureValue <- function(km5, measureName) {
   }
 }
 ######################################################
+
+######################################################
+#function
+#   clusterbootWrapper(data, B, bootmethod="boot",
+#                     clustermethod=kmeansCBI, krange, seed)
+#     Wrapper method for clusterboot functionality.
+
+clusterbootWrapper <- function(data, B, bootmethod="boot",
+                               cbi, krange, seed) {
+  cbiHelperResult = helperGetCBI(cbi, krange)
+
+  #cat ("Using: ", cbi, "\n")
+  #cat ("Type: ", typeof(cbiHelperResult[["method"]]), "\n")
+
+  mandatoryArgs = list(
+    "data"=data,
+    "B"=B,
+    "bootmethod"=bootmethod,
+    "seed"=seed,
+    "clustermethod"=cbiHelperResult[["method"]]
+  )
+
+  methodArgs = append(mandatoryArgs, cbiHelperResult[["args"]])
+
+  return (
+            quiet(
+              do.call(
+                clusterboot,
+                methodArgs
+              )
+            )
+          )
+}
+######################################################

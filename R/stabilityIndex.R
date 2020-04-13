@@ -24,6 +24,8 @@
 #' The rows contains the measurements of the metrics for each instance in the dataset.
 #' @param k Positive integer. Number of clusters between [2,15] range.
 #' @param bs Positive integer. Bootstrap value to perform the resampling.
+#' @param cbi Clusterboot interface name (default: "kmeans"): "kmeans", "clara", "hclust", "pamk".
+#' The method used in 'hclust' CBI is "ward.D2".
 #' @param getImages Boolean. If true, a plot is displayed.
 #' @param seed Positive integer. A seed for internal bootstrap.
 #'
@@ -41,13 +43,13 @@
 #' \insertRef{jaccard1901distribution}{evaluomeR}
 #'
 #'
-stability <- function(data, k=5, bs=100,
+stability <- function(data, k=5, bs=100, cbi="kmeans",
                       getImages=TRUE, seed=NULL) {
 
   data <- as.data.frame(assay(data))
 
   checkKValue(k)
-  runStabilityIndex(data, k.min=k, k.max=k, bs, seed=seed)
+  runStabilityIndex(data, k.min=k, k.max=k, bs, cbi, seed=seed)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k, k.max=k))
   if (getImages == TRUE) {
@@ -96,7 +98,7 @@ stability <- function(data, k=5, bs=100,
 #' \insertRef{jaccard1901distribution}{evaluomeR}
 #'
 #'
-stabilityRange <- function(data, k.range=c(2,15), bs=100,
+stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
                            getImages=TRUE, seed=NULL) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
@@ -112,7 +114,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, seed=seed)
+  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, seed=seed)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
 
@@ -161,7 +163,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100,
 #' \insertRef{jaccard1901distribution}{evaluomeR}
 #'
 #'
-stabilitySet <- function(data, k.set=c(2,3), bs=100,
+stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
                            getImages=TRUE, seed=NULL) {
   k.set.length = length(k.set)
   if (k.set.length == 0) {
@@ -176,7 +178,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100,
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.set = k.set, bs=bs, seed=seed)
+  runStabilityIndex(data, k.set = k.set, bs=bs, cbi, seed=seed)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.set = k.set))
 
@@ -190,7 +192,8 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100,
   return(se)
 }
 
-runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs, seed, k.set=NULL) {
+runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
+                              cbi, seed, k.set=NULL) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -246,10 +249,10 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs, seed, k.set=NULL
         #km5$cluster=boot.cluster(data=datos.bruto[,i],
         #                         nk=j.k, B=bs, seed=seed)
         #km5$jac=km5$cluster$means
-        km5$cluster=quiet(clusterboot(data=datos.bruto[,i], B=bs,
-                                bootmethod="boot",
-                                clustermethod=kmeansCBI,
-                                krange=j.k, seed=seed))
+        km5$cluster=clusterbootWrapper(data=datos.bruto[,i], B=bs,
+                                       bootmethod="boot",
+                                       cbi=cbi,
+                                       krange=j.k, seed=seed)
         km5$jac=km5$cluster$bootmean
         km5$bspart=km5$cluster$partition
 

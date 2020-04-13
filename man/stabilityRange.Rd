@@ -8,6 +8,7 @@ stabilityRange(
   data,
   k.range = c(2, 15),
   bs = 100,
+  cbi = "kmeans",
   getImages = TRUE,
   seed = NULL
 )
@@ -27,6 +28,9 @@ whilst the second one, \code{k.range[2]}, as the higher. Both values must be
 contained in [2,15] range.}
 
 \item{bs}{Positive integer. Bootstrap value to perform the resampling.}
+
+\item{cbi}{Clusterboot interface name (default: "kmeans"): "kmeans", "clara", "hclust", "pamk".
+The method used in 'hclust' CBI is "ward.D2".}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}
 
