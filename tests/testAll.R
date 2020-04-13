@@ -2,7 +2,7 @@ library(evaluomeR)
 
 data("rnaMetrics")
 
-dataFrame <- stability(data=rnaMetrics, cbi="clara", k=2, bs=100, getImages = FALSE)
+dataFrame <- stability(data=rnaMetrics, k=2, bs=100, getImages = FALSE)
 dataFrame <- stabilityRange(data=rnaMetrics, k.range=c(2,4), bs=20, getImages = FALSE)
 assay(dataFrame)
 # > assay(dataFrame)
@@ -23,5 +23,7 @@ assay(dataFrame, 1)
 
 dataFrame <- stability(data=rnaMetrics, cbi="kmeans", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="clara", k=2, bs=100, getImages = FALSE)
+dataFrame <- stability(data=rnaMetrics, cbi="clara_pam", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="hclust", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="pamk", k=2, bs=100, getImages = FALSE)
+dataFrame <- stability(data=rnaMetrics, cbi="pamk_pam", k=2, bs=100, getImages = FALSE)

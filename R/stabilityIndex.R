@@ -24,7 +24,9 @@
 #' The rows contains the measurements of the metrics for each instance in the dataset.
 #' @param k Positive integer. Number of clusters between [2,15] range.
 #' @param bs Positive integer. Bootstrap value to perform the resampling.
-#' @param cbi Clusterboot interface name (default: "kmeans"): "kmeans", "clara", "hclust", "pamk".
+#' @param cbi Clusterboot interface name (default: "kmeans"):
+#' "kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "pamk".
+#' Any CBI appended with '_pam' makes use of \code{\link{pam}}.
 #' The method used in 'hclust' CBI is "ward.D2".
 #' @param getImages Boolean. If true, a plot is displayed.
 #' @param seed Positive integer. A seed for internal bootstrap.

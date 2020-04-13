@@ -29,7 +29,9 @@ contained in [2,15] range.}
 
 \item{bs}{Positive integer. Bootstrap value to perform the resampling.}
 
-\item{cbi}{Clusterboot interface name (default: "kmeans"): "kmeans", "clara", "hclust", "pamk".
+\item{cbi}{Clusterboot interface name (default: "kmeans"):
+"kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "pamk".
+Any CBI appended with '_pam' makes use of \code{\link{pam}}.
 The method used in 'hclust' CBI is "ward.D2".}
 
 \item{getImages}{Boolean. If true, a plot is displayed.}

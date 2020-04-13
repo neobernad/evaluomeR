@@ -47,7 +47,7 @@ pkg.env$estable = NULL
 pkg.env$names.index = NULL
 pkg.env$names.metr = NULL
 pkg.env$seed = 13606
-pkg.env$cbi = c("kmeans", "clara", "hclust", "pamk") # Supported CBIs
+pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam") # Supported CBIs
 
 
 #####################
@@ -141,7 +141,11 @@ helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
            return(list("method" = fpc::kmeansCBI, "args" = args))
          },
          clara={
-           args = list("k" = krange)
+           args = list("k" = krange, "usepam"=FALSE)
+           return(list("method" = fpc::claraCBI, "args" = args))
+         },
+         clara_pam={
+           args = list("k" = krange, "usepam"=TRUE)
            return(list("method" = fpc::claraCBI, "args" = args))
          },
          hclust={
@@ -149,7 +153,11 @@ helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
            return(list("method" = fpc::hclustCBI, "args" = args))
          },
          pamk={
-           args = list("k" = krange)
+           args = list("k" = krange, "usepam"=FALSE)
+           return(list("method" = fpc::pamkCBI, "args" = args))
+         },
+         pamk_pam={
+           args = list("k" = krange, "usepam"=TRUE)
            return(list("method" = fpc::pamkCBI, "args" = args))
          },
          {
