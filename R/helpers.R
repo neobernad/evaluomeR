@@ -168,3 +168,16 @@ helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
          }
   )
 }
+#' @title Get supported CBIs in evaluomeR.
+#' @aliases evaluomeRSupportedCBI
+#' @description
+#' A vector of supported CBIs available in evaluomeR.
+#'
+#' @return A String vector.
+#'
+#' @examples
+#' supportedCBIs <- evaluomeRSupportedCBI
+#'
+evaluomeRSupportedCBI <- function() {
+  return(pkg.env$cbi)
+}
