@@ -12,7 +12,7 @@ assay(dataFrame)
 dataFrame <- stabilitySet(data=rnaMetrics, k.set=c(2,3,4), bs=20, getImages = FALSE)
 
 dataFrame <- quality(data=rnaMetrics, k=3, getImages = FALSE)
-dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,15), getImages = FALSE)
+dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,15), seed = 20, getImages = FALSE)
 assay(getDataQualityRange(dataFrame, 2), 1)
 dataFrame1 <- qualitySet(data=rnaMetrics, k.set=c(2,3,4), getImages = FALSE)
 
@@ -27,3 +27,6 @@ dataFrame <- stability(data=rnaMetrics, cbi="clara_pam", k=2, bs=100, getImages 
 dataFrame <- stability(data=rnaMetrics, cbi="hclust", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="pamk", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="pamk_pam", k=2, bs=100, getImages = FALSE)
+
+dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,15), getImages = T)
+assay(getDataQualityRange(dataFrame, 2), 1)

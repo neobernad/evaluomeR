@@ -115,7 +115,6 @@ createSEList <- function(data) {
   }
   length = length(names(data))
   seList <- list()
-
   for (i in 1:length) {
     cur.data <- data[[i]]
     dataMatrix <- as.matrix(cur.data)

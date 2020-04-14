@@ -736,15 +736,15 @@ runSilhouetteTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
     silhouetteData[[k]] <- na.omit(silhouetteData[[k]])
     if (nrow(silhouetteData[[k]]) == 0) {
       emptyDataFrames[[emptyDataFramesIndex]] = k
+      emptyDataFramesIndex = emptyDataFramesIndex + 1
     }
   }
+
   # Delete empty dfs (this occurs when no bootstrap is performed for a k)
-  for (k in emptyDataFrames) {
-    silhouetteData[[k]] <- NULL
-  }
+  silhouetteData = Filter(NROW, silhouetteData)
+
   # Delete k if its df was empty
   k.range = k.range[!k.range %in% emptyDataFrames]
-
   silhouetteData[sapply(silhouetteData, is.null)] <- NULL
   names(silhouetteData) <- paste("k_", k.range, sep = "")
   return(silhouetteData)
