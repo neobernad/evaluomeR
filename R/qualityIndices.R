@@ -254,13 +254,19 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs, seed, 
       e.res$n.k=j.k
       e.res$name.ontology=datos.bruto$Description
       unique.values = length(unique(datos.bruto[,i]))
+
       if (unique.values < j.k) {
         estable[[contador]] = NA
         m.global[[i.metr]][j.k,] = NA
       } else {
-        e.res$kmk.dynamic.bs <-
-          boot.cluster(data=datos.bruto[,i],
-                       nk=j.k, B=bs, seed=seed)$partition
+        bootClusterResult <- boot.cluster(data=datos.bruto[,i],
+                                          nk=j.k, B=bs, seed=seed)
+        if (is.null(bootClusterResult)) {
+          estable[[contador]] = NA
+          m.global[[i.metr]][j.k,] = NA
+          next
+        }
+        e.res$kmk.dynamic.bs <- bootClusterResult$partition
         e.res.or$centr=by(datos.bruto[,i],e.res$kmk.dynamic.bs,mean)
         for (e.res.or.i in 1:length(e.res.or$centr)) {
           e.res.or$means[which(e.res$kmk.dynamic.bs==e.res.or.i)]=e.res.or$centr[e.res.or.i]}
@@ -370,6 +376,10 @@ runQualityIndicesSilhouetteK_IMG <- function(k.min=NULL, k.max=NULL, k.set=NULL)
 
       for (m in length(names.index)) {
         y=e.mat.global[[m.g]][,m]
+        if (all(is.na(y))) { # Skip if all values are NA?
+          next
+        }
+
         y = y[rangeStart:rangeEnd]
         y.name=names.index[m]
         #leg.g[m] <- paste(y.name," avg. width",sep="")
@@ -720,9 +730,21 @@ runSilhouetteTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
   # Data cleaning
   ##
   # Matrix inserts NA by default, remove them before returning the data
+  emptyDataFrames = list()
+  emptyDataFramesIndex = 1
   for (k in k.range) {
     silhouetteData[[k]] <- na.omit(silhouetteData[[k]])
+    if (nrow(silhouetteData[[k]]) == 0) {
+      emptyDataFrames[[emptyDataFramesIndex]] = k
+    }
   }
+  # Delete empty dfs (this occurs when no bootstrap is performed for a k)
+  for (k in emptyDataFrames) {
+    silhouetteData[[k]] <- NULL
+  }
+  # Delete k if its df was empty
+  k.range = k.range[!k.range %in% emptyDataFrames]
+
   silhouetteData[sapply(silhouetteData, is.null)] <- NULL
   names(silhouetteData) <- paste("k_", k.range, sep = "")
   return(silhouetteData)

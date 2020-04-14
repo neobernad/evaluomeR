@@ -61,6 +61,11 @@ boot.cluster <- function(data, nk=5, B=10, seed=NULL, prnt=FALSE) {
       if (nk <= length(levels(as.factor(bs.data))))
         bscheck <- FALSE
     }
+    if (length(bs.data) <= nk) { # Not enough data for kmeans
+      message("\tWarning: Could not process data for k = ", nk)
+      return (NULL)
+    }
+
     bs.cluster <- kmeans(bs.data, centers=nk, iter.max=100)
     bs.cluster$partition <- bs.cluster$cluster
     bs.cluster$nk <- nk

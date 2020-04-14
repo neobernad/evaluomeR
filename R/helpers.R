@@ -115,9 +115,12 @@ createSEList <- function(data) {
   }
   length = length(names(data))
   seList <- list()
+
   for (i in 1:length) {
     cur.data <- data[[i]]
     dataMatrix <- as.matrix(cur.data)
+    #cat("DataMatrix '", names(data)[i], "'\n")
+    #print(dataMatrix)
     if (is.na(dataMatrix[1, "Metric"])) { # Metrics are NA? At least the first one
       dataMatrix[,1] <- cur.data$Metric
     }
