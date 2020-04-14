@@ -180,7 +180,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.set = k.set, bs=bs, cbi, seed=seed)
+  runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, seed=seed)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.set = k.set))
 
