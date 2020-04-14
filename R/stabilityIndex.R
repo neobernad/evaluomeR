@@ -246,8 +246,8 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 
       km5=NULL
       v.size=length(levels(as.factor(datos.bruto[,i])))
-      if (v.size>=j.k) {
-
+      can_process = (length(unique(datos.bruto[,i]))/j.k) > 2 # Avoid bootstrap to get stuck
+      if ((v.size>=j.k) & can_process) {
         #km5$cluster=boot.cluster(data=datos.bruto[,i],
         #                         nk=j.k, B=bs, seed=seed)
         #km5$jac=km5$cluster$means
@@ -291,6 +291,7 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
         m.stab.global.csv[[i.metr]][j.k] = list(km5)
         estable[[which(bs.values==bs)]] = km5
       } else {
+        message("\tWarning: Could not process data for k = ", j.k)
         km5$bspart=rep(NA,length(datos.bruto[,i]))
         km5$jac=rep(NA,j.k)
         km5$centr=rep(NA,j.k)

@@ -28,5 +28,3 @@ dataFrame <- stability(data=rnaMetrics, cbi="hclust", k=2, bs=100, getImages = F
 dataFrame <- stability(data=rnaMetrics, cbi="pamk", k=2, bs=100, getImages = FALSE)
 dataFrame <- stability(data=rnaMetrics, cbi="pamk_pam", k=2, bs=100, getImages = FALSE)
 
-dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,15), getImages = T)
-assay(getDataQualityRange(dataFrame, 2), 1)
