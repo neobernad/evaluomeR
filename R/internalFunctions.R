@@ -121,7 +121,7 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
                                cbi, krange, seed) {
   cbiHelperResult = helperGetCBI(cbi, krange)
 
-  cat ("Using: ", cbi, "\n")
+  #cat ("Using: ", cbi, "\n")
   #cat ("Type: ", typeof(cbiHelperResult[["method"]]), "\n")
 
   mandatoryArgs = list(
