@@ -186,7 +186,7 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", getImages=TRUE, seed=NU
   data <- as.data.frame(assay(data))
 
   suppressWarnings(
-    runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi, k.set=k.set))
+    runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi=cbi, k.set=k.set))
   silhouetteData =  suppressWarnings(
     runSilhouetteTableRange(data, k.set=k.set))
 
@@ -259,6 +259,7 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
       if (unique.values < j.k | !can_process) {
         estable[[contador]] = NA
         m.global[[i.metr]][j.k,] = NA
+        message("\tWarning: Could not process data for k = ", j.k)
       } else {
         #bootClusterResult <- boot.cluster(data=datos.bruto[,i],
         #                                  nk=j.k, B=bs, seed=seed)

@@ -53,4 +53,5 @@ dataFrame <- stability(data=rnaMetrics, cbi="pamk_pam", k=2, bs=100, getImages =
 # Supported CBIs:
 evaluomeRSupportedCBI()
 
-dataFrame <- stabilityRange(data=rnaMetrics, k.range=c(2,10), bs=20, getImages = FALSE)
+dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,10), getImages = FALSE)
+dataFrame
