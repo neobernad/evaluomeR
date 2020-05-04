@@ -246,7 +246,8 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 
       km5=NULL
       v.size=length(levels(as.factor(datos.bruto[,i])))
-      can_process = (length(unique(datos.bruto[,i]))/j.k) > 2 # Avoid bootstrap to get stuck
+      # can_process = (length(unique(datos.bruto[,i]))/j.k) > 2 # Avoid bootstrap to get stuck
+      can_process = TRUE
       if ((v.size>=j.k) & can_process) {
         #km5$cluster=boot.cluster(data=datos.bruto[,i],
         #                         nk=j.k, B=bs, seed=seed)

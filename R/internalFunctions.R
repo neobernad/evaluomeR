@@ -144,3 +144,40 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
           )
 }
 ######################################################
+
+######################################################
+#function
+#   clusterbootWrapper(data, B, bootmethod="boot",
+#                     clustermethod=kmeansCBI, krange, seed)
+#     Wrapper method for clusterboot functionality.
+
+clusteringWrapper <- function(data, cbi, krange, seed) {
+  cbiHelperResult = helperGetCBI(cbi, krange)
+
+  old.seed <- .Random.seed
+  on.exit( { .Random.seed <<- old.seed } )
+
+  if (!is.null(seed)) set.seed(seed)
+
+
+  #cat ("Using: ", cbi, "\n")
+
+  mandatoryArgs = list(
+    "data"=data
+  )
+
+  methodArgs = append(mandatoryArgs, cbiHelperResult[["args"]])
+
+  # print(cbiHelperResult[["method"]])
+  # print(methodArgs)
+
+  return (
+    quiet(
+      do.call(
+        cbiHelperResult[["method"]],
+        methodArgs
+      )
+    )
+  )
+}
+######################################################

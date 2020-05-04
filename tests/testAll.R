@@ -10,7 +10,7 @@ assay(dataFrame)
 # [2,] "DegFact" "0.955595238095238" "0.977777777777778" "0.820833333333333"
 dataFrame <- stabilitySet(data=rnaMetrics, k.set=c(2,3,4), bs=20, getImages = FALSE)
 
-dataFrame <- quality(data=rnaMetrics, k=3, getImages = FALSE)
+dataFrame <- quality(data=rnaMetrics, cbi="kmeans", k=3, getImages = FALSE)
 assay(dataFrame)
 # Metric    Cluster_1_SilScore  Cluster_2_SilScore  Cluster_3_SilScore
 # [1,] "RIN"     "0.420502645502646" "0.724044583696066" "0.68338517747747"

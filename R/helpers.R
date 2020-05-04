@@ -155,11 +155,11 @@ helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
            return(list("method" = fpc::hclustCBI, "args" = args))
          },
          pamk={
-           args = list("k" = krange, "usepam"=FALSE)
+           args = list("k" = krange, "usepam"=FALSE, criterion="asw")
            return(list("method" = fpc::pamkCBI, "args" = args))
          },
          pamk_pam={
-           args = list("k" = krange, "usepam"=TRUE)
+           args = list("k" = krange, "usepam"=TRUE, criterion="asw")
            return(list("method" = fpc::pamkCBI, "args" = args))
          },
          {

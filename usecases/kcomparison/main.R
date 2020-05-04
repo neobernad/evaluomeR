@@ -6,6 +6,10 @@ library(gridExtra)
 library(grid)
 
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
+
+evaluomeRSupportedCBI()
+GLOBAL_CBI = "pamk"
+
 source(paste0(wd,"agro.R"))
 source(paste0(wd,"obo.R"))
 outputDir=paste0(wd,"results-k")
@@ -31,7 +35,7 @@ table$Obo_global_max_k = as.integer(kOptTableObo$Global_optimal_k)
 table = as.data.frame(table)
 rownames(table) = rownames(kOptTableObo)
 
-csvPath = paste0(outputDir, "/both_repo_k_values",".csv")
+csvPath = paste0(outputDir, "/table_", GLOBAL_CBI,".csv")
 #write.csv(table, csvPath, row.names = TRUE)
 
 # Data frame with metrics whose k value matches
@@ -57,27 +61,27 @@ for (metric in rownames(table)) {
   obo_k_stability = as.numeric(stabilityTableObo[metric, obo_colname])
   agro_k_silhouette = as.numeric(silhouetteTableAgro[metric, agro_colname])
   obo_k_silhouette = as.numeric(silhouetteTableObo[metric, obo_colname])
-  
+
   # Agro Stability
   new_row = c("Agroportal", metric, as.numeric(agro_k_stability), stabilityTableAgro[metric, "k_5"])
   stabilityComparison <- InsertRow(stabilityComparison, NewRow = new_row, RowNum = stabCount)
   stabCount = stabCount + 1
-  
+
   # Agro Silhouette
   new_row = c("Agroportal", metric, agro_k_silhouette, silhouetteTableAgro[metric, "k_5"])
   qualityComparison <- InsertRow(qualityComparison, NewRow = new_row, RowNum = silCount)
   silCount = silCount + 1
-  
+
   # Obo Stability
   new_row = c("OBO Foundry", metric, obo_k_stability, stabilityTableObo[metric, "k_5"])
   stabilityComparison <- InsertRow(stabilityComparison, NewRow = new_row, RowNum = stabCount)
   stabCount = stabCount + 1
-  
+
   # Obo Silhouette
   new_row = c("OBO Foundry", metric, obo_k_silhouette, silhouetteTableObo[metric, "k_5"])
   qualityComparison <- InsertRow(qualityComparison, NewRow = new_row, RowNum = silCount)
   silCount = silCount + 1
-  
+
 }
 
 stabilityComparison = na.omit(stabilityComparison)

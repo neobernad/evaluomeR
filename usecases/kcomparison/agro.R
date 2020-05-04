@@ -15,9 +15,16 @@ plotMetricsViolin(inputDataAgro) # violin
 #stab = stabilityRange(data=rnaMetrics, k.range=c(3,4), bs=100, getImages=F, seed=13606)
 #qual = qualityRange(data=rnaMetrics, k.range=c(3,4), getImages=F, seed=13606)
 
+if (!exists("GLOBAL_CBI")) {
+  GLOBAL_CBI = "kmeans"
+}
+
+cat("Using CBI: ", GLOBAL_CBI, "\n")
+
 
 # Stability for range [3,8]
 stabilityDataAgro <- stabilityRange(data=inputDataAgro,
+                                    cbi=GLOBAL_CBI,
                                     k.range=c(3,8), bs=500,
                                     getImages = FALSE, seed=13606)
 # Stability for range [9, 15], since some metrics will be stuck in the
@@ -67,6 +74,7 @@ colnames(stabilityRange3_15NoNa) <- c("Metric", "Mean_stability_k_3", "Mean_stab
                  "Mean_stability_k_15")
 
 qualityDataAgro <- qualityRange(data=inputDataAgro,
+                                cbi=GLOBAL_CBI,
                                 k.range=c(3,15), getImages = FALSE,
                                 seed=13606)
 
@@ -74,17 +82,18 @@ qualityDataAgro <- qualityRange(data=inputDataAgro,
 kOptTableAgroFull <- getOptimalKValue(stabilityRange3_15NoNa, qualityDataAgro, k.range=c(3,15))
 kOptTableAgro <- kOptTableAgroFull[, c("Stability_max_k", "Quality_max_k", "Global_optimal_k")]
 kOptTableAgroValues <- kOptTableAgroFull[, c("Stability_max_k_stab", "Quality_max_k_stab")]
-csvPath = paste0(outputDir, "/agro.optimal.k",".csv")
+csvPath = paste0(outputDir, "/clusters/agro.optimal.k_",GLOBAL_CBI,".csv")
 #write.csv(kOptTableAgro, csvPath, row.names = TRUE)
+#> write.csv(kOptTableAgroFull, csvPath, row.names = TRUE, quote = TRUE)
 #View(kOptTableAgro)
 
 
 stabilityTableAgro <- getDfStabilityData(stabilityRange3_15NoNa)
 silhouetteTableAgro <- getDfQualityData(qualityDataAgro)
 
-#csvPath = paste0(outputDir, "/agro.stability",".csv")
+csvPath = paste0(outputDir, "/clusters/agro.stability_",GLOBAL_CBI,".csv")
 #write.csv(stabilityTableAgro, csvPath, row.names = TRUE)
-#csvPath = paste0(outputDir, "/agro.goodness",".csv")
+csvPath = paste0(outputDir, "/clusters/agro.goodness_",GLOBAL_CBI,".csv")
 #write.csv(silhouetteTableAgro, csvPath, row.names = TRUE)
 
 # Conteo de scores estables:

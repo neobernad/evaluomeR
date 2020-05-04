@@ -255,18 +255,21 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
       e.res$n.k=j.k
       e.res$name.ontology=datos.bruto$Description
       unique.values = length(unique(datos.bruto[,i]))
-      can_process = (unique.values/j.k) > 2 # Avoid bootstrap to get stuck
+      # can_process = (unique.values/j.k) > 2 # Avoid bootstrap to get stuck
+      can_process = TRUE
       if (unique.values < j.k | !can_process) {
         estable[[contador]] = NA
         m.global[[i.metr]][j.k,] = NA
         message("\tWarning: Could not process data for k = ", j.k)
       } else {
-        #bootClusterResult <- boot.cluster(data=datos.bruto[,i],
+        # bootClusterResult <- boot.cluster(data=datos.bruto[,i],
         #                                  nk=j.k, B=bs, seed=seed)
-        bootClusterResult <- clusterbootWrapper(data=datos.bruto[,i], B=bs,
-                           bootmethod="boot",
-                           cbi=cbi,
-                           krange=j.k, seed=seed)
+        bootClusterResult <- clusteringWrapper(data=datos.bruto[,i], cbi=cbi,
+                                               krange=j.k, seed=seed)
+        # bootClusterResult <- clusterbootWrapper(data=datos.bruto[,i], B=bs,
+        #                    bootmethod="boot",
+        #                    cbi=cbi,
+        #                    krange=j.k, seed=seed)
 
         e.res$kmk.dynamic.bs <- bootClusterResult$partition
         e.res.or$centr=by(datos.bruto[,i],e.res$kmk.dynamic.bs,mean)

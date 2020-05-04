@@ -12,26 +12,35 @@ plotMetricsBoxplot(inputDataObo) # boxplot
 plotMetricsCluster(inputDataObo) # cluster
 plotMetricsViolin(inputDataObo) # violin
 
+if (!exists("GLOBAL_CBI")) {
+  GLOBAL_CBI = "kmeans"
+}
+
+bs=500
+
+cat("Using CBI: ", GLOBAL_CBI, "\n")
+
 stabilityDataObo <- stabilityRange(data=inputDataObo,
-                                   k.range=c(3,15), bs=500,
+                                   k.range=c(3,15), cbi=GLOBAL_CBI, bs=bs,
                                    getImages = FALSE, seed=13606)
 qualityDataObo <- qualityRange(data=inputDataObo,
-                               k.range=c(3,15), getImages = FALSE,
+                               k.range=c(3,15), cbi=GLOBAL_CBI, getImages = FALSE,
                                seed=13606)
 
 kOptTableOboFull <- getOptimalKValue(stabilityDataObo, qualityDataObo, k.range=c(3,15))
 kOptTableObo <- kOptTableOboFull[, c("Stability_max_k", "Quality_max_k", "Global_optimal_k")]
 kOptTableOboValues <- kOptTableOboFull[, c("Stability_max_k_stab", "Quality_max_k_stab")]
-csvPath = paste0(outputDir, "/obo.optimal.k",".csv")
+csvPath = paste0(outputDir, "/clusters/obo.optimal.k_",GLOBAL_CBI,".csv")
 #write.csv(kOptTableObo, csvPath, row.names = TRUE)
+#> write.csv(kOptTableOboFull, csvPath, row.names = TRUE)
 #View(kOptTableObo)
 
 stabilityTableObo <- getDfStabilityData(stabilityDataObo)
 silhouetteTableObo <- getDfQualityData(qualityDataObo)
 
-csvPath = paste0(outputDir, "/obo.stability",".csv")
+csvPath = paste0(outputDir, "/clusters/obo.stability_",GLOBAL_CBI,".csv")
 #write.csv(stabilityTableObo, csvPath, row.names = TRUE)
-csvPath = paste0(outputDir, "/obo.goodness",".csv")
+csvPath = paste0(outputDir, "/clusters/obo.goodness_",GLOBAL_CBI,".csv")
 #write.csv(silhouetteTableObo, csvPath, row.names = TRUE)
 
 # Conteo de scores estables:
