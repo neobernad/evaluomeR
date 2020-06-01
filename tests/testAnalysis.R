@@ -3,7 +3,7 @@ library(evaluomeR)
 data("rnaMetrics")
 plotMetricsMinMax(rnaMetrics)
 plotMetricsBoxplot(rnaMetrics)
-plotMetricsCluster(rnaMetrics)
+cluster = plotMetricsCluster(ontMetrics, scale = TRUE)
 plotMetricsViolin(rnaMetrics)
 
 stabilityData <- stabilityRange(data=rnaMetrics, k.range=c(3,4), bs=20, getImages = FALSE, seed=100)
@@ -19,3 +19,4 @@ k.vector2=rep(2,length(colnames(df))-1)
 
 plotMetricsClusterComparison(rnaMetrics, k.vector1=k.vector1, k.vector2=k.vector2)
 plotMetricsClusterComparison(rnaMetrics, k.vector1=3, k.vector2=c(2,5))
+

@@ -19,13 +19,15 @@ if (!exists("GLOBAL_CBI")) {
   GLOBAL_CBI = "kmeans"
 }
 
+bs=500
+
 cat("Using CBI: ", GLOBAL_CBI, "\n")
 
 
 # Stability for range [3,8]
 stabilityDataAgro <- stabilityRange(data=inputDataAgro,
                                     cbi=GLOBAL_CBI,
-                                    k.range=c(3,8), bs=500,
+                                    k.range=c(3,8), bs=bs,
                                     getImages = FALSE, seed=13606)
 # Stability for range [9, 15], since some metrics will be stuck in the
 # bootstrap due to a lack of resampling in their values.
@@ -33,13 +35,13 @@ newInputDataAgro = inputDataAgro
 metricsToRemove = c("AROnto", "DITOnto", "TMOnto2")
 newInputDataAgro[, metricsToRemove] <- list(NULL)
 newStabilityDataAgro <- stabilityRange(data=newInputDataAgro,
-                                    k.range=c(9,15), bs=500,
+                                    k.range=c(9,15), bs=bs,
                                     getImages = FALSE, seed=13606)
 
 # Stability for DITonto in range [9,14]
 ditOntoInputDataAgro = inputDataAgro[, c("Description", "DITOnto")]
 ditOntoStabilityDataAgro <- stabilityRange(data=ditOntoInputDataAgro,
-                                       k.range=c(9,14), bs=500,
+                                       k.range=c(9,14), bs=bs,
                                        getImages = FALSE, seed=13606)
 # Merge both tables into one
 stabilityRange3_15 = getDfStabilityData(stabilityDataAgro, digits = 10)

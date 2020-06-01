@@ -144,17 +144,21 @@ plotMetricsBoxplot <- function(data) {
 #' object as a boxplot.
 #'
 #' @inheritParams stability
+#' @param scale Boolean. If true input data is scaled. Default: FALSE.
 #'
-#' @return Nothing.
+#' @return An hclust object.
 #'
 #' @examples
 #' # Using example data from our package
 #' data("ontMetrics")
-#' plotMetricsCluster(ontMetrics)
+#' plotMetricsCluster(ontMetrics, scale=TRUE)
 #'
-plotMetricsCluster <- function(data) {
+plotMetricsCluster <- function(data, scale=FALSE) {
   data <- as.data.frame(assay(data))
   data.metrics = data[,-1] # Removing Description column
+  if (isTRUE(scale)) {
+    data.metrics = base::scale(data.metrics)
+  }
   d <- dist(t(data.metrics), method = "euclidean") # distance matrix
   fit <- hclust(d, method="ward.D2")
   theme_set(theme_bw())
@@ -164,6 +168,7 @@ plotMetricsCluster <- function(data) {
     ) +
     labs(title="Metrics dendrogram")
   print(p)
+  return(fit)
 }
 
 #' @title Metric values as violin plot.
