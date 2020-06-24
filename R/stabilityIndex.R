@@ -246,16 +246,52 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 
       km5=NULL
       v.size=length(levels(as.factor(datos.bruto[,i])))
-      # can_process = (length(unique(datos.bruto[,i]))/j.k) > 2 # Avoid bootstrap to get stuck
-      can_process = TRUE
-      if ((v.size>=j.k) & can_process) {
+      if (v.size>=j.k) {
         #km5$cluster=boot.cluster(data=datos.bruto[,i],
         #                         nk=j.k, B=bs, seed=seed)
         #km5$jac=km5$cluster$means
-        km5$cluster=clusterbootWrapper(data=datos.bruto[,i], B=bs,
-                                       bootmethod="boot",
-                                       cbi=cbi,
-                                       krange=j.k, seed=seed)
+
+        clusterbootData = tryCatch({
+          clusterbootWrapper(data=datos.bruto[,i], B=bs,
+                             bootmethod="boot",
+                             cbi=cbi,
+                             krange=j.k, seed=seed)
+        }, error = function(error_condition) {
+          error_condition
+        })
+
+        if(inherits(clusterbootData, "error")) {
+          message(paste0("\t", clusterbootData))
+          message("\tWarning: Could not process data for k = ", j.k)
+          km5$bspart=rep(NA,length(datos.bruto[,i]))
+          km5$jac=rep(NA,j.k)
+          km5$centr=rep(NA,j.k)
+          km5$means=km5$bspart
+          km5$bspart.or=km5$bspart
+          km5$bspart.inv=km5$means
+          km5$jac.or=km5$jac
+          km5$jac.inv=km5$jac
+          km5$partition=km5$bspart.inv
+          km5$jac.stab=km5$jac.inv
+
+          km5$csv = NULL
+          km5$csv$cluster_partition = NULL
+          km5$csv$cluster_mean = NULL
+          km5$csv$cluster_centers = NULL
+          km5$csv$cluster_size = NULL
+          km5$csv$cluster_betweenss = NULL
+          km5$csv$cluster_totss = NULL
+          km5$csv$cluster_tot.withinss = NULL
+          km5$csv$cluster_anova = NULL
+
+          m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
+          m.stab.global.csv[[i.metr]][j.k] = list(km5)
+          estable[[which(bs.values==bs)]] = km5
+          next
+        }
+
+        km5$cluster = clusterbootData
+
         km5$jac=km5$cluster$bootmean
         km5$bspart=km5$cluster$partition
 

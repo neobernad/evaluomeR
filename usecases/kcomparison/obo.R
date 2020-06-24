@@ -7,6 +7,9 @@ outputDir=paste0(wd,"results-obo")
 
 inputDataObo = read.csv(inputPath, header = TRUE)
 
+correlationsOBO = metricsCorrelations(inputDataObo)
+correlationsOBO = assay(correlationsOBO)
+
 plotMetricsMinMax(inputDataObo) # minmax
 plotMetricsBoxplot(inputDataObo) # boxplot
 plotMetricsCluster(inputDataObo) # cluster

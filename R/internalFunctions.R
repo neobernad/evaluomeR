@@ -135,11 +135,11 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
   methodArgs = append(mandatoryArgs, cbiHelperResult[["args"]])
 
   return (
-            quiet(
+            #quiet(
               do.call(
                 clusterboot,
                 methodArgs
-              )
+                #  )
             )
           )
 }
@@ -147,9 +147,8 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
 
 ######################################################
 #function
-#   clusterbootWrapper(data, B, bootmethod="boot",
-#                     clustermethod=kmeansCBI, krange, seed)
-#     Wrapper method for clusterboot functionality.
+#   clusteringWrapper(data, cbi, krange, seed)
+#     Wrapper method for clustering functionality.
 
 clusteringWrapper <- function(data, cbi, krange, seed) {
   cbiHelperResult = helperGetCBI(cbi, krange)
@@ -179,5 +178,34 @@ clusteringWrapper <- function(data, cbi, krange, seed) {
       )
     )
   )
+}
+######################################################
+
+######################################################
+#function
+#   checkIfCanCluster(data, k)
+#       It prevents clusterboot method from getting stuck by checking if
+#       there is enough data to perform a clustering.
+
+checkIfCanCluster <- function(data, ...) {
+  mc <- as.list(match.call(expand.dots = TRUE))
+  k = NULL
+  if ("krange" %in% names(mc)) {
+    k = mc[["krange"]]
+  } else if ("l" %in% names(mc) ) {
+    k = mc[["k"]]
+  } else {
+    stop(paste0("Unexpected error. Could not retrieve 'k' value from dot-dot-dot argument. ",
+                "Arguments were: ", names(mc)))
+  }
+
+  numUnique = length(unique(data))
+  #print(paste0("Division is:", numUnique/k))
+  #print(paste0("Return is: ", (numUnique/k) > 1))
+
+  if ((numUnique/k) <= 1) {
+    stop(paste0("Not enough data to cluster '", numUnique, "' unique values in '", k, "' clusters"))
+  }
+
 }
 ######################################################

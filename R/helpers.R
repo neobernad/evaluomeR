@@ -140,27 +140,27 @@ helperGetCBI <- function(cbi=pkg.env$cbi, krange) {
   switch(cbi,
          kmeans={
            args = list("krange" = krange)
-           return(list("method" = fpc::kmeansCBI, "args" = args))
+           return(list("method" = kmeansCBI, "args" = args))
          },
          clara={
            args = list("k" = krange, "usepam"=FALSE)
-           return(list("method" = fpc::claraCBI, "args" = args))
+           return(list("method" = claraCBI, "args" = args))
          },
          clara_pam={
            args = list("k" = krange, "usepam"=TRUE)
-           return(list("method" = fpc::claraCBI, "args" = args))
+           return(list("method" = claraCBI, "args" = args))
          },
          hclust={
            args = list("k" = krange, "method"="ward.D2")
-           return(list("method" = fpc::hclustCBI, "args" = args))
+           return(list("method" = hclustCBI, "args" = args))
          },
          pamk={
            args = list("k" = krange, "usepam"=FALSE, criterion="asw")
-           return(list("method" = fpc::pamkCBI, "args" = args))
+           return(list("method" = pamkCBI, "args" = args))
          },
          pamk_pam={
            args = list("k" = krange, "usepam"=TRUE, criterion="asw")
-           return(list("method" = fpc::pamkCBI, "args" = args))
+           return(list("method" = pamkCBI, "args" = args))
          },
          {
            error=paste("Input CBI '", cbi, "' is not defined in the package", sep="")

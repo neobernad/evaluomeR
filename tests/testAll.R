@@ -2,7 +2,7 @@ library(evaluomeR)
 
 data("rnaMetrics")
 
-dataFrame <- stability(data=rnaMetrics, k=2, bs=100, getImages = FALSE)
+dataFrame <- stability(data=rnaMetrics, k=4, bs=100, getImages = FALSE)
 dataFrame <- stabilityRange(data=rnaMetrics, k.range=c(2,4), bs=20, getImages = FALSE)
 assay(dataFrame)
 # Metric    Mean_stability_k_2  Mean_stability_k_3  Mean_stability_k_4

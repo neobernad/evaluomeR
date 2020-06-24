@@ -7,6 +7,9 @@ outputDir=paste0(wd,"results-agro")
 
 inputDataAgro = read.csv(inputPath, header = TRUE)
 
+correlationsAgro = metricsCorrelations(inputDataAgro)
+correlationsAgro = assay(correlationsAgro)
+
 plotMetricsMinMax(inputDataAgro) # minmax
 plotMetricsBoxplot(inputDataAgro) # boxplot
 plotMetricsCluster(inputDataAgro) # cluster
