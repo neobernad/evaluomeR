@@ -92,51 +92,45 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 }
 
 #### Data loading ----
-csai15Path=paste0(wd,"data/data-csai15.csv")
 csai16Path=paste0(wd,"data/data-csai16.csv")
 csai17Path=paste0(wd,"data/data-csai17.csv")
+csai18Path=paste0(wd,"data/data-csai18.csv")
 
-csis15Path=paste0(wd,"data/data-csis15.csv")
 csis16Path=paste0(wd,"data/data-csis16.csv")
 csis17Path=paste0(wd,"data/data-csis17.csv")
+csis18Path=paste0(wd,"data/data-csis18.csv")
 
-orms15Path=paste0(wd,"data/data-orms15.csv")
 orms16Path=paste0(wd,"data/data-orms16.csv")
 orms17Path=paste0(wd,"data/data-orms17.csv")
+orms18Path=paste0(wd,"data/data-orms18.csv")
 
-inputCsai15 = read.csv(csai15Path, header = TRUE, sep = ";")
 inputCsai16 = read.csv(csai16Path, header = TRUE, sep = ";")
 inputCsai17 = read.csv(csai17Path, header = TRUE, sep = ";")
+inputCsai18 = read.csv(csai18Path, header = TRUE, sep = ";")
 
-inputCsis15 = read.csv(csis15Path, header = TRUE, sep = ";")
 inputCsis16 = read.csv(csis16Path, header = TRUE, sep = ";")
 inputCsis17 = read.csv(csis17Path, header = TRUE, sep = ";")
+inputCsis18 = read.csv(csis18Path, header = TRUE, sep = ";")
 
-inputOrms15 = read.csv(orms15Path, header = TRUE, sep = ";")
 inputOrms16 = read.csv(orms16Path, header = TRUE, sep = ";")
 inputOrms17 = read.csv(orms17Path, header = TRUE, sep = ";")
+inputOrms18 = read.csv(orms18Path, header = TRUE, sep = ";")
 
-#### Stability [2,15] ----
+#### Stability [2,16] ----
 k.range=c(2,15)
-stabCsai15 <- stabilityRange(data=inputCsai15, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabCsai16 <- stabilityRange(data=inputCsai16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabCsai17 <- stabilityRange(data=inputCsai17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabCsai18 <- stabilityRange(data=inputCsai18, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
-stabCsis15 <- stabilityRange(data=inputCsis15, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabCsis16 <- stabilityRange(data=inputCsis16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabCsis17 <- stabilityRange(data=inputCsis17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabCsis18 <- stabilityRange(data=inputCsis18, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
-stabOrms15 <- stabilityRange(data=inputOrms15, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabOrms16 <- stabilityRange(data=inputOrms16, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 stabOrms17 <- stabilityRange(data=inputOrms17, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
+stabOrms18 <- stabilityRange(data=inputOrms18, k.range=k.range, bs=100, getImages = FALSE, seed=seed)
 
 #### Stability SE to DF ----
-meanStabCsai15 = standardizeStabilityData(stabCsai15, k.range)
-meanStabCsai15$Metric = "CSAI15"
-meanStabCsai15$category = "CSAI"
-meanStabCsai15$year = "2015"
-colnames(meanStabCsai15) = str_remove_all(colnames(meanStabCsai15), "k_")
-
 meanStabCsai16 = standardizeStabilityData(stabCsai16, k.range)
 meanStabCsai16$Metric = "CSAI16"
 meanStabCsai16$category = "CSAI"
@@ -149,11 +143,11 @@ meanStabCsai17$category = "CSAI"
 meanStabCsai17$year = "2017"
 colnames(meanStabCsai17) = str_remove_all(colnames(meanStabCsai17), "k_")
 
-meanStabCsis15 = standardizeStabilityData(stabCsis15, k.range)
-meanStabCsis15$Metric = "CSIS15"
-meanStabCsis15$category = "CSIS"
-meanStabCsis15$year = "2015"
-colnames(meanStabCsis15) = str_remove_all(colnames(meanStabCsis15), "k_")
+meanStabCsai18 = standardizeStabilityData(stabCsai18, k.range)
+meanStabCsai18$Metric = "CSAI18"
+meanStabCsai18$category = "CSAI"
+meanStabCsai18$year = "2018"
+colnames(meanStabCsai18) = str_remove_all(colnames(meanStabCsai18), "k_")
 
 meanStabCsis16 = standardizeStabilityData(stabCsis16, k.range)
 meanStabCsis16$Metric = "CSIS16"
@@ -167,11 +161,11 @@ meanStabCsis17$category = "CSIS"
 meanStabCsis17$year = "2017"
 colnames(meanStabCsis17) = str_remove_all(colnames(meanStabCsis17), "k_")
 
-meanStabOrms15 = standardizeStabilityData(stabOrms15, k.range)
-meanStabOrms15$Metric = "ORMS15"
-meanStabOrms15$category = "ORMS"
-meanStabOrms15$year = "2015"
-colnames(meanStabOrms15) = str_remove_all(colnames(meanStabOrms15), "k_")
+meanStabCsis18 = standardizeStabilityData(stabCsis18, k.range)
+meanStabCsis18$Metric = "CSIS18"
+meanStabCsis18$category = "CSIS"
+meanStabCsis18$year = "2018"
+colnames(meanStabCsis18) = str_remove_all(colnames(meanStabCsis18), "k_")
 
 meanStabOrms16 = standardizeStabilityData(stabOrms16, k.range)
 meanStabOrms16$Metric = "ORMS16"
@@ -185,11 +179,17 @@ meanStabOrms17$category = "ORMS"
 meanStabOrms17$year = "2017"
 colnames(meanStabOrms17) = str_remove_all(colnames(meanStabOrms17), "k_")
 
+meanStabOrms18 = standardizeStabilityData(stabOrms18, k.range)
+meanStabOrms18$Metric = "ORMS18"
+meanStabOrms18$category = "ORMS"
+meanStabOrms18$year = "2018"
+colnames(meanStabOrms18) = str_remove_all(colnames(meanStabOrms18), "k_")
+
 #### Stability plotting ----
 
-stabDfList = list(meanStabCsai15, meanStabCsai16, meanStabCsai17,
-                  meanStabCsis15, meanStabCsis16, meanStabCsis17,
-                  meanStabOrms15, meanStabOrms16, meanStabOrms17)
+stabDfList = list(meanStabCsai16, meanStabCsai17, meanStabCsai18,
+                  meanStabCsis16, meanStabCsis17, meanStabCsis18,
+                  meanStabOrms16, meanStabOrms17, meanStabOrms18)
 
 stabPlot = ggplot()
 min = Inf
@@ -221,25 +221,19 @@ ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf")
        device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 #### Quality [2,15] ----
-qualCsai15 <- qualityRange(data=inputCsai15, k.range=k.range, getImages = FALSE, seed=seed)
 qualCsai16 <- qualityRange(data=inputCsai16, k.range=k.range, getImages = FALSE, seed=seed)
 qualCsai17 <- qualityRange(data=inputCsai17, k.range=k.range, getImages = FALSE, seed=seed)
+qualCsai18 <- qualityRange(data=inputCsai18, k.range=k.range, getImages = FALSE, seed=seed)
 
-qualCsis15 <- qualityRange(data=inputCsis15, k.range=k.range, getImages = FALSE, seed=seed)
 qualCsis16 <- qualityRange(data=inputCsis16, k.range=k.range, getImages = FALSE, seed=seed)
 qualCsis17 <- qualityRange(data=inputCsis17, k.range=k.range, getImages = FALSE, seed=seed)
+qualCsis18 <- qualityRange(data=inputCsis18, k.range=k.range, getImages = FALSE, seed=seed)
 
-qualOrms15 <- qualityRange(data=inputOrms15, k.range=k.range, getImages = FALSE, seed=seed)
 qualOrms16 <- qualityRange(data=inputOrms16, k.range=k.range, getImages = FALSE, seed=seed)
 qualOrms17 <- qualityRange(data=inputOrms17, k.range=k.range, getImages = FALSE, seed=seed)
+qualOrms18 <- qualityRange(data=inputOrms18, k.range=k.range, getImages = FALSE, seed=seed)
 
 #### Quality SE to DF ----
-silCsai15 = standardizeQualityData(qualCsai15, k.range)
-silCsai15$Metric = "CSAI15"
-silCsai15$category = "CSAI"
-silCsai15$year = "2015"
-colnames(silCsai15) = str_remove_all(colnames(silCsai15), "k_")
-
 silCsai16 = standardizeQualityData(qualCsai16, k.range)
 silCsai16$Metric = "CSAI16"
 silCsai16$category = "CSAI"
@@ -252,11 +246,11 @@ silCsai17$category = "CSAI"
 silCsai17$year = "2017"
 colnames(silCsai17) = str_remove_all(colnames(silCsai17), "k_")
 
-silCsis15 = standardizeQualityData(qualCsis15, k.range)
-silCsis15$Metric = "CSIS15"
-silCsis15$category = "CSIS"
-silCsis15$year = "2015"
-colnames(silCsis15) = str_remove_all(colnames(silCsis15), "k_")
+silCsai18 = standardizeQualityData(qualCsai18, k.range)
+silCsai18$Metric = "CSAI18"
+silCsai18$category = "CSAI"
+silCsai18$year = "2018"
+colnames(silCsai18) = str_remove_all(colnames(silCsai18), "k_")
 
 silCsis16 = standardizeQualityData(qualCsis16, k.range)
 silCsis16$Metric = "CSIS16"
@@ -270,11 +264,11 @@ silCsis17$category = "CSIS"
 silCsis17$year = "2017"
 colnames(silCsis17) = str_remove_all(colnames(silCsis17), "k_")
 
-silOrms15 = standardizeQualityData(qualOrms15, k.range)
-silOrms15$Metric = "ORMS15"
-silOrms15$category = "ORMS"
-silOrms15$year = "2015"
-colnames(silOrms15) = str_remove_all(colnames(silOrms15), "k_")
+silCsis18 = standardizeQualityData(qualCsis18, k.range)
+silCsis18$Metric = "CSIS18"
+silCsis18$category = "CSIS"
+silCsis18$year = "2018"
+colnames(silCsis18) = str_remove_all(colnames(silCsis18), "k_")
 
 silOrms16 = standardizeQualityData(qualOrms16, k.range)
 silOrms16$Metric = "ORMS16"
@@ -288,11 +282,17 @@ silOrms17$category = "ORMS"
 silOrms17$year = "2017"
 colnames(silOrms17) = str_remove_all(colnames(silOrms17), "k_")
 
+silOrms18 = standardizeQualityData(qualOrms18, k.range)
+silOrms18$Metric = "ORMS18"
+silOrms18$category = "ORMS"
+silOrms18$year = "2018"
+colnames(silOrms18) = str_remove_all(colnames(silOrms18), "k_")
+
 #### Quality plotting ----
 
-silDfList = list(silCsai15, silCsai16, silCsai17,
-                 silCsis15, silCsis16, silCsis17,
-                 silOrms15, silOrms16, silOrms17)
+silDfList = list(silCsai16, silCsai17, silCsai18,
+                 silCsis16, silCsis17, silCsis18,
+                 silOrms16, silOrms17, silOrms18)
 
 silPlot = ggplot()
 min = Inf
@@ -330,56 +330,56 @@ save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=
 #### CSV generation ----
 
 # CSAI Stab
-write.csv(standardizeStabilityData(stabCsai15, k.range), paste0(dataDir, "/stabilityCsai15.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabCsai16, k.range), paste0(dataDir, "/stabilityCsai16.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabCsai17, k.range), paste0(dataDir, "/stabilityCsai17.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabCsai18, k.range), paste0(dataDir, "/stabilityCsai18.csv"), row.names = TRUE)
 
 # CSAI Qual
-write.csv(standardizeQualityData(qualCsai15, k.range), paste0(dataDir, "/qualityCsai15.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualCsai16, k.range), paste0(dataDir, "/qualityCsai16.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualCsai17, k.range), paste0(dataDir, "/qualityCsai17.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualCsai18, k.range), paste0(dataDir, "/qualityCsai18.csv"), row.names = TRUE)
 
 # CSIS Stab
-write.csv(standardizeStabilityData(stabCsis15, k.range), paste0(dataDir, "/stabilityCsis15.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabCsis16, k.range), paste0(dataDir, "/stabilityCsis16.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabCsis17, k.range), paste0(dataDir, "/stabilityCsis17.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabCsis18, k.range), paste0(dataDir, "/stabilityCsis18.csv"), row.names = TRUE)
 
 # CSIS Qual
-write.csv(standardizeQualityData(qualCsis15, k.range), paste0(dataDir, "/qualityCsis15.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualCsis16, k.range), paste0(dataDir, "/qualityCsis16.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualCsis17, k.range), paste0(dataDir, "/qualityCsis17.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualCsis18, k.range), paste0(dataDir, "/qualityCsis18.csv"), row.names = TRUE)
 
 # ORMS Stab
-write.csv(standardizeStabilityData(stabOrms15, k.range), paste0(dataDir, "/stabilityOrms15.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabOrms16, k.range), paste0(dataDir, "/stabilityOrms16.csv"), row.names = TRUE)
 write.csv(standardizeStabilityData(stabOrms17, k.range), paste0(dataDir, "/stabilityOrms17.csv"), row.names = TRUE)
+write.csv(standardizeStabilityData(stabOrms18, k.range), paste0(dataDir, "/stabilityOrms18.csv"), row.names = TRUE)
 
 # ORMS Qual
-write.csv(standardizeQualityData(qualOrms15, k.range), paste0(dataDir, "/qualityOrms15.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualOrms16, k.range), paste0(dataDir, "/qualityOrms16.csv"), row.names = TRUE)
 write.csv(standardizeQualityData(qualOrms17, k.range), paste0(dataDir, "/qualityOrms17.csv"), row.names = TRUE)
+write.csv(standardizeQualityData(qualOrms18, k.range), paste0(dataDir, "/qualityOrms18.csv"), row.names = TRUE)
 
 #### Optimal k values ----
 k.range=c(3,15)
 
 # Csai
-kOptCsai15 = getOptimalKValue(stabCsai15, qualCsai15, k.range=k.range)$Global_optimal_k
 kOptCsai16 = getOptimalKValue(stabCsai16, qualCsai16, k.range=k.range)$Global_optimal_k
 kOptCsai17 = getOptimalKValue(stabCsai17, qualCsai17, k.range=k.range)$Global_optimal_k
+kOptCsai18 = getOptimalKValue(stabCsai18, qualCsai18, k.range=k.range)$Global_optimal_k
 
 # Csis
-kOptCsis15 = getOptimalKValue(stabCsis15, qualCsis15, k.range=k.range)$Global_optimal_k
 kOptCsis16 = getOptimalKValue(stabCsis16, qualCsis16, k.range=k.range)$Global_optimal_k
 kOptCsis17 = getOptimalKValue(stabCsis17, qualCsis17, k.range=k.range)$Global_optimal_k
+kOptCsis18 = getOptimalKValue(stabCsis18, qualCsis18, k.range=k.range)$Global_optimal_k
 
 # Orms
-kOptOrms15 = getOptimalKValue(stabOrms15, qualOrms15, k.range=k.range)$Global_optimal_k
 kOptOrms16 = getOptimalKValue(stabOrms16, qualOrms16, k.range=k.range)$Global_optimal_k
 kOptOrms17 = getOptimalKValue(stabOrms17, qualOrms17, k.range=k.range)$Global_optimal_k
+kOptOrms18 = getOptimalKValue(stabOrms18, qualOrms18, k.range=k.range)$Global_optimal_k
 
-tableKOpt = setNames(as.data.frame(matrix(nrow=3,ncol=3)), c("2015","2016","2017"))
+tableKOpt = setNames(as.data.frame(matrix(nrow=3,ncol=3)), c("2016","2017","2018"))
 rownames(tableKOpt) <- c("CSAI", "CSIS", "ORMS")
-tableKOpt["2015"] <- c(kOptCsai15, kOptCsis15, kOptOrms15)
 tableKOpt["2016"] <- c(kOptCsai16, kOptCsis16, kOptOrms16)
 tableKOpt["2017"] <- c(kOptCsai17, kOptCsis17, kOptOrms17)
+tableKOpt["2018"] <- c(kOptCsai18, kOptCsis18, kOptOrms18)
 tableKOpt
