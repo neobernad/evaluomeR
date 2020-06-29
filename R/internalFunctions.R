@@ -192,7 +192,7 @@ checkIfCanCluster <- function(data, ...) {
   k = NULL
   if ("krange" %in% names(mc)) {
     k = mc[["krange"]]
-  } else if ("l" %in% names(mc) ) {
+  } else if ("k" %in% names(mc) ) {
     k = mc[["k"]]
   } else {
     stop(paste0("Unexpected error. Could not retrieve 'k' value from dot-dot-dot argument. ",
