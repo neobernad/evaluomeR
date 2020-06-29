@@ -433,7 +433,9 @@ runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL
         for (k in k.range) {
           km5.cur = km5.list[[k]]
           cur.value = getMeasureValue(km5.cur, measure)
-          measure.data.list = c(measure.data.list, cur.value)
+         if (cur.value != "") {
+           measure.data.list = c(measure.data.list, cur.value)
+         }
         }
       }
       wrapper[[measure]] = unlist(measure.data.list, use.names = FALSE)
@@ -441,9 +443,12 @@ runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL
     }  # end for i.metr
 
     # Transform into dataframe
-    stabilityDataFrame[[measure]] = t(data.frame(stabilityDataList))
-    colnames(stabilityDataFrame[[measure]]) = header
-    rownames(stabilityDataFrame[[measure]]) <- NULL
+    # Add df if has data
+    if (ncol(t(data.frame(stabilityDataList))) != 1) {
+      stabilityDataFrame[[measure]] = t(data.frame(stabilityDataList))
+      colnames(stabilityDataFrame[[measure]]) = header
+      rownames(stabilityDataFrame[[measure]]) <- NULL
+    }
   }
 
   return(stabilityDataFrame)
