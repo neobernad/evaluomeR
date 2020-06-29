@@ -18,7 +18,7 @@ The rows contains the measurements of the metrics for each instance in the datas
 \item{scale}{Boolean. If true input data is scaled. Default: FALSE.}
 }
 \value{
-A ggdendrogram object and an hclust object in `$fit` attribute in output object.
+An hclust object.
 }
 \description{
 It clusters the value of the metrics in a \code{\link{SummarizedExperiment}}
