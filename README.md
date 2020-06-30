@@ -6,10 +6,7 @@
 ![Conda](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/installer/conda.svg)
 
 
-https://anaconda.org/bioconda/bioconductor-evaluomer/badges/platforms.svg
-
-
-# What is it about? #
+# evaluomeR
 
 The **evaluomeR** package permits to evaluate the reliability of bioinformatic metrics by analysing
 the stability and goodness of the classifications of such metrics. The method takes the measurements of 
