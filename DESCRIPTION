@@ -31,7 +31,11 @@ Imports:
     plotrix,
     stats,
     matrixStats,
-    Rdpack
+    Rdpack,
+    MASS,
+    class,
+    prabclus,
+    mclust
 Suggests: BiocStyle, knitr, rmarkdown, kableExtra, magrittr
 VignetteBuilder: knitr
 RdMacros: Rdpack

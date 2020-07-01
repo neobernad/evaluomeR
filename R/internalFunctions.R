@@ -37,7 +37,7 @@ jaccard.cluster <- function(clust1,clust2) {
 
 boot.cluster <- function(data, nk=5, B=10, seed=NULL, prnt=FALSE) {
   old.seed <- .Random.seed
-  on.exit( { .Random.seed <<- old.seed } )
+  on.exit( { .Random.seed <- old.seed } )
   if (!is.null(seed)) {
     #http://stackoverflow.com/questions/14324096/setting-seed-locally-not-globally-in-r?rq=1
     set.seed(as.integer(seed)) #seed

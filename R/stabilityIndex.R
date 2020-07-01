@@ -433,9 +433,7 @@ runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL
         for (k in k.range) {
           km5.cur = km5.list[[k]]
           cur.value = getMeasureValue(km5.cur, measure)
-         if (cur.value != "") {
-           measure.data.list = c(measure.data.list, cur.value)
-         }
+          measure.data.list = c(measure.data.list, cur.value)
         }
       }
       wrapper[[measure]] = unlist(measure.data.list, use.names = FALSE)

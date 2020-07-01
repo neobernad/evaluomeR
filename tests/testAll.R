@@ -55,3 +55,6 @@ evaluomeRSupportedCBI()
 
 dataFrame <- qualityRange(data=rnaMetrics, k.range=c(2,10), getImages = FALSE)
 dataFrame
+
+dataFrame <- stabilityRange(data=rnaMetrics, k.range=c(2,8), bs=20, getImages = FALSE)
+assay(dataFrame)
