@@ -32,6 +32,7 @@ qualityDataObo <- qualityRange(data=inputDataObo,
 
 kOptTableOboFull <- getOptimalKValue(stabilityDataObo, qualityDataObo, k.range=c(3,15))
 kOptTableObo <- kOptTableOboFull[, c("Stability_max_k", "Quality_max_k", "Global_optimal_k")]
+rownames(kOptTableObo) <- kOptTableOboFull$Metric
 kOptTableOboValues <- kOptTableOboFull[, c("Stability_max_k_stab", "Quality_max_k_stab")]
 csvPath = paste0(outputDir, "/clusters/obo.optimal.k_",GLOBAL_CBI,".csv")
 #write.csv(kOptTableObo, csvPath, row.names = TRUE)

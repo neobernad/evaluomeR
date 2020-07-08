@@ -322,7 +322,7 @@ oboKOptSilLabels[, c("repository", "k=5")] <- list(NULL)
 oboKOptSilLabelsCopy = oboKOptSilLabels
 
 oboKOptSilLabels[
-  which(oboKOptStaLabelsCopy[optimal_k] > 0.7 & oboKOptSilLabelsCopy[optimal_k] <= 1), optimal_k
+  which(oboKOptSilLabelsCopy[optimal_k] > 0.7 & oboKOptSilLabelsCopy[optimal_k] <= 1), optimal_k
   ] = "Strong clust. struct."
 oboKOptSilLabels[
   which(oboKOptSilLabelsCopy[optimal_k] > 0.5 & oboKOptSilLabelsCopy[optimal_k] <= 0.7), optimal_k

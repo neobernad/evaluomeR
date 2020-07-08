@@ -527,10 +527,10 @@ clusterboot <- function(data,B=100,
   }
   lb <- length(bootmethod)
   if (distances) {
-    checkIfCanCluster(data=data, ...)
+    # checkIfCanCluster(data=data, ...)
     c1 <- clustermethod(as.dist(data),...)
   } else {
-    checkIfCanCluster(data=data, ...)
+    # checkIfCanCluster(data=data, ...)
     c1 <- clustermethod(data,...)
   }
 
@@ -618,10 +618,10 @@ clusterboot <- function(data,B=100,
       }
       # print(mdata)
       if ("diss" %in% names(formals(clustermethod)) & distances) {
-        checkIfCanCluster(data=mdata, ...)
+        # checkIfCanCluster(data=mdata, ...)
         bc1 <- clustermethod(mdata,diss=TRUE,...)
       } else {
-        checkIfCanCluster(data=mdata, ...)
+        # checkIfCanCluster(data=mdata, ...)
         bc1 <- clustermethod(mdata,...)
       }
       # print("clustermethod done")
