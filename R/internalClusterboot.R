@@ -334,26 +334,26 @@ speccCBI <- function(data,k,...){
   out
 }
 
-tclustCBI <- function(data,k,trim=0.05,...){
-  if (requireNamespace("tclust", quietly = TRUE)) {
-    data <- as.matrix(data)
-    c1 <- tclust::tclust(data,k=k,alpha=trim,...)
-    sc1c <- c1$cluster
-    cl <- list()
-    nc <- nccl <- max(sc1c)
-    if (sum(sc1c==0)>0){
-      nc <- nccl+1
-      sc1c[sc1c==0] <- nc
-    }
-    for (i in 1:nc)
-      cl[[i]] <- sc1c == i
-    out <- list(result=c1,nc=nc,nccl=nccl,clusterlist=cl,partition=sc1c,
-                clustermethod="tclust")
-    out
-  }
-  else
-    warning("tclust could not be loaded")
-}
+# tclustCBI <- function(data,k,trim=0.05,...){
+#   if (requireNamespace("tclust", quietly = TRUE)) {
+#     data <- as.matrix(data)
+#     c1 <- tclust::tclust(data,k=k,alpha=trim,...)
+#     sc1c <- c1$cluster
+#     cl <- list()
+#     nc <- nccl <- max(sc1c)
+#     if (sum(sc1c==0)>0){
+#       nc <- nccl+1
+#       sc1c[sc1c==0] <- nc
+#     }
+#     for (i in 1:nc)
+#       cl[[i]] <- sc1c == i
+#     out <- list(result=c1,nc=nc,nccl=nccl,clusterlist=cl,partition=sc1c,
+#                 clustermethod="tclust")
+#     out
+#   }
+#   else
+#     warning("tclust could not be loaded")
+# }
 
 # trimkmeansCBI <- function(data,k,scaling=TRUE,trim=0.1,...){
 #     c1 <- trimkmeans(data,k=k,scaling=scaling,trim=trim,...)
@@ -448,51 +448,51 @@ mahalCBI <- function(data,clustercut=0.5,...){
   out
 }
 
-pdfclustCBI <- function(data,...){
-  if (requireNamespace("pdfCluster", quietly = TRUE)) {
-    c1 <- pdfCluster::pdfCluster(data,...)
-    sc1c <- c1@clusters
-    cl <- list()
-    nc <- nccl <- max(sc1c)
-    for (i in 1:nc)
-      cl[[i]] <- sc1c == i
-    out <- list(result=c1,nc=nc,nccl=nccl,clusterlist=cl,partition=sc1c,
-                clustermethod="pdfCluster")
-    out
-  }
-  else
-    warning("pdfCluster could not be loaded")
-}
+# pdfclustCBI <- function(data,...){
+#   if (requireNamespace("pdfCluster", quietly = TRUE)) {
+#     c1 <- pdfCluster::pdfCluster(data,...)
+#     sc1c <- c1@clusters
+#     cl <- list()
+#     nc <- nccl <- max(sc1c)
+#     for (i in 1:nc)
+#       cl[[i]] <- sc1c == i
+#     out <- list(result=c1,nc=nc,nccl=nccl,clusterlist=cl,partition=sc1c,
+#                 clustermethod="pdfCluster")
+#     out
+#   }
+#   else
+#     warning("pdfCluster could not be loaded")
+# }
 
 # distr could also be mvt, msn, mst
-emskewCBI <- function(data,k,distr="mst",repeats=100,...){
-  if (requireNamespace("EMMIXskew", quietly = TRUE)) {
-    if (!exists("distr")) distr="mvn"
-    attempt <- 1
-    repeat{
-      c1 <- EMMIXskew::EmSkew(data,g=k,distr=distr,...)
-      if (!is.null(c1)){
-        if (max(c1$clust)==k)
-          break
-      }
-      attempt <- attempt+1
-      if(attempt>repeats){
-        cat("EmSkew failed after ",repeats," repetitions.")
-        break
-      }
-      if(debug) print("Repeat EmSkew exection")
-    }
-    partition <- c1$clust
-    nc <- max(partition)
-    cl <- list()
-    for (i in 1:nc) cl[[i]] <- partition == i
-    out <- list(result = c1, nc = nc, clusterlist = cl, partition = partition,
-                clustermethod = paste("emskew_",distr,sep=""))
-    out
-  }
-  else
-    warning("EMMIXskew could not be loaded")
-}
+# emskewCBI <- function(data,k,distr="mst",repeats=100,...){
+#   if (requireNamespace("EMMIXskew", quietly = TRUE)) {
+#     if (!exists("distr")) distr="mvn"
+#     attempt <- 1
+#     repeat{
+#       c1 <- EMMIXskew::EmSkew(data,g=k,distr=distr,...)
+#       if (!is.null(c1)){
+#         if (max(c1$clust)==k)
+#           break
+#       }
+#       attempt <- attempt+1
+#       if(attempt>repeats){
+#         cat("EmSkew failed after ",repeats," repetitions.")
+#         break
+#       }
+#       if(debug) print("Repeat EmSkew exection")
+#     }
+#     partition <- c1$clust
+#     nc <- max(partition)
+#     cl <- list()
+#     for (i in 1:nc) cl[[i]] <- partition == i
+#     out <- list(result = c1, nc = nc, clusterlist = cl, partition = partition,
+#                 clustermethod = paste("emskew_",distr,sep=""))
+#     out
+#   }
+# else
+#     warning("EMMIXskew could not be loaded")
+# }
 
 
 
