@@ -5,9 +5,6 @@ library(reshape2)
 library(gridExtra)
 library(grid)
 
-wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
-outputDir=paste0(wd,"results-cbi")
-
 evaluomeRSupportedCBI()
 optimalKs=NULL
 stabValues=NULL
@@ -32,6 +29,9 @@ for (cbi in cbi_used) {
   silValues[[GLOBAL_CBI]]$Agro = silhouetteTableAgro
   silValues[[GLOBAL_CBI]]$Obo = silhouetteTableObo
 }
+
+wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
+outputDir=paste0(wd,"results-cbi")
 
 #optimalKs = as.data.frame(optimalKs)
 #rownames(optimalKs) = rownames(kOptTableObo)
@@ -126,6 +126,12 @@ stabilityComparison = na.omit(stabilityComparison)
 qualityComparison = na.omit(qualityComparison)
 agroKComparison = na.omit(agroKComparison)
 oboKComparison = na.omit(oboKComparison)
+
+stabilityComparison = stabilityComparison[order(stabilityComparison$metric), ]
+qualityComparison = qualityComparison[order(qualityComparison$metric), ]
+agroKComparison = agroKComparison[order(agroKComparison$metric), ]
+oboKComparison = oboKComparison[order(oboKComparison$metric), ]
+
 
 # Column name change from clara_pam to pam
 colnames(stabilityComparison)[which(names(stabilityComparison) == "clara_pam")] <- "pam"

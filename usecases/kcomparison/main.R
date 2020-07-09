@@ -8,7 +8,7 @@ library(grid)
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
 
 evaluomeRSupportedCBI()
-GLOBAL_CBI = "pamk"
+GLOBAL_CBI = "kmeans"
 
 source(paste0(wd,"agro.R"))
 source(paste0(wd,"obo.R"))
