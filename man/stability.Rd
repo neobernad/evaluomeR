@@ -4,7 +4,8 @@
 \alias{stability}
 \title{Stability index.}
 \usage{
-stability(data, k = 5, bs = 100, cbi = "kmeans", getImages = TRUE, seed = NULL)
+stability(data, k = 5, bs = 100, cbi = "kmeans", getImages = TRUE,
+  seed = NULL)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

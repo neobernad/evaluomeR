@@ -244,10 +244,9 @@ agroKComparisonMelt$value = as.numeric(agroKComparisonMelt$value)
 agro_k <- ggplot(data=agroKComparisonMelt, aes(x=metric, y=value, group = variable)) +
   geom_line(aes(color=variable, linetype=variable)) +
   geom_point(aes(color=variable, shape=variable)) +
-  # geom_point(aes(color=variable)) + # For hollow shapes
+  geom_point(aes(color=variable)) +
   scale_colour_grey(start = 0, end = 0.5) +
   scale_y_continuous(name="K", breaks = c(2:15)) +
-  scale_shape_manual(values=0:2) + #
   coord_cartesian(ylim = c(2, 15)) + # For hollow shapes
   theme(axis.text.x = element_text(angle = 90, hjust = 1),
         axis.text.y = element_text(size = 16),

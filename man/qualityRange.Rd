@@ -4,13 +4,8 @@
 \alias{qualityRange}
 \title{Goodness of classifications for a range of k clusters.}
 \usage{
-qualityRange(
-  data,
-  k.range = c(3, 5),
-  cbi = "kmeans",
-  getImages = TRUE,
-  seed = NULL
-)
+qualityRange(data, k.range = c(3, 5), cbi = "kmeans",
+  getImages = TRUE, seed = NULL)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

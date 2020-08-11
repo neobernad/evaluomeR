@@ -20,7 +20,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Depends: R (>= 3.6), SummarizedExperiment, MultiAssayExperiment, 
-            cluster (>= 2.0.9), fpc (>= 2.2-3)
+            cluster (>= 2.0.9), fpc (>= 2.2-3), flexmix (>= 2.3.15)
 Imports:
     corrplot (>= 0.84),
     grDevices,
@@ -50,3 +50,4 @@ Collate:
     'qualityIndices.R'
     'correlation.R'
     'metricsAnalysis.R'
+    'predictions.R'
