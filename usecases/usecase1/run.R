@@ -6,10 +6,14 @@ library(stringr)
 library(reshape2)
 library(ggthemes)
 
+# Version
+# Adding merged .tiff plots
+# Neobernad committed on 24 Jan 2020
+
 wd = paste0(dirname(rstudioapi::getSourceEditorContext()$path),"/")
 seed = 13000
-plotDir=paste0(wd,"plots")
-dataDir=paste0(wd,"results-csv")
+plotDir=paste0(wd,"plots-rm")
+dataDir=paste0(wd,"results-csv-rm")
 
 dir.create(file.path(plotDir))
 dir.create(file.path(dataDir))
@@ -217,8 +221,8 @@ stabPlot = stabPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc(base_family = "sans")
 
-ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+#ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf"),
+#       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 #### Quality [2,15] ----
 qualCsai16 <- qualityRange(data=inputCsai16, k.range=k.range, getImages = FALSE, seed=seed)
@@ -320,44 +324,44 @@ silPlot = silPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_impact_factor.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+#ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_impact_factor.pdf"),
+#       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 pg = plot_grid(stabPlot, silPlot, align = "v", nrow = 2, rel_heights = c(1/2, 1/2), labels=c("A", "B"))
-save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.pdf"), pg, nrow=2, dpi="print")
-save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=2, dpi="print", device="tiff")
+#save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.pdf"), pg, nrow=2, dpi="print")
+#save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=2, dpi="print", device="tiff")
 
 #### CSV generation ----
 
 # CSAI Stab
-write.csv(standardizeStabilityData(stabCsai16, k.range), paste0(dataDir, "/stabilityCsai16.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabCsai17, k.range), paste0(dataDir, "/stabilityCsai17.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabCsai18, k.range), paste0(dataDir, "/stabilityCsai18.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsai16, k.range), paste0(dataDir, "/stabilityCsai16.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsai17, k.range), paste0(dataDir, "/stabilityCsai17.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsai18, k.range), paste0(dataDir, "/stabilityCsai18.csv"), row.names = TRUE)
 
 # CSAI Qual
-write.csv(standardizeQualityData(qualCsai16, k.range), paste0(dataDir, "/qualityCsai16.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualCsai17, k.range), paste0(dataDir, "/qualityCsai17.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualCsai18, k.range), paste0(dataDir, "/qualityCsai18.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsai16, k.range), paste0(dataDir, "/qualityCsai16.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsai17, k.range), paste0(dataDir, "/qualityCsai17.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsai18, k.range), paste0(dataDir, "/qualityCsai18.csv"), row.names = TRUE)
 
 # CSIS Stab
-write.csv(standardizeStabilityData(stabCsis16, k.range), paste0(dataDir, "/stabilityCsis16.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabCsis17, k.range), paste0(dataDir, "/stabilityCsis17.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabCsis18, k.range), paste0(dataDir, "/stabilityCsis18.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsis16, k.range), paste0(dataDir, "/stabilityCsis16.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsis17, k.range), paste0(dataDir, "/stabilityCsis17.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabCsis18, k.range), paste0(dataDir, "/stabilityCsis18.csv"), row.names = TRUE)
 
 # CSIS Qual
-write.csv(standardizeQualityData(qualCsis16, k.range), paste0(dataDir, "/qualityCsis16.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualCsis17, k.range), paste0(dataDir, "/qualityCsis17.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualCsis18, k.range), paste0(dataDir, "/qualityCsis18.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsis16, k.range), paste0(dataDir, "/qualityCsis16.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsis17, k.range), paste0(dataDir, "/qualityCsis17.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualCsis18, k.range), paste0(dataDir, "/qualityCsis18.csv"), row.names = TRUE)
 
 # ORMS Stab
-write.csv(standardizeStabilityData(stabOrms16, k.range), paste0(dataDir, "/stabilityOrms16.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabOrms17, k.range), paste0(dataDir, "/stabilityOrms17.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabOrms18, k.range), paste0(dataDir, "/stabilityOrms18.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabOrms16, k.range), paste0(dataDir, "/stabilityOrms16.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabOrms17, k.range), paste0(dataDir, "/stabilityOrms17.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabOrms18, k.range), paste0(dataDir, "/stabilityOrms18.csv"), row.names = TRUE)
 
 # ORMS Qual
-write.csv(standardizeQualityData(qualOrms16, k.range), paste0(dataDir, "/qualityOrms16.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualOrms17, k.range), paste0(dataDir, "/qualityOrms17.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualOrms18, k.range), paste0(dataDir, "/qualityOrms18.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualOrms16, k.range), paste0(dataDir, "/qualityOrms16.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualOrms17, k.range), paste0(dataDir, "/qualityOrms17.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualOrms18, k.range), paste0(dataDir, "/qualityOrms18.csv"), row.names = TRUE)
 
 #### Optimal k values ----
 k.range=c(3,15)
