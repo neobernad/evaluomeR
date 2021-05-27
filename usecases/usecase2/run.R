@@ -159,8 +159,8 @@ stabPlot = stabPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_agro_obo_both.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+#ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_agro_obo_both.pdf"),
+#       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 #### Quality [2,6] ----
 qualAgro <- qualityRange(data=agroData, k.range=k.range, getImages = FALSE, seed=seed)
@@ -222,24 +222,24 @@ silPlot = silPlot +
   scale_colour_grey(start = 0.7, end = 0) +
   theme_calc()
 
-ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_agro_obo_both.pdf"),
-       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+#ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_agro_obo_both.pdf"),
+#       device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
 pg = plot_grid(stabPlot, silPlot, align = "v", nrow = 2, rel_heights = c(1/2, 1/2), labels=c("A", "B"))
-save_plot(paste0(plotDir, "/stability_silhouette_agro_obo_both.pdf"), pg, nrow=2, dpi="print")
-save_plot(paste0(plotDir, "/stability_silhouette_agro_obo_both.tiff"), pg, nrow=2, dpi="print", device="tiff")
+#save_plot(paste0(plotDir, "/stability_silhouette_agro_obo_both.pdf"), pg, nrow=2, dpi="print")
+#save_plot(paste0(plotDir, "/stability_silhouette_agro_obo_both.tiff"), pg, nrow=2, dpi="print", device="tiff")
 
 #### CSV generation ----
 
 # Stab
-write.csv(standardizeStabilityData(stabAgro, k.range), paste0(dataDir, "/stabilityAgro.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabObo, k.range), paste0(dataDir, "/stabilityObo.csv"), row.names = TRUE)
-write.csv(standardizeStabilityData(stabBoth, k.range), paste0(dataDir, "/stabilityAgro_Obo.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabAgro, k.range), paste0(dataDir, "/stabilityAgro.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabObo, k.range), paste0(dataDir, "/stabilityObo.csv"), row.names = TRUE)
+#write.csv(standardizeStabilityData(stabBoth, k.range), paste0(dataDir, "/stabilityAgro_Obo.csv"), row.names = TRUE)
 
 # Qual
-write.csv(standardizeQualityData(qualAgro, k.range), paste0(dataDir, "/qualityAgro.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualObo, k.range), paste0(dataDir, "/qualityObo.csv"), row.names = TRUE)
-write.csv(standardizeQualityData(qualBoth, k.range), paste0(dataDir, "/qualityAgro_Obo.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualAgro, k.range), paste0(dataDir, "/qualityAgro.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualObo, k.range), paste0(dataDir, "/qualityObo.csv"), row.names = TRUE)
+#write.csv(standardizeQualityData(qualBoth, k.range), paste0(dataDir, "/qualityAgro_Obo.csv"), row.names = TRUE)
 
 #### Optimal k values ----
 k.range=c(3,6)

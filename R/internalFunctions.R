@@ -200,10 +200,12 @@ checkIfCanCluster <- function(data, ...) {
   }
 
   numUnique = length(unique(data))
+  #print(paste0("Not unique:", length(data)))
+  #print(paste0("Unique:", numUnique))
   #print(paste0("Division is:", numUnique/k))
-  #print(paste0("Return is: ", (numUnique/k) > 1))
+  #print(paste0("Do I stop?: ", (numUnique/k) < 1))
 
-  if ((numUnique/k) <= 1) {
+  if ((numUnique/k) < 1) {
     stop(paste0("Not enough data to cluster '", numUnique, "' unique values in '", k, "' clusters"))
   }
 

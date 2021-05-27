@@ -370,6 +370,69 @@ speccCBI <- function(data,k,...){
 #     out
 # }
 
+kmeansruns <- function(data,krange=2:10,criterion="ch",
+                       iter.max=100,runs=100,
+                       scaledata=FALSE,alpha=0.001,
+                       critout=FALSE,plot=FALSE,...){
+  data <- as.matrix(data)
+  if (scaledata) data <- scale(data)
+  if (criterion=="asw") sdata <- dist(data)
+  cluster1 <- 1 %in% krange
+  crit <- numeric(max(krange))
+  km <- list()
+  for (k in krange){
+    if (k>1){
+      minSS <- Inf
+      kmopt <- NULL
+      for (i in 1:runs){
+        options(show.error.messages = FALSE)
+        #numUnique = length(unique(data))
+        #print(paste0("Num unique: ", numUnique))
+        #print(paste0("Num NOT unique: ", length(data)))
+        #repeat{
+          #          cat(k," ",i,"before \n")
+          kmm <- try(kmeans(data,k,iter.max=iter.max,...))
+          #          str(kmm)
+          if (inherits(kmm,"try-error")) {
+            stop(paste0("Cannot compute for k = ", k))
+          }
+        #}
+        options(show.error.messages = TRUE)
+        swss <- sum(kmm$withinss)
+        #        print(calinhara(data,kmm$cluster))
+        if (swss<minSS){
+          kmopt <- kmm
+          minSS <- swss
+        }
+        if (plot){
+          par(ask=TRUE)
+          pairs(data,col=kmm$cluster,main=swss)
+        }
+      } # for i
+      km[[k]] <- kmopt
+      #      print(km[[k]])
+      #      print(calinhara(data,km[[k]]$cluster))
+      crit[k] <- switch(criterion,
+                        asw=cluster.stats(sdata,km[[k]]$cluster)$avg.silwidth,
+                        ch=calinhara(data,km[[k]]$cluster))
+      if (critout)
+        cat(k," clusters ",crit[k],"\n")
+    } # if k>1
+  } # for k
+  if (cluster1)
+    cluster1 <- dudahart2(data,km[[2]]$cluster,alpha=alpha)$cluster1
+  k.best <- which.max(crit)
+  if (cluster1)
+    k.best <- 1
+  #  print(crit)
+  #  print(k.best)
+  #  print(km[[k.best]])
+  km[[k.best]]$crit <- crit
+  km[[k.best]]$bestk <- k.best
+  out <- km[[k.best]]
+  out
+}
+
 kmeansCBI <- function(data,krange,k=NULL,scaling=FALSE,runs=1,criterion="ch",...){
   if (!is.null(k)) krange <- k
   if(!identical(scaling,FALSE))
@@ -380,8 +443,9 @@ kmeansCBI <- function(data,krange,k=NULL,scaling=FALSE,runs=1,criterion="ch",...
   partition <- c1$cluster
   cl <- list()
   nc <- c1$bestk
-  #  print(nc)
-  #  print(sc1)
+  # print("---")
+  # print(nc)
+  # print(c1)
   for (i in 1:nc)
     cl[[i]] <- partition==i
   out <- list(result=c1,nc=nc,clusterlist=cl,partition=partition,
@@ -533,7 +597,6 @@ clusterboot <- function(data,B=100,
     # checkIfCanCluster(data=data, ...)
     c1 <- clustermethod(data,...)
   }
-
   #  print(noisemethod)
   #  print(str(c1))
   if (noisemethod){
