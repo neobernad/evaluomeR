@@ -243,7 +243,7 @@ meanStabOrms20$category = "ORMS"
 meanStabOrms20$year = "2020"
 colnames(meanStabOrms20) = str_remove_all(colnames(meanStabOrms20), "k_")
 
-#### Stability plotting ----
+#### Stability plotting (X k value, Y stability ----
 
 stabDfList = list(meanStabCsai16, meanStabCsai17, meanStabCsai18, meanStabCsai19, meanStabCsai20,
                   meanStabCsis16, meanStabCsis17, meanStabCsis18, meanStabCsis19, meanStabCsis20,
@@ -277,6 +277,47 @@ stabPlot = stabPlot +
 
 ggsave(plot = stabPlot, filename=paste0(plotDir, "/stability_impact_factor.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="print")
+
+
+#### Stability plotting by year (X k year, Y stability ----
+
+max_stab_k_df = setNames(data.frame(matrix(ncol = 5, nrow = 0)),
+                         c("Journal" ,"category", "year", "variable", "value"))
+min = Inf
+max = -Inf
+for (stabDf in stabDfList) {
+  stabDf_melt = melt(stabDf, id.vars = c("Metric", "category", "year"))
+  colnames(stabDf_melt)[1] = "Journal"
+  stabDf_melt = stabDf_melt[stabDf_melt$value==max(stabDf_melt$value), ]
+  stabDf_melt$variable = as.integer(stabDf_melt$variable)+1
+  stabDf_melt$year = as.integer(stabDf_melt$year)
+  max_stab_k_df[nrow(max_stab_k_df) + 1, ] = stabDf_melt
+
+  if (min > min(stabDf_melt$value)) {
+    min = min(stabDf_melt$value)
+  }
+  if (max < max(stabDf_melt$value)) {
+    max = max(stabDf_melt$value)
+  }
+}
+
+max_stab_k_df$k = as.character(max_stab_k_df$variable)
+
+
+stabPlot_year = ggplot(data = max_stab_k_df) +
+  #geom_text(mapping = aes(x=year, y=value,  label=k),  nudge_y = -0.01) +
+  geom_point(mapping = aes(x=year, y=value,  shape=k)) +
+  geom_line(mapping = aes(x=year, y=value, linetype=category, colour=category, group=category))
+
+
+stabPlot_year = stabPlot_year +
+  scale_y_continuous(name="Stability", limits = c(min,max), breaks = c(0.6, 0.75, 0.85), labels=c(0.6, 0.75, 0.85)) +
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_calc(base_family = "sans")
+
+ggsave(plot = stabPlot_year, filename=paste0(plotDir, "/stability_impact_factor_by_year.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+
 
 #### Quality [2,15] ----
 qualCsai16 <- qualityRange(data=inputCsai16, k.range=k.range, getImages = FALSE, seed=seed)
@@ -388,7 +429,7 @@ silOrms20$category = "ORMS"
 silOrms20$year = "2020"
 colnames(silOrms20) = str_remove_all(colnames(silOrms20), "k_")
 
-#### Quality plotting ----
+#### Quality plotting (X k value, Y quality ----
 
 silDfList = list(silCsai16, silCsai17, silCsai18, silCsai19, silCsai20,
                  silCsis16, silCsis17, silCsis18, silCsis19, silCsis20,
@@ -423,9 +464,55 @@ silPlot = silPlot +
 ggsave(plot = silPlot, filename=paste0(plotDir, "/silhouette_impact_factor.pdf"),
        device="pdf", units="cm", width = 20, height = 10, dpi="print")
 
+
+#### Quality plotting by year (X k year, Y quality ----
+
+max_qual_k_df = setNames(data.frame(matrix(ncol = 5, nrow = 0)),
+                         c("Journal" ,"category", "year", "variable", "value"))
+min = Inf
+max = -Inf
+for (silDf in silDfList) {
+  silDf_melt = melt(silDf, id.vars = c("Metric", "category", "year"))
+  colnames(silDf_melt)[1] = "Journal"
+  silDf_melt = silDf_melt[silDf_melt$value==max(silDf_melt$value), ]
+  silDf_melt$variable = as.integer(silDf_melt$variable)+1
+  silDf_melt$year = as.integer(silDf_melt$year)
+  max_qual_k_df[nrow(max_qual_k_df) + 1, ] = silDf_melt
+
+  if (min > min(silDf_melt$value)) {
+    min = min(silDf_melt$value)
+  }
+  if (max < max(silDf_melt$value)) {
+    max = max(silDf_melt$value)
+  }
+}
+
+max_qual_k_df$k = as.character(max_qual_k_df$variable)
+
+silPlot_year = ggplot(data = max_qual_k_df) +
+  #geom_text(mapping = aes(x=year, y=value,  label=k),  nudge_y = -0.01) +
+  geom_point(mapping = aes(x=year, y=value,  shape=k)) +
+  geom_line(mapping = aes(x=year, y=value, linetype=category, colour=category, group=category))
+
+
+silPlot_year = silPlot_year +
+  scale_y_continuous(name="Quality", limits = c(min,max), breaks = c(0.25, 0.5, 0.7), labels=c(0.25, 0.5, 0.7)) +
+  scale_colour_grey(start = 0.7, end = 0) +
+  theme_calc()
+
+ggsave(plot = stabPlot_year, filename=paste0(plotDir, "/silhouette_impact_factor_by_year.pdf"),
+       device="pdf", units="cm", width = 20, height = 10, dpi="print")
+
+
+# Saving A - B plot for stabPlot and silPlot
 pg = plot_grid(stabPlot, silPlot, align = "v", nrow = 2, rel_heights = c(1/2, 1/2), labels=c("A", "B"))
 save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.pdf"), pg, nrow=2, dpi="print")
-save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=2, dpi="print", device="tiff")
+# save_plot(paste0(plotDir, "/stability_silhouette_impact_factor.tiff"), pg, nrow=2, dpi="print", device="tiff")
+
+# Saving A - B plot for stabPlot_year and silPlot_year
+pg = plot_grid(stabPlot_year, silPlot_year, align = "v", nrow = 2, rel_heights = c(1/2, 1/2), labels=c("A", "B"))
+save_plot(paste0(plotDir, "/stability_silhouette_impact_factor_by_year.pdf"), pg, nrow=2, dpi="print")
+# save_plot(paste0(plotDir, "/stability_silhouette_impact_factor_by_year.tiff"), pg, nrow=2, dpi="print", device="tiff")
 
 #### CSV generation ----
 
