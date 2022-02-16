@@ -716,20 +716,20 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
     optimal_k = clusters$optimal_k[i]
     
     # Get the clusters formed by using the optimal k as a vector of integers
-    optimal_cluster = select(clusters, contains(as.character(optimal_k))) 
+    optimal_cluster = dplyr::select(clusters, contains(as.character(optimal_k))) 
     optimal_cluster = optimal_cluster[i,1]
     optimal_cluster = as.numeric(strsplit(optimal_cluster, ", ")[[1]])
     
     # Create a dataframe including the individual id, the concerning metric
     # and the cluster id in which the individual is classfied.
-    annotated_df_clean = select(df_clean, 1)
+    annotated_df_clean = dplyr::select(df_clean, 1)
     annotated_df_clean$cluster = optimal_cluster
     
     # Merge this dataframe with the original one, so that original individuals
     # removed due to NAs will be present an NA as cluster.
     # Include this dataframe in the named list, using the name of the metric as
     # a key.
-    result_list[[metric]] = merge(select(df, 1, contains(metric)), annotated_df_clean, all.x = TRUE)
+    result_list[[metric]] = merge(dplyr::select(df, 1, contains(metric)), annotated_df_clean, all.x = TRUE)
   }
   return(result_list)
 }
