@@ -37,7 +37,8 @@ Imports:
     prabclus,
     mclust,
     kableExtra,
-    dplyr
+    dplyr,
+    tidyr
 Suggests: BiocStyle, knitr, rmarkdown, magrittr
 VignetteBuilder: knitr
 RdMacros: Rdpack
