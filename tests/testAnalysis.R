@@ -20,3 +20,8 @@ k.vector2=rep(2,length(colnames(df))-1)
 plotMetricsClusterComparison(rnaMetrics, k.vector1=k.vector1, k.vector2=k.vector2)
 plotMetricsClusterComparison(rnaMetrics, k.vector1=3, k.vector2=c(2,5))
 
+annotated_clusters=annotateClustersByMetric(rnaMetrics, k.range=c(2,3), bs=20, seed=100)
+annotated_clusters[['RIN']]
+
+ranges = getMetricRangeByCluster(rnaMetrics, k.range=c(2,3), bs=20, seed=100)
+ranges

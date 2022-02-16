@@ -36,7 +36,8 @@ Imports:
     class,
     prabclus,
     mclust,
-    kableExtra
+    kableExtra,
+    dplyr
 Suggests: BiocStyle, knitr, rmarkdown, magrittr
 VignetteBuilder: knitr
 RdMacros: Rdpack
