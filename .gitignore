@@ -28,6 +28,7 @@ unsrturl.bst
 .dropbox
 .exrc
 .gdb.history
+notebooks/local/.ipynb_checkpoints/
 .gitattributes
 .gitmodules
 .hgtags
