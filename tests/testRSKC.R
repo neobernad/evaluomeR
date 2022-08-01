@@ -1,22 +1,21 @@
 library(evaluomeR)
 library(RSKC)
 library(sparcl)
-library(dendextend)
 
 
 intputDf = as.data.frame(assay(ontMetrics))
 intputDf$Description = NULL
 
 intputDf
-a = plotMetricsCluster(intputDf)
-plot(a)
-rect.hclust(a, k = 3, border = "red")
+a = plotMetricsCluster(intputDf, k=3)
+
+
+
+
+stop("Ok")
 
 # due to the ties - there is specific reason to have this be these 3 clusters:
 cutree(dend, k = 3)[order.dendrogram(dend)]
-
-
-
 
 
 inputMatrix = as.matrix(intputDf)
@@ -29,8 +28,6 @@ km.perm <- KMeansSparseCluster.permute(x,K=3,wbounds=wbounds,nperms=5)
 print(km.perm)
 plot(km.perm)
 print(km.perm$bestw)
-
-
 
 
 stabilityData <- stabilityRange(data=ontMetrics, k.range=c(3,4), bs=20, getImages = FALSE, seed=100)

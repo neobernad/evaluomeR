@@ -141,7 +141,8 @@ plotMetricsBoxplot <- function(data) {
 #' @aliases plotMetricsCluster
 #' @description
 #' It clusters the value of the metrics in a \code{\link{SummarizedExperiment}}
-#' object as a boxplot.
+#' object a an hclust dendogram from \code{\link{stats}}. By default distance is measured in 'euclidean'
+#' and hclust method is 'ward.D20.
 #'
 #' @inheritParams stability
 #' @param scale Boolean. If true input data is scaled. Default: FALSE.
@@ -155,21 +156,23 @@ plotMetricsBoxplot <- function(data) {
 #' plotMetricsCluster(ontMetrics, scale=TRUE)
 #'
 plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
-  data <- as.data.frame(assay(data))
+  data <- as.data.frame(assay(intputDf))
   data.metrics = data[,-1] # Removing Description column
   if (isTRUE(scale)) {
     data.metrics = base::scale(data.metrics)
   }
   d <- dist(t(data.metrics), method = "euclidean") # distance matrix
   fit <- hclust(d, method="ward.D2")
-  theme_set(theme_bw())
 
-  p <- ggdendrogram(fit, rotate = FALSE, size = 2) + # display dendogram
-    theme(
-      text = element_text(size=15)
-    ) +
-    labs(title="Metrics dendrogram")
-  print(p)
+  dend <- as.dendrogram(fit)
+
+  nodePar <- list(lab.cex = 0.6, pch = c(NA, 19), cex = 0.7, col = "blue")
+  plot(dend, xlab = "", sub="", ylab = "Euclidean distance",
+       main = paste0("Metrics dendrogram 'ward.D2'"), nodePar = nodePar)
+
+  if (!is.null(k)) {
+    rect.dendrogram(dend , k=k, border="purple")
+  }
   return(fit)
 }
 
