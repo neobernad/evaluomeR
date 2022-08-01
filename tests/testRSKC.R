@@ -1,6 +1,7 @@
 library(evaluomeR)
 library(RSKC)
 library(sparcl)
+library(dendextend)
 
 data("rnaMetrics")
 
@@ -8,6 +9,11 @@ intputDf = as.data.frame(assay(ontMetrics))
 intputDf$Description = NULL
 
 intputDf
+a = plotMetricsCluster(intputDf)
+b = cutree(a, k=3)
+
+
+
 
 inputMatrix = as.matrix(intputDf)
 # Note, has to scale matrix otherwise plot (km.perm will not be showing different #non-zero Wjs)
