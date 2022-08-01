@@ -156,7 +156,7 @@ plotMetricsBoxplot <- function(data) {
 #' plotMetricsCluster(ontMetrics, scale=TRUE)
 #'
 plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
-  data <- as.data.frame(assay(intputDf))
+  data <- as.data.frame(assay(data))
   data.metrics = data[,-1] # Removing Description column
   if (isTRUE(scale)) {
     data.metrics = base::scale(data.metrics)
@@ -171,7 +171,7 @@ plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
        main = paste0("Metrics dendrogram 'ward.D2'"), nodePar = nodePar)
 
   if (!is.null(k)) {
-    rect.dendrogram(dend , k=k, border="purple")
+    dendextend::rect.dendrogram(dend , k=k, border="purple")
   }
   return(fit)
 }

@@ -8,9 +8,9 @@ intputDf$Description = NULL
 
 intputDf
 annotated_clusters=annotateClustersByMetric(intputDf, k.range=c(2,3), bs=20, seed=100)
+plotMetricsCluster(intputDf, k=4)
 
 
-stop("Ok")
 
 # due to the ties - there is specific reason to have this be these 3 clusters:
 cutree(dend, k = 3)[order.dendrogram(dend)]
