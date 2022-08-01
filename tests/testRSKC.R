@@ -7,9 +7,7 @@ intputDf = as.data.frame(assay(ontMetrics))
 intputDf$Description = NULL
 
 intputDf
-a = plotMetricsCluster(intputDf, k=3)
-
-
+annotated_clusters=annotateClustersByMetric(intputDf, k.range=c(2,3), bs=20, seed=100)
 
 
 stop("Ok")
