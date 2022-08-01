@@ -3,14 +3,18 @@ library(RSKC)
 library(sparcl)
 library(dendextend)
 
-data("rnaMetrics")
 
 intputDf = as.data.frame(assay(ontMetrics))
 intputDf$Description = NULL
 
 intputDf
 a = plotMetricsCluster(intputDf)
-b = cutree(a, k=3)
+plot(a)
+rect.hclust(a, k = 3, border = "red")
+
+# due to the ties - there is specific reason to have this be these 3 clusters:
+cutree(dend, k = 3)[order.dendrogram(dend)]
+
 
 
 

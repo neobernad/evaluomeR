@@ -712,26 +712,29 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
   # For each metric, get the optimal k, get the clusters formed by using
   # that optimal k, include this information in a dataframe
   result_list = list()
+
   for (i in 1:nrow(clusters)){
-    metric = clusters$Metric[i]
+    metric = as.character(clusters$Metric[i])
     # Get the optimal k
     optimal_k = clusters$optimal_k[i]
 
     # Get the clusters formed by using the optimal k as a vector of integers
-    optimal_cluster = dplyr::select(clusters, contains(as.character(optimal_k)))
+    optimal_cluster = dplyr::select(clusters, dplyr::contains(as.character(optimal_k)))
     optimal_cluster = optimal_cluster[i,1]
+    optimal_cluster = as.character(optimal_cluster)
     optimal_cluster = as.numeric(strsplit(optimal_cluster, ", ")[[1]])
 
     # Create a dataframe including the individual id, the concerning metric
     # and the cluster id in which the individual is classfied.
     annotated_df_clean = dplyr::select(df_clean, 1)
+    print(annotated_df_clean)
     annotated_df_clean$cluster = optimal_cluster
 
     # Merge this dataframe with the original one, so that original individuals
     # removed due to NAs will be present an NA as cluster.
     # Include this dataframe in the named list, using the name of the metric as
     # a key.
-    result_list[[metric]] = merge(dplyr::select(df, 1, contains(metric)), annotated_df_clean, all.x = TRUE)
+    result_list[[metric]] = merge(dplyr::select(df, 1, dplyr::contains(metric)), annotated_df_clean, all.x = TRUE)
   }
   return(result_list)
 }
@@ -773,7 +776,7 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
 
     # For each cluster, get the minimal and the maximal value
     for (cluster_id in 1:max(annotated_clusters$cluster, na.rm=T)) {
-      concrete_cluster_values = filter(annotated_clusters, cluster==cluster_id) %>% pull (metric)
+      concrete_cluster_values = dplyr::filter(annotated_clusters, cluster==cluster_id) %>% dplyr::pull(metric)
       metrics = c(metrics, metric)
       cluster_ids = c(cluster_ids, cluster_id)
       min_values = c(min_values, min(concrete_cluster_values))
