@@ -424,7 +424,7 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
 #' @inheritParams stability
 #' @param k.vector1 Vector of positive integers representing \code{k} clusters.
 #' The \code{k} values must be contained in [2,15] range.
-#' @param k.vector2 Vector of positive integers representing \code{k} clusters.
+#' @param k.vector2 Optional. Vector of positive integers representing \code{k} clusters.
 #' The \code{k} values must be contained in [2,15] range.
 #'
 #' @return Nothing.
@@ -437,7 +437,7 @@ getOptimalKValue <- function(stabData, qualData, k.range=NULL) {
 #' kOptTable = getOptimalKValue(stabilityData, qualityData)
 #'
 #'
-plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) {
+plotMetricsClusterComparison <- function(data, k.vector1, k.vector2=NULL, seed=NULL) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -451,6 +451,10 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2, seed=NULL) 
 
   if (length(k.vector1) == 1) {
     k.vector1=rep(k.vector1, numMetrics)
+  }
+
+  if (is.null(k.vector2)) {
+    k.vector2 = k.vector1 # This will colour elipses around the same clusters of k.vector1
   }
 
   if (length(k.vector2) == 1) {
@@ -693,6 +697,9 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
 #' annotated_clusters=annotateClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
 #' View(annotated_clusters[['ANOnto']])
 annotateClustersByMetric <- function(df, k.range, bs, seed){
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
   df <- as.data.frame(assay(df))
   # Create a dataframe by removing NAs from the original data.
   df_clean = na.omit(df)
@@ -764,6 +771,9 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
 #' ranges = getMetricRangeByCluster(ontMetrics, k.range=c(2,3), bs=20, seed=100)
 #' View(ranges)
 getMetricRangeByCluster <- function(df, k.range, bs, seed) {
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
   df <- as.data.frame(assay(df))
   annotated_clusters_by_metric = annotateClustersByMetric(df, k.range, bs, seed)
 
