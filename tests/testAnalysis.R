@@ -18,5 +18,6 @@ k.vector1=rep(5,length(colnames(df))-1)
 k.vector2=rep(2,length(colnames(df))-1)
 
 plotMetricsClusterComparison(rnaMetrics, k.vector1=k.vector1, k.vector2=k.vector2)
+plotMetricsClusterComparison(rnaMetrics, k.vector1=3, k.vector2=c(2,5))
 plotMetricsClusterComparison(rnaMetrics, k.vector1=3)
 
