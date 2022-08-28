@@ -5,8 +5,9 @@ plotMetricsMinMax(rnaMetrics)
 plotMetricsBoxplot(rnaMetrics)
 cluster = plotMetricsCluster(ontMetrics, scale = TRUE)
 plotMetricsViolin(rnaMetrics)
+plotMetricsViolin(ontMetrics)
 
-stabilityData <- stabilityRange(data=rnaMetrics, k.range=c(3,4), bs=20, getImages = FALSE, seed=100)
+ntMetricsstabilityData <- stabilityRange(data=rnaMetrics, k.range=c(3,4), bs=20, getImages = FALSE, seed=100)
 qualityData <- qualityRange(data=rnaMetrics, k.range=c(3,4), getImages = FALSE, seed=100)
 
 kOptTable <- getOptimalKValue(stabilityData, qualityData, k.range=c(3,4))

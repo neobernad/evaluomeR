@@ -34,7 +34,7 @@ optK <- getOptimalKValue(stabilityData, qualityData, k.range=c(3,4))
 
 
 for (L1 in c(2,5,10,15)) {
-  r3 = RSKC(assayOnt, 3, 0.1, L1 = L1, nstart = 200,
+  r3 = RSKC(intputDf, 3, 0.1, L1 = L1, nstart = 200,
             silent=TRUE, scaling = FALSE, correlation = FALSE)
   cat(paste0("L1 value: ", L1,"\n"))
   cat(names(r3$weights)[1], ": ", r3$weights[1],"\n")

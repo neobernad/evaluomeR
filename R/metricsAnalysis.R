@@ -184,6 +184,7 @@ plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
 #' object as a violin plot.
 #'
 #' @inheritParams stability
+#' @param nplots Positive integer. Number of metrics per violin plot. Default: 20.
 #'
 #' @return Nothing.
 #'
@@ -192,20 +193,20 @@ plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
 #' data("ontMetrics")
 #' plotMetricsViolin(ontMetrics)
 #'
-plotMetricsViolin <- function(data) {
+plotMetricsViolin <- function(data, nplots=20) {
   data <- as.data.frame(assay(data))
   data.metrics = data[,-1] # Removing Description column
-  num_metrics_plot=20
+  nplots=20
 
   metrics_length = length(colnames(data.metrics))
-  num_iterations = round(metrics_length/num_metrics_plot)
+  num_iterations = round(metrics_length/nplots)
   if (num_iterations > 0) {
     num_iterations = num_iterations - 1
   }
   for (iteration in 0:num_iterations) {
       i = 1
-      rangeStart = (iteration*num_metrics_plot)+1
-      rangeEnd = rangeStart+num_metrics_plot-1
+      rangeStart = (iteration*nplots)+1
+      rangeEnd = rangeStart+nplots-1
       if (rangeEnd > metrics_length) {
         rangeEnd = metrics_length
       }
