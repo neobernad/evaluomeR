@@ -914,14 +914,12 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
   ranges_by_k = list()
   #for each k
   for (k in k.range[1]:k.range[2]){
-    print(k)
     metrics = c()
     cluster_ids = c()
     min_values = c()
     max_values = c()
     # For each metric
     for (metric in annotated_clusters_by_metric[['stability_data']]$Metric){
-      print(metric)
       annotated_clusters = annotated_clusters_by_metric[[metric]][[as.character(k)]]
       # For each cluster, get the minimal and the maximal value
       for (cluster_id in 1:max(annotated_clusters$cluster, na.rm=T)) {
