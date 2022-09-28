@@ -801,7 +801,7 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
   # Compose the results
   # For each metric, get the optimal k, get the clusters formed by using
   # that optimal k, include this information in a dataframe
-  result_list = list(stability_data = as.data.frame(assay(stabilityData)), quality_data = as.data.frame(assay(qualityData)), k_opt_table = kOptTable)
+  result_list = list(stability_data = stabilityData, quality_data = qualityData, k_opt_table = kOptTable)
   
   for (i in 1:nrow(clusters)){
     metric = as.character(clusters$Metric[i])
