@@ -671,8 +671,8 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
 }
 
 #' @title Calculate the cluster ID from the optimal cluster per metric for each individual.
-#' annotateClustersByMetric
-#' @aliases annotateClustersByMetric
+#' annotateOptimalClustersByMetric
+#' @aliases annotateOptimalClustersByMetric
 #' @description
 #' Return a named list, where each metric name is linked to a data frame
 #' containing the evaluated individuals, their score for the specified metric,
@@ -689,15 +689,15 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
 #' @return A named list resulting from computing the optimal cluster for each
 #' metric. Each metric is a name in the named list, and its content is a
 #' data frame that includes the individuals, the value for the corresponding
-#' metric, and the cluster id in which the individual has been asigned according
+#' metric, and the cluster id in which the individual has been assigned according
 #' to the optimal cluster.
 #' @export
 #'
 #' @examples
 #' data("ontMetrics")
-#' annotated_clusters=annotateClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
+#' annotated_clusters=annotateOptimalClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
 #' View(annotated_clusters[['ANOnto']])
-annotateClustersByMetric <- function(df, k.range, bs, seed){
+annotateOptimalClustersByMetric <- function(df, k.range, bs, seed){
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -749,10 +749,96 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
   return(result_list)
 }
 
+#' @title Calculate the cluster ID from the cluster per metric for each individual by using k partitions.
+#' annotateClustersByMetric
+#' @aliases annotateClustersByMetric
+#' @description
+#' Return a named list, where each metric name is linked to another named list,
+#' whose named elements are each 'k' value, which is linked to a data frame
+#' containing the evaluated individuals, their score for the specified metric,
+#' and the cluster id in which each individual is classified. This cluster
+#' assignment is performed by using the k value received as parameter.
+#'
+#' @param df Input data frame. The first column denotes the identifier of the
+#' evaluated individuals. The remaining columns contain the metrics used to
+#' evaluate the individuals. Rows with NA values will be ignored.
+#' @param k.range Range of k values to build the clusters.
+#' @param bs Bootstrap re-sample param.
+#' @param seed Random seed to be used.
+#'
+#' @return A named list whose key is the name of a metric, and whose value
+#' is another named list whose key is a value of k, and whose value is a
+#' data frame that includes the individuals, the value for the corresponding
+#' metric, and the cluster id in which the individual has been assigned according
+#' to the corresponding k.
+#' @export
+#'
+#' @examples
+#' data("ontMetrics")
+#' annotated_clusters=annotateClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
+#' View(annotated_clusters[['ANOnto']][['2']])
+#' View(annotated_clusters[['ANOnto']][['3']])
+annotateClustersByMetric <- function(df, k.range, bs, seed){
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
+  df <- as.data.frame(assay(df))
+  # Create a dataframe by removing NAs from the original data.
+  df_clean = na.omit(df)
+  
+  # Compute stability, quality and the optimal k value from evaluome
+  stabilityData <- stabilityRange(data=df_clean, k.range=k.range,
+                                  bs=bs, getImages = FALSE, seed=seed)
+  
+  qualityData <- qualityRange(data=df_clean, k.range=k.range,
+                              getImages = FALSE, seed=seed)
+  
+  kOptTable <- getOptimalKValue(stabilityData, qualityData)
+  
+  # Get the clusters obtained by evaluome for each k, together with
+  # the optimal k
+  clusters = as.data.frame(assay(stabilityData$cluster_partition))
+  clusters$optimal_k = kOptTable$Global_optimal_k
+  
+  # Compose the results
+  # For each metric, get the optimal k, get the clusters formed by using
+  # that optimal k, include this information in a dataframe
+  result_list = list(stability_data = stabilityData, quality_data = qualityData, k_opt_table = kOptTable)
+  
+  for (i in 1:nrow(clusters)){
+    metric = as.character(clusters$Metric[i])
+    # Get the optimal k
+    optimal_k = clusters$optimal_k[i]
+    cluster_by_k = list(optimal_k = optimal_k)
+    
+    for (k in k.range[1]:k.range[2]){
+      # Get the clusters formed by using the optimal k as a vector of integers
+      cluster = dplyr::select(clusters, dplyr::contains(as.character(k)))
+      cluster = cluster[i,1]
+      cluster = as.character(cluster)
+      cluster = as.numeric(strsplit(cluster, ", ")[[1]])
+      
+      # Create a dataframe including the individual id, the concerning metric
+      # and the cluster id in which the individual is classfied.
+      annotated_df_clean = dplyr::select(df_clean, 1)
+      annotated_df_clean$cluster = cluster
+      
+      # Merge this dataframe with the original one, so that original individuals
+      # removed due to NAs will be present an NA as cluster.
+      # Include this dataframe in the named list, using the name of the metric as
+      # a key.
+      cluster_by_k[[as.character(k)]] = merge(dplyr::select(df, 1, dplyr::contains(metric)), annotated_df_clean, all.x = TRUE)
+      
+    }
+    result_list[[metric]] = cluster_by_k
+  }
+  return(result_list)
+}
+
 
 #' @title Get the range of each metric per cluster from the optimal cluster.
-#' getMetricRangeByCluster
-#' @aliases getMetricRangeByCluster
+#' getMetricOptimalRangeByCluster
+#' @aliases getMetricOptimalRangeByCluster
 #' @description
 #' Obtains the ranges of the metrics obtained by each optimal cluster.
 #'
@@ -769,14 +855,14 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
 #'
 #' @examples
 #' data("ontMetrics")
-#' ranges = getMetricRangeByCluster(ontMetrics, k.range=c(2,3), bs=20, seed=100)
+#' ranges = getMetricOptimalRangeByCluster(ontMetrics, k.range=c(2,3), bs=20, seed=100)
 #' View(ranges)
-getMetricRangeByCluster <- function(df, k.range, bs, seed) {
+getMetricOptimalRangeByCluster <- function(df, k.range, bs, seed) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
   df <- as.data.frame(assay(df))
-  annotated_clusters_by_metric = annotateClustersByMetric(df, k.range, bs, seed)
+  annotated_clusters_by_metric = annotateOptimalClustersByMetric(df, k.range, bs, seed)
 
   metrics = c()
   cluster_ids = c()
@@ -799,3 +885,54 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
   return(data.frame(metric=metrics, cluster=cluster_ids, min_value=min_values, max_value=max_values))
 }
 
+#' @title Get the range of each metric per cluster from the clusters resulting from using the k values defined in k.range.
+#' getMetricRangeByCluster
+#' @aliases getMetricRangeByCluster
+#' @description
+#' Gets the ranges of the metrics obtained by each cluster.
+#'
+#' @param df Input data frame. The first column denotes the identifier of the
+#' evaluated individuals. The remaining columns contain the metrics used to
+#' evaluate the individuals. Rows with NA values will be ignored.
+#' @param k.range Range of k values in which the optimal k will be searched
+#' @param bs Bootstrap re-sample param.
+#' @param seed Random seed to be used.
+#'
+#' @return A named list where each k is related to a dataframe including the
+#' min and the max value for each pair (metric, cluster).
+#' @export
+#'
+#' @examples
+#' data("ontMetrics")
+#' ranges = getMetricRangeByCluster(ontMetrics, k.range=c(2,3), bs=20, seed=100)
+#' View(ranges[['3']])
+getMetricRangeByCluster <- function(df, k.range, bs, seed) {
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
+  df <- as.data.frame(assay(df))
+  annotated_clusters_by_metric = annotateClustersByMetric(df, k.range, bs, seed)
+  
+  ranges_by_k = list()
+  #for each k
+  for (k in k.range[1]:k.range[2]){
+    metrics = c()
+    cluster_ids = c()
+    min_values = c()
+    max_values = c()
+    # For each metric
+    for (metric in as.data.frame(assay(annotated_clusters_by_metric[['stability_data']]))$Metric){
+      annotated_clusters = annotated_clusters_by_metric[[metric]][[as.character(k)]]
+      # For each cluster, get the minimal and the maximal value
+      for (cluster_id in 1:max(annotated_clusters$cluster, na.rm=T)) {
+        concrete_cluster_values = dplyr::filter(annotated_clusters, cluster==cluster_id) %>% dplyr::pull(metric)
+        metrics = c(metrics, metric)
+        cluster_ids = c(cluster_ids, cluster_id)
+        min_values = c(min_values, min(concrete_cluster_values))
+        max_values = c(max_values, max(concrete_cluster_values))
+      }
+    }
+    ranges_by_k[[as.character(k)]] = data.frame(metric=metrics, cluster=cluster_ids, min_value=min_values, max_value=max_values)
+  }
+  return (ranges_by_k)
+}

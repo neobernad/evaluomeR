@@ -1,4 +1,4 @@
-import("MASS", "class", "prabclus", "mclust","utils")
+import("MASS", "class", "prabclus", "mclust","utils", "dplyr")
 
 importFrom("Rdpack","reprompt")
 importFrom("corrplot","corrplot")
@@ -58,4 +58,7 @@ export(plotMetricsClusterComparison)
 export(evaluomeRSupportedCBI)
 export(globalMetric)
 export(annotateClustersByMetric)
+export(annotateOptimalClustersByMetric)
 export(getMetricRangeByCluster)
+export(getMetricOptimalRangeByCluster)
+
