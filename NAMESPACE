@@ -61,5 +61,4 @@ export(annotateClustersByMetric)
 export(annotateOptimalClustersByMetric)
 export(getMetricRangeByCluster)
 export(getMetricOptimalRangeByCluster)
-export(clusterbootWrapper)
 
