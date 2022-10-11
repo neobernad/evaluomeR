@@ -753,7 +753,8 @@ annotateOptimalClustersByMetric <- function(df, k.range, bs, seed){
 #' annotateClustersByMetric
 #' @aliases annotateClustersByMetric
 #' @description
-#' Return a named list, where each metric name is linked to a data frame
+#' Return a named list, where each metric name is linked to another named list,
+#' whose named elements are each 'k' value, which is linked to a data frame
 #' containing the evaluated individuals, their score for the specified metric,
 #' and the cluster id in which each individual is classified. This cluster
 #' assignment is performed by using the k value received as parameter.
@@ -765,17 +766,18 @@ annotateOptimalClustersByMetric <- function(df, k.range, bs, seed){
 #' @param bs Bootstrap re-sample param.
 #' @param seed Random seed to be used.
 #'
-#' @return A named list resulting from computing the optimal cluster for each
-#' metric. Each metric is a name in the named list, and its content is a
+#' @return A named list whose key is the name of a metric, and whose value
+#' is another named list whose key is a value of k, and whose value is a
 #' data frame that includes the individuals, the value for the corresponding
 #' metric, and the cluster id in which the individual has been assigned according
-#' to the optimal cluster.
+#' to the corresponding k.
 #' @export
 #'
 #' @examples
 #' data("ontMetrics")
-#' annotated_clusters=annotateOptimalClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
-#' View(annotated_clusters[['ANOnto']])
+#' annotated_clusters=annotateClustersByMetric(ontMetrics, k.range=c(2,3), bs=20, seed=100)
+#' View(annotated_clusters[['ANOnto']][['2']])
+#' View(annotated_clusters[['ANOnto']][['3']])
 annotateClustersByMetric <- function(df, k.range, bs, seed){
   if (is.null(seed)) {
     seed = pkg.env$seed
@@ -887,7 +889,7 @@ getMetricOptimalRangeByCluster <- function(df, k.range, bs, seed) {
 #' getMetricRangeByCluster
 #' @aliases getMetricRangeByCluster
 #' @description
-#' Obtains the ranges of the metrics obtained by each optimal cluster.
+#' Gets the ranges of the metrics obtained by each cluster.
 #'
 #' @param df Input data frame. The first column denotes the identifier of the
 #' evaluated individuals. The remaining columns contain the metrics used to
