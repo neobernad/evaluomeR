@@ -306,6 +306,7 @@ claraCBI <- function(data,k,usepam=TRUE,diss=inherits(data,"dist"),...){
   #  print(sc1)
   for (i in 1:nc)
     cl[[i]] <- partition==i
+
   out <- list(result=c1,nc=nc,clusterlist=cl,partition=partition,
               clustermethod="clara/pam")
   out
@@ -435,6 +436,7 @@ kmeansruns <- function(data,krange=2:10,criterion="ch",
 
 kmeansCBI <- function(data,krange,k=NULL,scaling=FALSE,runs=1,criterion="ch",...){
   if (!is.null(k)) krange <- k
+  #print(paste0("k is ", krange))
   if(!identical(scaling,FALSE))
     sdata <- scale(data,center=TRUE,scale=scaling)
   else
@@ -448,8 +450,44 @@ kmeansCBI <- function(data,krange,k=NULL,scaling=FALSE,runs=1,criterion="ch",...
   # print(c1)
   for (i in 1:nc)
     cl[[i]] <- partition==i
+
   out <- list(result=c1,nc=nc,clusterlist=cl,partition=partition,
               clustermethod="kmeans")
+  out
+}
+
+rskcCBI <- function(data,krange,k=NULL,scaling=FALSE,alpha=0,L1=NULL,correlation=FALSE,
+                    silent=TRUE,nstart = 200,...) {
+
+
+  # rskc_out = RSKC(df, global_k_value, 0.1, L1 = l1, nstart = 200,
+  #                 silent=TRUE, scaling = FALSE, correlation = FALSE)
+
+  if (ncol(data) <= 1) {
+    stop("Cannot perform RSKC clustering. Input dataframe must at least provide two columns")
+  }
+
+  if (!is.null(k)) krange <- k
+  if (is.null(L1)) { # Compute automatic best L1 boundry
+    #print(paste0("No L1 provided. Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
+    wbounds = seq(2,sqrt(ncol(data)), len=30)
+    km.perm <- sparcl::KMeansSparseCluster.permute(data,K=krange,wbounds=wbounds,nperms=5,silent=TRUE)
+    L1 = km.perm$bestw
+    #print(paste0("Best L1 upper bound is: ", L1))
+  } # Else whatever the user want
+
+  c1 = RSKC(data, krange, alpha, L1, nstart = 200,
+            silent=silent, scaling=scaling,correlation=correlation)
+
+  partition <- c1$labels
+  cl <- list()
+  nc <- c1$ncl
+
+  for (i in 1:nc)
+    cl[[i]] <- partition==i
+
+  out <- list(result=c1,nc=nc,clusterlist=cl,partition=partition,
+              clustermethod="rskc")
   out
 }
 
@@ -467,6 +505,7 @@ pamkCBI <- function (data, krange = 2:10,k=NULL,
   nc <- c1$nc
   #    print(nc)
   for (i in 1:nc) cl[[i]] <- partition == i
+
   out <- list(result = c1, nc = nc, clusterlist = cl, partition = partition,
               clustermethod = "pam/estimated k",criterion=criterion)
   out

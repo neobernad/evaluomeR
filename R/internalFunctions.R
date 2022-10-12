@@ -114,15 +114,16 @@ getMeasureValue <- function(km5, measureName) {
 ######################################################
 #function
 #   clusterbootWrapper(data, B, bootmethod="boot",
-#                     clustermethod=kmeansCBI, krange, seed)
+#                     clustermethod=kmeansCBI, krange, seed, ...)
 #     Wrapper method for clusterboot functionality.
 
 clusterbootWrapper <- function(data, B, bootmethod="boot",
-                               cbi, krange, seed) {
-  cbiHelperResult = helperGetCBI(cbi, krange)
+                               cbi, krange, seed, ...) {
+  cbiHelperResult = helperGetCBI(cbi, krange, ...)
 
-  #cat ("Using: ", cbi, "\n")
-  #cat ("Type: ", typeof(cbiHelperResult[["method"]]), "\n")
+  #cat("Using: ", cbi, "\n")
+  #cat("Type: ", typeof(cbiHelperResult[["method"]]), "\n")
+  #print(cbiHelperResult)
 
   mandatoryArgs = list(
     "data"=data,
@@ -133,6 +134,8 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
   )
 
   methodArgs = append(mandatoryArgs, cbiHelperResult[["args"]])
+  # Append parameters that the user might have specified in the ellipsis
+  methodArgs = append(methodArgs, list(...))
 
   return (
             #quiet(
