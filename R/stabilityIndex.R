@@ -52,7 +52,7 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
   data <- as.data.frame(assay(data))
 
   checkKValue(k)
-  runStabilityIndex(data, k.min=k, k.max=k, bs, cbi, all_metrics, seed=seed, ...)
+  runStabilityIndex(data, k.min=k, k.max=k, bs=bs, cbi=cbi, all_metrics=all_metrics, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k, k.max=k))
   if (getImages == TRUE) {
@@ -102,7 +102,7 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
 #'
 #'
 stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
-                           getImages=FALSE, all_metrics=FALSE, seed=NULL) {
+                           getImages=FALSE, all_metrics=FALSE, seed=NULL, ...) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -117,7 +117,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics, seed=seed)
+  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
 
@@ -167,7 +167,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
 #'
 #'
 stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
-                           getImages=FALSE, all_metrics=FALSE, seed=NULL) {
+                           getImages=FALSE, all_metrics=FALSE, seed=NULL, ...) {
   k.set.length = length(k.set)
   if (k.set.length == 0) {
     stop("k.set list is empty")
@@ -181,7 +181,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics, seed=seed)
+  runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.set = k.set))
 

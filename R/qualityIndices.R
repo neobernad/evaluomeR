@@ -35,7 +35,7 @@
 #' \insertRef{kaufman2009finding}{evaluomeR}
 #'
 quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
-                    all_metrics=FALSE, seed=NULL) {
+                    all_metrics=FALSE, seed=NULL, ...) {
 
   checkKValue(k)
 
@@ -43,7 +43,7 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
 
   suppressWarnings(
     runQualityIndicesSilhouette(data, k.min = k,
-                                k.max = k, bs = 1, cbi, all_metrics, seed=seed))
+                                k.max = k, bs = 1, cbi, all_metrics, seed=seed, ...))
   silhouetteDataFrame = suppressWarnings(
     runSilhouetteTable(data, k = k))
   if (getImages == TRUE) {
@@ -101,7 +101,7 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
 #' \insertRef{kaufman2009finding}{evaluomeR}
 #'
 qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
-                         all_metrics=FALSE, seed=NULL) {
+                         all_metrics=FALSE, seed=NULL, ...) {
 
   k.range.length = length(k.range)
   if (k.range.length != 2) {
@@ -119,7 +119,7 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
 
   suppressWarnings(
     runQualityIndicesSilhouette(data, k.min = k.min,
-                                k.max = k.max, bs = 1, cbi, all_metrics, seed=seed))
+                                k.max = k.max, bs = 1, cbi, all_metrics, seed=seed, ...))
   silhouetteData =  suppressWarnings(
     runSilhouetteTableRange(data, k.min = k.min, k.max = k.max))
 
@@ -172,7 +172,7 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
 #' @references
 #' \insertRef{kaufman2009finding}{evaluomeR}
 #'
-qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", getImages=FALSE, seed=NULL) {
+qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", getImages=FALSE, seed=NULL, ...) {
 
   k.set.length = length(k.set)
   if (k.set.length == 0) {
@@ -188,7 +188,7 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", getImages=FALSE, seed=N
   data <- as.data.frame(assay(data))
 
   suppressWarnings(
-    runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi=cbi, k.set=k.set))
+    runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi=cbi, k.set=k.set, ...))
   silhouetteData =  suppressWarnings(
     runSilhouetteTableRange(data, k.set=k.set))
 
@@ -203,7 +203,7 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", getImages=FALSE, seed=N
 }
 
 runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
-                                        cbi, all_metrics, seed, k.set=NULL) {
+                                        cbi, all_metrics, seed=NULL, k.set=NULL, ...) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -289,7 +289,7 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
         # bootClusterResult <- boot.cluster(data=datos.bruto[,i],
         #                                  nk=j.k, B=bs, seed=seed)
         bootClusterResult <- clusteringWrapper(data=data_to_cluster, cbi=cbi,
-                                               krange=j.k, seed=seed)
+                                               krange=j.k, seed=seed, ...)
         # bootClusterResult <- clusterbootWrapper(data=datos.bruto[,i], B=bs,
         #                    bootmethod="boot",
         #                    cbi=cbi,

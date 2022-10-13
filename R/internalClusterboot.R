@@ -457,11 +457,8 @@ kmeansCBI <- function(data,krange,k=NULL,scaling=FALSE,runs=1,criterion="ch",...
 }
 
 rskcCBI <- function(data,krange,k=NULL,scaling=FALSE,alpha=0,L1=NULL,correlation=FALSE,
-                    silent=TRUE,nstart = 200,...) {
+                    silent=TRUE,nstart = 200, ...) {
 
-
-  # rskc_out = RSKC(df, global_k_value, 0.1, L1 = l1, nstart = 200,
-  #                 silent=TRUE, scaling = FALSE, correlation = FALSE)
 
   if (ncol(data) <= 1) {
     stop("Cannot perform RSKC clustering. Input dataframe must at least provide two columns")

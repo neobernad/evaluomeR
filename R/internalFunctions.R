@@ -151,10 +151,10 @@ clusterbootWrapper <- function(data, B, bootmethod="boot",
 ######################################################
 #function
 #   clusteringWrapper(data, cbi, krange, seed)
-#     Wrapper method for clustering functionality.
+#     Wrapper method for clustering without bootstrap functionality.
 
-clusteringWrapper <- function(data, cbi, krange, seed) {
-  cbiHelperResult = helperGetCBI(cbi, krange)
+clusteringWrapper <- function(data, cbi, krange, seed, ...) {
+  cbiHelperResult = helperGetCBI(cbi, krange, ...)
 
   old.seed <- .Random.seed
   on.exit( { .Random.seed <<- old.seed } )
@@ -169,6 +169,8 @@ clusteringWrapper <- function(data, cbi, krange, seed) {
   )
 
   methodArgs = append(mandatoryArgs, cbiHelperResult[["args"]])
+  # Append parameters that the user might have specified in the ellipsis
+  methodArgs = append(methodArgs, list(...))
 
   # print(cbiHelperResult[["method"]])
   # print(methodArgs)
