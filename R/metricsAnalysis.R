@@ -830,7 +830,7 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
         cluster_by_k[[as.character(k)]] = merge(dplyr::select(df, 1, dplyr::contains(metric)), annotated_df_clean, all.x = TRUE)
       } else {
         # annotated_df_clean$cluster = NA
-        cluster_by_k[[as.character(k)]] = NA
+        cluster_by_k[[as.character(k)]] = NULL
       }
     }
     result_list[[metric]] = cluster_by_k
@@ -927,7 +927,7 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
     for (metric in as.data.frame(assay(annotated_clusters_by_metric[['stability_data']]))$Metric){
       annotated_clusters = annotated_clusters_by_metric[[metric]][[as.character(k)]]
       # For each cluster, get the minimal and the maximal value
-      if(!is.na(annotated_clusters)){
+      if(!is.null(annotated_clusters)){
         for (cluster_id in 1:max(annotated_clusters$cluster, na.rm=T)) {
           concrete_cluster_values = dplyr::filter(annotated_clusters, cluster==cluster_id) %>% dplyr::pull(metric)
           metrics = c(metrics, metric)
