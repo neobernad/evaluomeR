@@ -821,7 +821,11 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
       # Create a dataframe including the individual id, the concerning metric
       # and the cluster id in which the individual is classfied.
       annotated_df_clean = dplyr::select(df_clean, 1)
-      annotated_df_clean$cluster = cluster
+      if (!isEmpty(cluster)) {
+        annotated_df_clean$cluster = cluster
+      } else {
+        annotated_df_clean$cluster = NA
+      }
       
       # Merge this dataframe with the original one, so that original individuals
       # removed due to NAs will be present an NA as cluster.
