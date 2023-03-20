@@ -3,7 +3,7 @@ library(evaluomeR)
 
 evaluomeRSupportedCBI()
 
-dataFrame <- stability(data=ontMetrics, cbi="rskc", k=3, all_metrics=TRUE, bs=100, L1=10)
+dataFrame <- stability(data=ontMetrics, cbi="kmeans", k=3, all_metrics=FALSE, bs=100, L1=10)
 assay(dataFrame)
 
 dataFrame <- stabilityRange(data=ontMetrics, cbi="rskc", k.range=c(3,4), all_metrics=TRUE, bs=100, L1=10)
