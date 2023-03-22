@@ -799,3 +799,72 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
   return(data.frame(metric=metrics, cluster=cluster_ids, min_value=min_values, max_value=max_values))
 }
 
+
+#' @title Get the range of each metric per cluster from the optimal cluster.
+#' getMetricRangeByCluster
+#' @aliases getMetricRangeByCluster
+#' @description
+#' Obtains the ranges of the metrics obtained by each optimal cluster.
+#'
+#' @param df Input data frame. The first column denotes the identifier of the
+#' evaluated individuals. The remaining columns contain the metrics used to
+#' evaluate the individuals. Rows with NA values will be ignored.
+#' @param k K value (number of clusters)
+#' @param alpha 0 <= alpha <= 1, the proportion of the cases to be trimmed in robust sparse K-means, see \code{\link{RSKC}}.
+#' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+#' @param seed Random seed to be used.
+#'
+#' @return A dataframe including the min and the max value for each
+#' pair (metric, cluster).
+#' @export
+#'
+#' @examples
+#' data("ontMetrics")
+#' metricsRelevancy = getMetricsRelevancy(ontMetrics, k=3, alpha=0.1, seed=100)
+#' metricsRelevancy$rskc # RSKC output object
+#' metricsRelevancy$trimmed_cases # Trimmed cases from input (row indexes)
+#' metricsRelevancy$relevancy # Metrics relevancy table
+#'
+getMetricsRelevancy <- function(df, k, alpha=NULL, L1=NULL, seed=NULL) {
+    if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
+  if (is.null(alpha)) {
+    alpha = 0.1
+  }
+
+  df <- as.data.frame(assay(df))
+
+  if (is.null(L1)) {
+    print(paste0("No L1 provided. Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
+    dataMatrix = as.matrix(df)
+    wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
+    km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
+    L1 = km.perm$bestw
+    print(paste0("Best L1 upper bound found is: ", L1))
+  }
+
+  # Compute RSKC
+  rskc_out = RSKC(df, k, 0.1, L1 = L1, nstart = 200,
+                  silent=TRUE, scaling = FALSE, correlation = FALSE)
+  # Get trimmed cases from input
+  union_vector = c(rskc_out$oE,rskc_out$oW)
+  union_vector_unique = unique(union_vector)
+  union_vector_unique = sort(union_vector_unique)
+
+  # Metrics relevancy
+  columns = c('metric', 'weight')
+  rskc_df = data.frame(matrix(ncol = length(columns), nrow = length(rskc_out$weights)))
+  colnames(rskc_df) = columns
+  rskc_df['metric'] = names(rskc_out$weights)
+  rskc_df['weight'] = rskc_out$weights
+  rskc_df_sorted = rskc_df[order(rskc_df$weight, decreasing = TRUE), ] # Sorting from greater values to lower
+
+
+
+  output = NULL
+  output$rskc = rskc_out
+  output$trimmed_cases = union_vector_unique
+  output$relevancy = rskc_df_sorted
+  return (output)
+}
