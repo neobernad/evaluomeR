@@ -841,11 +841,14 @@ getMetricsRelevancy <- function(df, k, alpha=NULL, L1=NULL, seed=NULL) {
     wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
     km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
     L1 = km.perm$bestw
-    print(paste0("Best L1 upper bound found is: ", L1))
+
   }
 
+
   # Compute RSKC
-  rskc_out = RSKC(df, k, 0.1, L1 = L1, nstart = 200,
+  print(paste0("Alpha set as: ", alpha))
+  print(paste0("L1 set as: ", L1))
+  rskc_out = RSKC(df, k, alpha, L1 = L1, nstart = 200,
                   silent=TRUE, scaling = FALSE, correlation = FALSE)
   # Get trimmed cases from input
   union_vector = c(rskc_out$oE,rskc_out$oW)
