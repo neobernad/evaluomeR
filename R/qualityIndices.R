@@ -311,13 +311,15 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
         sil.w=silhouette(part.onto, dist(metric.onto))
         sil.c = NULL
         sil.c$n=length(sil.w[,1])
-        sil.c$cluster.size=as.numeric(summary(sil.w)$clus.sizes)
-        sil.c$cluster.number=length(summary(sil.w)$cluster.size)
-        sil.c$clus.avg.silwidths=summary(sil.w)$clus.avg.widths
-        sil.c$avg.silwidths=summary(sil.w)$avg.width
+        sil.c$cluster.size = as.numeric(summary(sil.w)$clus.sizes)
+        sil.c$cluster.pos = part.onto
+        sil.c$cluster.labels = e.res$name.ontology
+        sil.c$cluster.number = length(summary(sil.w)$cluster.size)
+        sil.c$clus.avg.silwidths = summary(sil.w)$clus.avg.widths
+        sil.c$avg.silwidths = summary(sil.w)$avg.width
         e.res$sil.w = sil.w
         e.res$sil.c = sil.c
-        estable[[contador]]=e.res
+        estable[[contador]] = e.res
 
         m.global[[i.metr]][j.k,] = mean(sil.w[,"sil_width"])
       }
@@ -700,6 +702,9 @@ runSilhouetteTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
       silhouetteData$header <- c(silhouetteData$header, header)
     }
 
+    header = paste(c("Cluster_position","Cluster_labels"))
+    silhouetteData$header <- c(silhouetteData$header, header)
+
     silhouetteData$header = unlist(silhouetteData$header, use.names=FALSE)
     return(silhouetteData$header)
   }
@@ -748,6 +753,10 @@ runSilhouetteTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
       #cur.row <- c(cur.row, cur.data$sil.c$avg.silwidth)
       cur.row <- c(cur.row, mean(cur.data$sil.w[,"sil_width"]))
       cur.row <- c(cur.row, cur.data$sil.c$cluster.size)
+
+      cur.row <- c(cur.row, paste(cur.data$sil.c$cluster.pos, collapse  = ","))
+      cur.row <- c(cur.row, paste(cur.data$sil.c$cluster.labels, collapse  = ","))
+
       cur.row <- unlist(cur.row, use.names = FALSE)
 
       index = silhouetteDataIndex[cur.k]
