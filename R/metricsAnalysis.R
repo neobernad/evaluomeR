@@ -609,6 +609,12 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
     if (!is.null(k.range) && (k < k.range[1] || k > k.range[2])) {
       next
     }
+    if (length(values) < length(Metric)) {
+      for (i in seq(length(values), length(Metric)-1,1)) {
+        values = append(values, NaN)
+      }
+    }
+
     qualDf[[newColname]] = values
   }
 
