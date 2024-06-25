@@ -19,7 +19,7 @@ Description: Evaluating the reliability of your own metrics
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-Depends: R (>= 3.6), SummarizedExperiment, MultiAssayExperiment, 
+Depends: R (>= 3.6), SummarizedExperiment, MultiAssayExperiment, dplyr,
             cluster (>= 2.0.9), fpc (>= 2.2-3), randomForest (>= 4.6.14),
             flexmix (>= 2.3.15), RSKC (>= 2.4.2), sparcl (>= 1.0.4)
 Imports:
