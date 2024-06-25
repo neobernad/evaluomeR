@@ -829,13 +829,13 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
 #' metricsRelevancy$trimmed_cases # Trimmed cases from input (row indexes)
 #' metricsRelevancy$relevancy # Metrics relevancy table
 #'
-getMetricsRelevancy <- function(df, k, alpha=NULL, L1=NULL, seed=NULL) {
+getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
     if (is.null(seed)) {
     seed = pkg.env$seed
   }
-  if (is.null(alpha)) {
-    alpha = 0.1
-  }
+#  if (is.null(alpha)) {
+#    alpha = 0.1
+#  }
 
   df <- as.data.frame(assay(df))
 
