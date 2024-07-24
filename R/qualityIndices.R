@@ -44,16 +44,16 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
   suppressWarnings(
     runQualityIndicesSilhouette(data, k.min = k,
                                 k.max = k, bs = 1, cbi, all_metrics, seed=seed, ...))
-  silhouetteDataFrame = suppressWarnings(
-    runSilhouetteTable(data, k = k))
+  silhouetteData =  suppressWarnings(
+    runSilhouetteTableRange(data, k.min = k, k.max = k))
+
   if (getImages == TRUE) {
     suppressWarnings(
       runQualityIndicesSilhouetteK_IMG(k.min = k, k.max = k))
     suppressWarnings(
-      runSilhouetteIMG(data, k))
+      runQualityIndicesSilhouetteMetric_IMG(k.min = k, k.max = k))
   }
-  se <- createSE(silhouetteDataFrame)
-  return(se)
+  seList <- createSEList(silhouetteData)
 
 }
 

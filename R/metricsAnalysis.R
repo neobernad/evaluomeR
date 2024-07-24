@@ -625,6 +625,10 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
   }
 
   rownames(qualDf) = qualDf$Metric
+  if (ncol(qualDf) == 2) { # Only one metric
+    qualDf["Metric"] = NULL
+    return(qualDf)
+  }
   qualDf = qualDf[, -1] # Remove "Metric" column, metrics are rownames now
   qualDf <- qualDf[ order(row.names(qualDf)), ]
   return(qualDf)
@@ -671,6 +675,10 @@ standardizeStabilityData <- function(stabData, k.range=NULL) {
   }
 
   rownames(stabDf) = stabDf$Metric
+  if (ncol(stabDf) == 2) { # Only one metric
+    stabDf["Metric"] = NULL
+    return(stabDf)
+  }
   stabDf = stabDf[, -1] # Remove "Metric" column, metrics are rownames now
   stabDf <- stabDf[ order(row.names(stabDf)), ]
   return(stabDf)
