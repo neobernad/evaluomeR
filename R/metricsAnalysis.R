@@ -883,3 +883,133 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
   output$relevancy = rskc_df_sorted
   return (output)
 }
+
+
+#' @title Computes L1 boundry
+#' getRSKCL1Boundry
+#' @aliases getRSKCL1Boundry
+#' @description
+#' Computes the L1 boundry for an RSKC cbi execution.
+#'
+#' @param df Input data frame. The first column denotes the identifier of the
+#' evaluated individuals. The remaining columns contain the metrics used to
+#' evaluate the individuals. Rows with NA values will be ignored.
+#' @param k K value (number of clusters)
+#' @param seed Random seed to be used.
+#'
+#' @return A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+#' @export
+#'
+#' @examples
+#' data("ontMetrics")
+#' l1_boundry = getRSKCL1Boundry(ontMetrics, k=3, seed=100)
+#'
+getRSKCL1Boundry <- function(df, k, seed=NULL) {
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
+
+  df <- as.data.frame(assay(df))
+  df_data = df[-1] # Removing 'Description' column as it is not numeric
+
+  message(paste0("Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
+  dataMatrix = as.matrix(df_data)
+  wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
+  km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
+  L1 = floor(km.perm$bestw)
+  message(paste0("Best L1 found is: ", km.perm$bestw, ", using floor: ", L1))
+
+  return (L1)
+}
+
+#' @title Computes RSKC alpha
+#' getRSKCAlpha
+#' @aliases getRSKCAlpha
+#' @description
+#' Computes the proportion of the cases to be trimmed in robust sparse K-means, 0 <= alpha <= 1, see \code{\link{RSKC}}.
+#'
+#' @param df Input data frame. The first column denotes the identifier of the
+#' evaluated individuals. The remaining columns contain the metrics used to
+#' evaluate the individuals. Rows with NA values will be ignored.
+#' @param k K value (number of clusters)
+#' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+#' @param seed Random seed to be used.
+#'
+#' @return Best suitable alpha.
+#' @export
+#'
+#' @examples
+#' data("ontMetrics")
+#' alpha = getRSKCAlpha(ontMetrics, k=3, L1=2, seed=100)
+#'
+getRSKCAlpha <- function(df, k, L1, seed=NULL) {
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
+
+  df <- as.data.frame(assay(df))
+  df_data = df[-1] # Removing 'Description' column as it is not numeric
+
+  # Helper structures
+  ## Structure to keep track of stability and qualit of each RSKC run.
+  rskc_run <- function(stab, qual, alpha) {
+    structure(list(stab = stab, mean_stab = mean(as.double(stab)),
+                   qual = qual, mean_qual = mean(as.double(qual)),
+                   alpha = alpha), class = "rskc_run")
+  }
+  run_list = list()
+  ## Getting best RSKC run according to stabilities and qualities
+  best_stab = -Inf
+  best_qual = -Inf
+  best_alpha_stab = 0
+  best_alpha_qual = 0
+  getBestRun <- function(run_list) {
+    for (run in run_list)
+      if (run$mean_stab > best_stab) {
+        best_stab = run$mean_stab
+        best_alpha_stab = run$alpha
+      }
+    if (run$mean_qual > best_qual) {
+      best_qual = run$best_qual
+      best_alpha_qual = run$alpha
+    }
+
+    return(
+      list("best_alpha_stab" = best_alpha_stab,
+           "best_alpha_qual"=best_alpha_qual)
+    )
+  }
+
+  alpha_values = seq(0, 0.25, 0.05)
+  index = 1
+  for (alpha in alpha_values) {
+    message(paste0("Running stability and quality indexes with alpha=", alpha))
+    stab = stability(data=nci60, k=3,
+                     bs=100, seed=seed,
+                     all_metrics=TRUE,
+                     cbi="rskc", L1=9, alpha=alpha)
+    stab_table = standardizeStabilityData(stab)
+
+    qual = quality(data=nci60, k=3,
+                   seed=seed,
+                   all_metrics=TRUE,
+                   cbi="rskc", L1=9, alpha=alpha)
+    qual_table = standardizeQualityData(qual)
+
+    run_list[[index]] <- rskc_run(stab = stab_table, qual = qual_table, alpha=alpha)
+    index = index + 1
+  }
+
+  best_run = getBestRun(run_list)
+
+  message(paste0("Highest stability found when alpha=", best_run$best_alpha_stab))
+  message(paste0("Highest quality found when alpha=", best_run$best_alpha_qual))
+
+  best_alpha = best_run$best_alpha_qual
+  if (best_run$best_alpha_stab <= best_run$best_alpha_qual) {
+    best_alpha = best_run$best_alpha_stab
+  }
+  message(paste0("Using alpha=", best_alpha, " as it trims less data."))
+
+  return (best_alpha)
+}

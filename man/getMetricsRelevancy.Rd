@@ -6,7 +6,7 @@
 \title{Get the range of each metric per cluster from the optimal cluster.
 getMetricRangeByCluster}
 \usage{
-getMetricsRelevancy(df, k, alpha = NULL, L1 = NULL, seed = NULL)
+getMetricsRelevancy(df, k, alpha = 0, L1 = NULL, seed = NULL)
 }
 \arguments{
 \item{df}{Input data frame. The first column denotes the identifier of the

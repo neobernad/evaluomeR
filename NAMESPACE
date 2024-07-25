@@ -61,3 +61,6 @@ export(annotateClustersByMetric)
 export(getMetricRangeByCluster)
 export(clusterbootWrapper)
 export(getMetricsRelevancy)
+export(getRSKCL1Boundry)
+export(getRSKCAlpha)
+
