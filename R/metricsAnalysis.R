@@ -948,7 +948,6 @@ getRSKCAlpha <- function(df, k, L1, seed=NULL) {
   }
 
   df <- as.data.frame(assay(df))
-  df_data = df[-1] # Removing 'Description' column as it is not numeric
 
   # Helper structures
   ## Structure to keep track of stability and qualit of each RSKC run.
@@ -984,13 +983,13 @@ getRSKCAlpha <- function(df, k, L1, seed=NULL) {
   index = 1
   for (alpha in alpha_values) {
     message(paste0("Running stability and quality indexes with alpha=", alpha))
-    stab = stability(data=nci60, k=3,
+    stab = stability(data=df, k=3,
                      bs=100, seed=seed,
                      all_metrics=TRUE,
                      cbi="rskc", L1=9, alpha=alpha)
     stab_table = standardizeStabilityData(stab)
 
-    qual = quality(data=nci60, k=3,
+    qual = quality(data=df, k=3,
                    seed=seed,
                    all_metrics=TRUE,
                    cbi="rskc", L1=9, alpha=alpha)
