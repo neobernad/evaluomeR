@@ -595,6 +595,36 @@ mahalCBI <- function(data,clustercut=0.5,...){
 # }
 
 
+compare_with_gold_standard <- function(data, gold_standard, clustermethod, datatomatrix, ...) {
+
+  # Convertimos el data a matriz si es necesario
+  if (datatomatrix) {
+    data <- as.matrix(data)
+  }
+
+  c1 <- clustermethod(data, ...)
+
+
+  # Comparación Jaccard entre la clasificación de referencia (gold standard) y el clustering
+  jaccardresult <- clujaccard(gold_standard, c1$partition, zerobyzero = 0)
+  print("Gold standard")
+  print(gold_standard)
+  print("Partitions")
+  print(c1$partition)
+  print("Jaccard: ")
+  print(jaccardresult)
+
+  # Retornamos el objeto de resultados
+  out <- list(result = c1, partition = c1$partition,
+              nc = c1$nc, nccl = c1$nccl,
+              clustermethod = c1$clustermethod,
+              bootmean = jaccardresult)
+
+  class(out) <- "no_bootstrap"
+  return(out)
+}
+
+
 
 clusterboot <- function(data,B=100,
                         distances=(inherits(data,"dist")),
@@ -605,7 +635,8 @@ clusterboot <- function(data,B=100,
                         clustermethod,noisemethod=FALSE,
                         count=TRUE,
                         showplots=FALSE,dissolution=0.5,
-                        recover=0.75,seed=NULL,datatomatrix=TRUE,...){
+                        recover=0.75,seed=NULL,datatomatrix=TRUE,
+                        gold_standard=NULL,...){
   sumlogic <- function(x,y,relation="eq")
     switch (relation,
             eq = sum(x==y, na.rm=TRUE),
@@ -614,7 +645,15 @@ clusterboot <- function(data,B=100,
             se = sum(x<=y, na.rm=TRUE),
             le = sum(x>=y, na.rm=TRUE))
 
-  if (!is.null(seed)) set.seed(seed)
+  if (!is.null(seed)) {
+    set.seed(seed)
+  }
+  # Avoid bootstrap if gold standard classification is set
+  if (!is.null(gold_standard)) {
+    return(compare_with_gold_standard(data = data, gold_standard = gold_standard,
+                                      clustermethod = clustermethod, datatomatrix=datatomatrix, ...))
+  }
+
   invisible(distances)
   if (datatomatrix)
     data <- as.matrix(data)
@@ -668,10 +707,10 @@ clusterboot <- function(data,B=100,
     else
       plot(data,pch=sapply(c1$partition,toString),col=c1$partition)
   }
-  #  matrixlist <- list()
+
+
   for (l in 1:lb){
     for (i in 1:B){
-      #TODO: Quitar -> if (count) cat(bootmethod[l],i,"\n")
       if (bootmethod[l]=="boot"){
         bsamp <- sample(n,n,replace=TRUE)
         if (!multipleboot) bsamp <- unique(bsamp)

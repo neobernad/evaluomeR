@@ -31,6 +31,8 @@
 #' @param getImages Boolean. If true, a plot is displayed.
 #' @param all_metrics Boolean. If true, clustering is performed upon all the dataset.
 #' @param seed Positive integer. A seed for internal bootstrap.
+#' @param gold_standard: Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
+#' Only applicable if parameter 'all_metrics' is set to TRUE.
 #'
 #' @return A \code{\link{ExperimentList}} containing the stability and cluster measurements
 #'  for k clusters.
@@ -47,12 +49,14 @@
 #'
 #'
 stability <- function(data, k=5, bs=100, cbi="kmeans",
-                      getImages=FALSE, all_metrics=FALSE, seed=NULL, ...) {
+                      getImages=FALSE, all_metrics=FALSE, seed=NULL,
+                      gold_standard=NULL,...) {
 
   data <- as.data.frame(assay(data))
 
   checkKValue(k)
-  runStabilityIndex(data, k.min=k, k.max=k, bs=bs, cbi=cbi, all_metrics=all_metrics, seed=seed, ...)
+  runStabilityIndex(data, k.min=k, k.max=k, bs=bs, cbi=cbi,
+                    all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k, k.max=k))
   if (getImages == TRUE) {
@@ -102,7 +106,8 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
 #'
 #'
 stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
-                           getImages=FALSE, all_metrics=FALSE, seed=NULL, ...) {
+                           getImages=FALSE, all_metrics=FALSE, seed=NULL,
+                           gold_standard=NULL,...) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -114,10 +119,9 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   if (k.max < k.min) {
     stop("The first value of k.range cannot be greater than its second value")
   }
-
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, seed=seed, ...)
+  runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
 
@@ -167,7 +171,8 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
 #'
 #'
 stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
-                           getImages=FALSE, all_metrics=FALSE, seed=NULL, ...) {
+                         getImages=FALSE, all_metrics=FALSE, seed=NULL,
+                         gold_standard, ...) {
   k.set.length = length(k.set)
   if (k.set.length == 0) {
     stop("k.set list is empty")
@@ -181,7 +186,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
 
   data <- as.data.frame(SummarizedExperiment::assay(data))
 
-  runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, seed=seed, ...)
+  runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
   stabilityDataFrame <- suppressWarnings(
     runStabilityIndexTableRange(data, k.set = k.set))
 
@@ -196,12 +201,21 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
 }
 
 runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
-                              cbi, all_metrics, seed, k.set=NULL, ...) {
+                              cbi, all_metrics, seed, k.set=NULL,
+                              gold_standard=NULL,...) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
   if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
     stop("runStabilityIndex: All k parameters are null!")
+  }
+  if (!is.null(gold_standard)) {
+    if (all_metrics==FALSE) {
+      stop("Gold standard parameter can be set only if the clustering of all the metrics is selected (all_metrics = TRUE)")
+    }
+    if (bs != 0) {
+      message("Warning: 'gold_standard' parameter is set, argument 'bs' will be ignored.")
+    }
   }
 
   data <- removeNAValues(data)
@@ -280,6 +294,7 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
           clusterbootWrapper(data=data_to_cluster, B=bs,
                              bootmethod="boot",
                              cbi=cbi,
+                             gold_standard=gold_standard,
                              krange=j.k, seed=seed, ...)
         }, error = function(error_condition) {
           error_condition
