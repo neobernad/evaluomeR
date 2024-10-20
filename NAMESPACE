@@ -38,6 +38,7 @@ importFrom("flexmix", "FLXMRglm")
 importFrom("flexmix", "stepFlexmix")
 importFrom("flexmix", "getModel")
 importFrom("flexmix", "prior")
+importFrom("fossil", "rand.index")
 
 export(stability)
 export(stabilityRange)

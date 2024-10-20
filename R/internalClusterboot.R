@@ -597,32 +597,30 @@ mahalCBI <- function(data,clustercut=0.5,...){
 
 compare_with_gold_standard <- function(data, gold_standard, clustermethod, datatomatrix, ...) {
 
-  # Convertimos el data a matriz si es necesario
   if (datatomatrix) {
     data <- as.matrix(data)
   }
 
   c1 <- clustermethod(data, ...)
 
+  randresult <- fossil::rand.index(gold_standard, c1$partition)
 
-  # Comparación Jaccard entre la clasificación de referencia (gold standard) y el clustering
-  jaccardresult <- clujaccard(gold_standard, c1$partition, zerobyzero = 0)
-  print("Gold standard")
-  print(gold_standard)
-  print("Partitions")
-  print(c1$partition)
-  print("Jaccard: ")
-  print(jaccardresult)
+  message("Gold standard")
+  message(gold_standard)
+  message("Partitions")
+  message(c1$partition)
+  message("Rand Index: ")
+  message(randresult)
 
-  # Retornamos el objeto de resultados
   out <- list(result = c1, partition = c1$partition,
               nc = c1$nc, nccl = c1$nccl,
               clustermethod = c1$clustermethod,
-              bootmean = jaccardresult)
+              bootmean = randresult)
 
   class(out) <- "no_bootstrap"
   return(out)
 }
+
 
 
 
