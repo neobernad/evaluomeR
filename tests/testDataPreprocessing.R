@@ -18,9 +18,15 @@ r_pca = evaluomeR::performPCA(dataset = dataset, ncp = nFactors, scale = TRUE)
 evaluomeR::plotPCA_fviz_screeplot(r_pca$pca)
 evaluomeR::plotPCA_fviz_biplot(r_pca$pca)
 
-r_pca$dataset_ncp
+head(r_pca$dataset_ncp)
 
 
 
 
 
+L1 = getRSKCL1Boundry(dataset, k=2, seed=2)
+
+L1 = getRSKCAlpha(dataset, k=2, L1=2, seed=2)
+
+evaluomeR::evaluomeRSupportedCBI(
+)

@@ -4,7 +4,7 @@
 \alias{performPCA}
 \title{Perform PCA}
 \usage{
-performPCA(dataset, ncp = 5, scale = TRUE)
+performPCA(dataset, ncp = 5, scale = TRUE, visualize = FALSE)
 }
 \arguments{
 \item{dataset}{A data frame to be analyzed via PCA.}

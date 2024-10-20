@@ -1014,7 +1014,7 @@ print.clboot <- function(x, statistics=c("mean","dissolution","recovery"),...){
   }
   invisible(x)
 }
-
+# @export
 plot.clboot <- function(x,xlim=c(0,1),breaks=seq(0,1,by=0.05),...){
   par(mfrow=c(x$nc,length(x$bootmethod)))
   for (j in 1:x$nc)
