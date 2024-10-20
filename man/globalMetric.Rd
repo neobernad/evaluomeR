@@ -4,8 +4,14 @@
 \alias{globalMetric}
 \title{Global metric score defined by a prediction.}
 \usage{
-globalMetric(data, k.range = c(2, 15), nrep = 10,
-  criterion = c("BIC", "AIC"), PCA = FALSE, seed = NULL)
+globalMetric(
+  data,
+  k.range = c(2, 15),
+  nrep = 10,
+  criterion = c("BIC", "AIC"),
+  PCA = FALSE,
+  seed = NULL
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

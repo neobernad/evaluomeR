@@ -4,8 +4,15 @@
 \alias{quality}
 \title{Goodness of classifications.}
 \usage{
-quality(data, k = 5, cbi = "kmeans", getImages = FALSE,
-  all_metrics = FALSE, seed = NULL, ...)
+quality(
+  data,
+  k = 5,
+  cbi = "kmeans",
+  getImages = FALSE,
+  all_metrics = FALSE,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

@@ -4,7 +4,9 @@
 \name{bioMetrics}
 \alias{bioMetrics}
 \title{Dataset: Metrics for biological pathways}
-\format{An object of class \code{SummarizedExperiment} with 15 rows and 3 columns.}
+\format{
+An object of class \code{SummarizedExperiment} with 15 rows and 3 columns.
+}
 \usage{
 data("bioMetrics")
 }

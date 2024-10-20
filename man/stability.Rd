@@ -4,8 +4,17 @@
 \alias{stability}
 \title{Stability index.}
 \usage{
-stability(data, k = 5, bs = 100, cbi = "kmeans", getImages = FALSE,
-  all_metrics = FALSE, seed = NULL, ...)
+stability(
+  data,
+  k = 5,
+  bs = 100,
+  cbi = "kmeans",
+  getImages = FALSE,
+  all_metrics = FALSE,
+  seed = NULL,
+  gold_standard = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
@@ -30,6 +39,9 @@ The method used in 'hclust' CBI is "ward.D2".}
 \item{all_metrics}{Boolean. If true, clustering is performed upon all the dataset.}
 
 \item{seed}{Positive integer. A seed for internal bootstrap.}
+
+\item{gold_standard:}{Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
+Only applicable if parameter 'all_metrics' is set to TRUE.}
 }
 \value{
 A \code{\link{ExperimentList}} containing the stability and cluster measurements

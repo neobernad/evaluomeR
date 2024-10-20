@@ -5,8 +5,7 @@
 \title{Comparison between two clusterings as plot.
 plotMetricsClusterComparison}
 \usage{
-plotMetricsClusterComparison(data, k.vector1, k.vector2 = NULL,
-  seed = NULL)
+plotMetricsClusterComparison(data, k.vector1, k.vector2 = NULL, seed = NULL)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

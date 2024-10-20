@@ -4,7 +4,9 @@
 \name{ontMetrics}
 \alias{ontMetrics}
 \title{Dataset: Structural ontology metrics}
-\format{An object of class \code{SummarizedExperiment} with 80 rows and 20 columns.}
+\format{
+An object of class \code{SummarizedExperiment} with 80 rows and 20 columns.
+}
 \usage{
 data("ontMetrics")
 }

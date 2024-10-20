@@ -4,8 +4,17 @@
 \alias{stabilityRange}
 \title{Stability index for a range of k clusters.}
 \usage{
-stabilityRange(data, k.range = c(2, 15), bs = 100, cbi = "kmeans",
-  getImages = FALSE, all_metrics = FALSE, seed = NULL, ...)
+stabilityRange(
+  data,
+  k.range = c(2, 15),
+  bs = 100,
+  cbi = "kmeans",
+  getImages = FALSE,
+  all_metrics = FALSE,
+  seed = NULL,
+  gold_standard = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

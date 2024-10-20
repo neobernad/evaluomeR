@@ -40,11 +40,15 @@ Imports:
     kableExtra,
     dplyr,
     dendextend (>= 1.16.0),
-    fossil (>= 0.4.0)
+    fossil (>= 0.4.0),
+    psych (>= 2.4.6.26),
+    FactoMineR (>= 2.11), 
+    factoextra (>= 1.0.7),
+    nFactors (>= 2.4.1.1)
 Suggests: BiocStyle, knitr, rmarkdown, magrittr
 VignetteBuilder: knitr
 RdMacros: Rdpack
-RoxygenNote: 7.0.2
+RoxygenNote: 7.3.2
 biocViews: Clustering, Classification, FeatureExtraction
 Collate:
     'data.R'

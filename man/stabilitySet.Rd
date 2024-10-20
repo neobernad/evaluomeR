@@ -4,8 +4,17 @@
 \alias{stabilitySet}
 \title{Stability index for a set of k clusters.}
 \usage{
-stabilitySet(data, k.set = c(2, 3), bs = 100, cbi = "kmeans",
-  getImages = FALSE, all_metrics = FALSE, seed = NULL, ...)
+stabilitySet(
+  data,
+  k.set = c(2, 3),
+  bs = 100,
+  cbi = "kmeans",
+  getImages = FALSE,
+  all_metrics = FALSE,
+  seed = NULL,
+  gold_standard = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.

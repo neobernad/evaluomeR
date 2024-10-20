@@ -1,5 +1,6 @@
 library(evaluomeR)
 
+
 individuals_per_cluster = function(qualityResult) {
   qual_df = as.data.frame(assay(qualityResult))
 

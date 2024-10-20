@@ -4,8 +4,15 @@
 \alias{qualitySet}
 \title{Goodness of classifications for a set of k clusters.}
 \usage{
-qualitySet(data, k.set = c(2, 4), cbi = "kmeans",
-  all_metrics = FALSE, getImages = FALSE, seed = NULL, ...)
+qualitySet(
+  data,
+  k.set = c(2, 4),
+  cbi = "kmeans",
+  all_metrics = FALSE,
+  getImages = FALSE,
+  seed = NULL,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
