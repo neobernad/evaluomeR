@@ -172,7 +172,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
 #'
 stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
                          getImages=FALSE, all_metrics=FALSE, seed=NULL,
-                         gold_standard, ...) {
+                         gold_standard=NULL, ...) {
   k.set.length = length(k.set)
   if (k.set.length == 0) {
     stop("k.set list is empty")
@@ -282,7 +282,12 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
       }
 
       km5=NULL
-      v.size=length(levels(as.factor(data_to_cluster)))
+      v.size = 0
+      if (!all_metrics) {
+        v.size = length(levels(as.factor(data_to_cluster)))
+      } else {
+        v.size = j.k
+      }
       if (v.size>=j.k) {
         #km5$cluster=boot.cluster(data=datos.bruto[,i],
         #                         nk=j.k, B=bs, seed=seed)
