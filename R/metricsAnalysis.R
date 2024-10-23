@@ -919,10 +919,10 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
   L1 = floor(km.perm$bestw)
   message(paste0("Best L1 found is: ", km.perm$bestw, ", using floor: ", L1))
 
-  return (L1)
+  return (as.numeric(L1))
 }
 
-#' @title Computes RSKC alpha
+#' @title Computes best alpha using Robust and Sparse Clustering
 #' getRSKCAlpha
 #' @aliases getRSKCAlpha
 #' @description
@@ -933,6 +933,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' evaluate the individuals. Rows with NA values will be ignored.
 #' @param k K value (number of clusters)
 #' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+#' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)
 #' @param seed Random seed to be used.
 #'
 #' @return Best suitable alpha.
@@ -942,7 +943,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' data("ontMetrics")
 #' alpha = getRSKCAlpha(ontMetrics, k=3, L1=2, seed=100)
 #'
-getRSKCAlpha <- function(df, k, L1, seed=NULL) {
+getRSKCAlpha <- function(df, k, L1, max_alpha = 0.5, seed=NULL) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -979,20 +980,21 @@ getRSKCAlpha <- function(df, k, L1, seed=NULL) {
     )
   }
 
-  alpha_values = seq(0, 0.25, 0.05)
+  alpha_values = seq(0, max_alpha, 0.05)
   index = 1
   for (alpha in alpha_values) {
-    message(paste0("Running stability and quality indexes with alpha=", alpha))
-    stab = stability(data=df, k=3,
+    message(paste0("Running stability and quality indexes with alpha=",
+                   alpha," k=",k, " L1=", L1))
+    stab = stability(data=df, k=k,
                      bs=100, seed=seed,
                      all_metrics=TRUE,
-                     cbi="rskc", L1=9, alpha=alpha)
+                     cbi="rskc", L1=L1, alpha=alpha)
     stab_table = standardizeStabilityData(stab)
 
-    qual = quality(data=df, k=3,
+    qual = quality(data=df, k=k,
                    seed=seed,
                    all_metrics=TRUE,
-                   cbi="rskc", L1=9, alpha=alpha)
+                   cbi="rskc", L1=L1, alpha=alpha)
     qual_table = standardizeQualityData(qual)
 
     run_list[[index]] <- rskc_run(stab = stab_table, qual = qual_table, alpha=alpha)
@@ -1010,5 +1012,118 @@ getRSKCAlpha <- function(df, k, L1, seed=NULL) {
   }
   message(paste0("Using alpha=", best_alpha, " as it trims less data."))
 
-  return (best_alpha)
+  return (as.numeric(best_alpha))
+}
+
+#' @title Automated Trimmed & Sparse Clustering
+#' @name ATSC
+#' @aliases ATSC
+#' @description Automated Trimmed & Sparse Clustering.
+#' This methods performs an optimal k value analysis with \code{\link{stabilityRange}}, \code{\link{qualityRange}}
+#' and \code{\link{getOptimalKValue}} evaluomeR methods.
+#' The optimal \code{k} value is used to compute estimate a \code{L1} bound and an \code{alpha} trimming portion automatically
+#' in order to perform an automatic trimmed and sparse clustering.
+#' This posibily results in the input dataset being trimmed (either by columns, determined by \code{L1} or
+#' by rows, determined by \code{alpha}).
+#' Another optimal k value analysis is then executed over the trimmed dataset, to conclude with the an optimal partition.
+#'
+#'
+#' @inheritParams stabilityRange
+#' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+#' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)
+#'
+#' @return A list containing:
+#' \item{stab}{A data frame containing standardized stability.}
+#' \item{qual}{A data frame containing standardized quality.}
+#' \item{optimalK}{The optimal k value representing the optimal number of clusters determined from the initial analysis.}
+#' \item{stab_ATSC}{A data frame containing standardized stability after applying ATSC.}
+#' \item{qual_ATSC}{A data frame containing standardized quality  applying ATSC.}
+#' \item{optimalK_ATSC}{The optimal k value representing the optimal number of clusters determined after applying ATSC.}
+#' \item{rskcOut}{An object returned by the RSKC function containing clustering results, including weights and trimmed observations.}
+#' \item{trimmedRows}{A vector of indices representing the rows that were trimmed from the dataset during the clustering process.}
+#' \item{trimmedColumns}{A vector of names representing the columns that were trimmed (i.e., removed) from the dataset due to zero weights.}
+#' \item{trimmedDataset}{A data frame containing the final processed dataset after trimming rows and columns.}
+#' @export
+#'
+ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
+                 max_alpha = 0.1, all_metrics=TRUE, seed=NULL) {
+  k.range.length = length(k.range)
+  if (k.range.length != 2) {
+    stop("k.range length must be 2")
+  }
+  k.min = k.range[1]
+  k.max = k.range[2]
+  checkKValue(k.min)
+  checkKValue(k.max)
+  if (k.max < k.min) {
+    stop("The first value of k.range cannot be greater than its second value")
+  }
+  message(paste0("Computing optimal k value with '", cbi, "'"))
+  data = as.data.frame(SummarizedExperiment::assay(data))
+  stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
+                                        all_metrics = all_metrics, seed=seed)
+  stab = evaluomeR::standardizeStabilityData(stabRange, k.range = k.range)
+  qualRange = evaluomeR::qualityRange(data=data, cbi=cbi, k=k.range,
+                                      all_metrics = all_metrics, seed = seed)
+  qual = evaluomeR::standardizeQualityData(qualRange, k.range = k.range)
+  rOptimalK = evaluomeR::getOptimalKValue(stabRange, qualRange)
+  optimalK = as.numeric(rOptimalK$Global_optimal_k)
+  message(paste0("Optimal k: ", optimalK))
+
+  # Automated Trimmed & Sparse Clustering
+  message("Determining best L1 and alpha parameter automatically, it might take a while...")
+  invisible(suppressMessages({
+    L1 = evaluomeR::getRSKCL1Boundry(data, k=optimalK, seed=seed)
+    alpha = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
+                                    max_alpha = max_alpha, seed=seed)
+  }))
+
+
+  message(paste0("\tBest L1 found '", L1, "' - best alpha '", alpha, "'"))
+
+  message("Running Trimmed & Sparse Clustering algorithm")
+  rskcOut = RSKC(data[, !colnames(data) %in% "Description"], L1=L1, alpha=alpha, ncl=optimalK)
+  data_trimmed = data
+  trimmedRows = c()
+  if (alpha > 0 && length(rskcOut$oW) > 1) { # Rows were trimmed, detect which
+    trimmedRows  = c(rskcOut$oE,rskcOut$oW)
+    trimmedRows = unique(trimmedRows)
+    trimmedRows = sort(trimmedRows)
+    message(paste0("\tNumber of trimmed cases: ", length(trimmedRows)))
+    data_trimmed = data_trimmed[-trimmedRows, ]
+
+  }
+  # Check if L1 removed columns (feature weight == 0)
+  trimmedColumns = names(rskcOut$weights)[rskcOut$weights == 0]
+  if (length(trimmedColumns) > 0) {
+    message(paste0("\tNumber of affected columns: ", length(trimmedColumns)))
+    data_trimmed = data_trimmed[, !(names(data_trimmed) %in% trimmedColumns)]
+    #message(paste(trimmedColumns, sep = ","))
+  }
+
+  message("Computing optimal k value on the dataset processed by a trimmed sparse clustering method.")
+
+  stabRange_ATSC = evaluomeR::stabilityRange(data=data_trimmed, cbi=cbi, k=k.range, bs=bs,
+                                             all_metrics = all_metrics, seed=seed)
+  stab_ATSC = evaluomeR::standardizeStabilityData(stabRange_ATSC, k.range = k.range)
+
+  qualRange_ATSC = evaluomeR::qualityRange(data=data_trimmed, cbi=cbi, k=k.range,
+                                           all_metrics = all_metrics, seed = seed)
+  qual_ATSC = evaluomeR::standardizeQualityData(qualRange_ATSC, k.range = k.range)
+
+  rOptimalK_ATSC = evaluomeR::getOptimalKValue(stabRange_ATSC, qualRange_ATSC)
+  optimalK_ATSC = as.numeric(rOptimalK_ATSC$Global_optimal_k)
+  message(paste0("New optimal k with ATSC: ", optimalK_ATSC))
+
+
+  return (list(
+    # Before ATSC
+    stab=stab, qual=qual, optimalK=optimalK,
+    # After ATSC
+    stab_ATSC=stab_ATSC, qual_ATSC=qual_ATSC, optimalK=optimalK_ATSC,
+    # Additional parameters of interes
+    rskcOut=rskcOut, trimmedRows=trimmedRows, trimmedColumns=trimmedColumns,
+    trimmmedDataset=data_trimmed
+  ))
+
 }

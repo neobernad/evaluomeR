@@ -75,6 +75,7 @@ export(clusterbootWrapper)
 export(getMetricsRelevancy)
 export(getRSKCL1Boundry)
 export(getRSKCAlpha)
+export(ATSC)
 
 export(cleanDataset)
 export(PCASuitability)
