@@ -1046,7 +1046,8 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.5, seed=NULL) {
 #' @export
 #'
 ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
-                 max_alpha = 0.1, all_metrics=TRUE, seed=NULL) {
+                 max_alpha = 0.1, all_metrics=TRUE,
+                 L1=NULL, alpha=NULL, seed=NULL) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -1072,14 +1073,18 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
 
   # Automated Trimmed & Sparse Clustering
   message("Determining best L1 and alpha parameter automatically, it might take a while...")
-  invisible(suppressMessages({
+  if (is.null(L1)) {
     L1 = evaluomeR::getRSKCL1Boundry(data, k=optimalK, seed=seed)
+  }
+
+  if (is.null(alpha)) {
     alpha = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
                                     max_alpha = max_alpha, seed=seed)
-  }))
+  }
+  #invisible(suppressMessages({}))
 
 
-  message(paste0("\tBest L1 found '", L1, "' - best alpha '", alpha, "'"))
+  message(paste0("\tUsing L1 '", L1, "' and alpha '", alpha, "'"))
 
   message("Running Trimmed & Sparse Clustering algorithm")
   rskcOut = RSKC(data[, !colnames(data) %in% "Description"], L1=L1, alpha=alpha, ncl=optimalK)
@@ -1120,10 +1125,10 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     # Before ATSC
     stab=stab, qual=qual, optimalK=optimalK,
     # After ATSC
-    stab_ATSC=stab_ATSC, qual_ATSC=qual_ATSC, optimalK=optimalK_ATSC,
+    stab_ATSC=stab_ATSC, qual_ATSC=qual_ATSC, optimalK_ATSC=optimalK_ATSC,
     # Additional parameters of interes
     rskcOut=rskcOut, trimmedRows=trimmedRows, trimmedColumns=trimmedColumns,
-    trimmmedDataset=data_trimmed
+    trimmmedDataset=data_trimmed, L1=L1, alpha=alpha
   ))
 
 }

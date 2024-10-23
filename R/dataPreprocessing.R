@@ -136,7 +136,7 @@ PCASuitability <- function(R, sig_level = 0.05) {
   is_suitable = FALSE
 
 
-  if (is.na(bartlett_test$p.value)) {
+  if (is.na(bartlett_test$p.value) || bartlett_test$p.value == 0) {
     message("\tPCA is not suitable. Bartlett's test produced NA for p-value.")
     return (list(pca_suitable=is_suitable,
                  bartlett.test=NULL,
@@ -204,9 +204,9 @@ PCASuitability <- function(R, sig_level = 0.05) {
 #' @export
 performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
 
-  description_col = dataset[[1]]
+  Description = dataset[[1]]
   if ("Description" %in% colnames(dataset)) {
-    description_col = dataset[,"Description", drop=FALSE]
+    Description = dataset[,"Description", drop=FALSE]
     dataset <- dataset[, !colnames(dataset) %in% "Description"]
   }
 
@@ -241,7 +241,7 @@ performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
   )
 
   dataset_ncp = as.data.frame(pca_result$ind$coord[, 1:ncp])
-  dataset_ncp <- cbind(description_col, dataset_ncp)
+  dataset_ncp <- cbind(Description, dataset_ncp)
 
   return (list(dataset_ncp = dataset_ncp,
                pca = pca_result,
