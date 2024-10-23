@@ -10,6 +10,8 @@ plotPCA_fviz_screeplot(pca_result, title = NULL)
 \item{pca_result}{The result of a PCA analysis (object returned from `performPCA`).}
 
 \item{title}{An optional title for the scree plot. If NULL, a default title will be used.}
+
+\item{ncp}{Number of principal components}
 }
 \value{
 A ggplot object representing the scree plot.

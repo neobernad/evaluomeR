@@ -38,7 +38,7 @@ removeNonNumericColumns <- function(dataset) {
 #'
 #' @export
 cleanDataset <- function(dataset, correlation_threshold = 1) {
-  if (correlation_threshold >= 1 || correlation_threshold < -1) {
+  if (correlation_threshold > 1 || correlation_threshold < -1) {
     message("Error: 'correlation_threshold' must be in range [-1,1].")
     return(list(dataset = NULL,
                 R = NULL))
@@ -109,6 +109,10 @@ removeCorrelations <- function(numeric_dataset, correlation_threshold = 1) {
     R <- cor(dataset_to_check)
   }
 
+  if (ncol(numeric_dataset) == ncol(dataset_to_check)) {
+    message("\tNo correlated columns found")
+  }
+
   return(list(cleaned_dataset = dataset_to_check,
               remaining_colnames = colnames(dataset_to_check),
               R=R))
@@ -149,8 +153,17 @@ PCASuitability <- function(R, sig_level = 0.05) {
                  kmo=NULL))
   }
   # Else: Suitable, perform KMO test
+  # If the condition number is too high (typically above 1e12 or more), avoid running the KMO() function
+  condition_number <- kappa(R)
 
-  kmo_result = psych::KMO(R)
+  if (condition_number < 1e12) {
+    kmo_result <- psych::KMO(R)
+  } else {
+    message("\tMatrix is too close to singular, KMO test cannot be performed.")
+    return (list(pca_suitable=is_suitable,
+                 bartlett.test=bartlett_test,
+                 kmo=NULL))
+  }
   kmo_value = kmo_result$MSA
 
   # Interpret KMO value
@@ -189,7 +202,7 @@ PCASuitability <- function(R, sig_level = 0.05) {
 #' @return A list containing the PCA results, summary of eigenvalues, contributions, coordinates, and more.
 #'
 #' @export
-performPCA <- function(dataset, ncp = 5, scale = TRUE, visualize = FALSE) {
+performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
 
   description_col = dataset[[1]]
   if ("Description" %in% colnames(dataset)) {
@@ -197,10 +210,16 @@ performPCA <- function(dataset, ncp = 5, scale = TRUE, visualize = FALSE) {
     dataset <- dataset[, !colnames(dataset) %in% "Description"]
   }
 
+  if (is.null(ncp)) {
+    message("Parameter 'npc' is null. Computing number of factors automatically:")
+    ncp = evaluomeR::determineNumberOfFactors(dataset)
+    message(paste0("Number of factors, 'ncp' used is: ", ncp))
+  }
+
   pca_result <- FactoMineR::PCA(dataset, scale.unit = scale, ncp = ncp, graph = FALSE)
   pca_dimdesc = FactoMineR::dimdesc(pca_result, axes=c(1,2))
 
-  summary(pca_result)
+  #summary(pca_result)
 
   # Mimic what summary(pca_result) would do
   eigenvalues <- pca_result$eig
@@ -221,7 +240,7 @@ performPCA <- function(dataset, ncp = 5, scale = TRUE, visualize = FALSE) {
     ind_cos2 = ind_cos2
   )
 
-  dataset_ncp = as.data.frame(pca_result$ind$coord[, 1:nFactors])
+  dataset_ncp = as.data.frame(pca_result$ind$coord[, 1:ncp])
   dataset_ncp <- cbind(description_col, dataset_ncp)
 
   return (list(dataset_ncp = dataset_ncp,
@@ -239,6 +258,7 @@ performPCA <- function(dataset, ncp = 5, scale = TRUE, visualize = FALSE) {
 #'
 #' @param pca_result The result of a PCA analysis (object returned from `performPCA`).
 #' @param title An optional title for the scree plot. If NULL, a default title will be used.
+#' @param ncp Number of principal components
 #'
 #' @return A ggplot object representing the scree plot.
 #'
