@@ -964,19 +964,22 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
   best_alpha_stab = 0
   best_alpha_qual = 0
   getBestRun <- function(run_list) {
-    for (run in run_list)
+    for (run in run_list) {
       if (run$mean_stab > best_stab) {
         best_stab = run$mean_stab
         best_alpha_stab = run$alpha
       }
-    if (run$mean_qual > best_qual) {
-      best_qual = run$best_qual
-      best_alpha_qual = run$alpha
+      if (run$mean_qual > best_qual) {
+        best_qual = run$mean_qual
+        best_alpha_qual = run$alpha
+      }
     }
 
     return(
       list("best_alpha_stab" = best_alpha_stab,
-           "best_alpha_qual"=best_alpha_qual)
+           "best_alpha_qual"=best_alpha_qual,
+           "best_stab"=best_stab,
+           "best_qual"=best_qual)
     )
   }
 
@@ -1002,9 +1005,8 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
   }
 
   best_run = getBestRun(run_list)
-
-  message(paste0("Highest stability found when alpha=", best_run$best_alpha_stab))
-  message(paste0("Highest quality found when alpha=", best_run$best_alpha_qual))
+  message(paste0("Highest stability found when alpha=", best_run$best_alpha_stab," (", best_run$best_stab,")"))
+  message(paste0("Highest quality found when alpha=", best_run$best_alpha_qual," (", best_run$best_qual,")"))
 
   best_alpha = best_run$best_alpha_qual
   if (best_run$best_alpha_stab <= best_run$best_alpha_qual) {

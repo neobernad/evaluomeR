@@ -32,3 +32,5 @@ r_atsc$optimalK
 r_atsc$trimmedColumns
 new_dataset = r_atsc$trimmmedDataset
 
+#evaluomeR::getRSKCAlpha(dataset, k=3, L1=3, max_alpha = 0.05)
+
