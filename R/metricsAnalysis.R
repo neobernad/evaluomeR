@@ -1080,8 +1080,10 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   }
 
   if (is.null(alpha)) {
-    alpha = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
+    invisible(suppressMessages({
+      alpha = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
                                     max_alpha = max_alpha, seed=seed)
+    }))
   }
   #invisible(suppressMessages({}))
 
