@@ -933,7 +933,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' evaluate the individuals. Rows with NA values will be ignored.
 #' @param k K value (number of clusters)
 #' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
-#' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)
+#' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05). Default is 0.1.
 #' @param seed Random seed to be used.
 #'
 #' @return Best suitable alpha.
@@ -943,7 +943,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' data("ontMetrics")
 #' alpha = getRSKCAlpha(ontMetrics, k=3, L1=2, seed=100)
 #'
-getRSKCAlpha <- function(df, k, L1, max_alpha = 0.5, seed=NULL) {
+getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -980,7 +980,7 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.5, seed=NULL) {
     )
   }
 
-  alpha_values = seq(0, max_alpha, 0.05)
+  alpha_values = seq(0, max_alpha, 0.01)
   index = 1
   for (alpha in alpha_values) {
     message(paste0("Running stability and quality indexes with alpha=",
