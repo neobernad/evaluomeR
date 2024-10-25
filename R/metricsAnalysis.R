@@ -1106,11 +1106,8 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     message(paste0("\tNumber of trimmed cases: ", length(trimmedRows)))
     data_trimmed = data_trimmed[-trimmedRows, ]
     if (!is.null(gold_standard)) { # Remove trimmed cases from gold standard vector
-      message("\tTrimming gold standard")
-      message(gold_standard)
-      message("---")
+      message("\tTrimming gold standard as well")
       gold_standard = gold_standard[-trimmedRows]
-      message(gold_standard)
     }
 
   }

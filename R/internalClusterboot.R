@@ -605,12 +605,12 @@ compare_with_gold_standard <- function(data, gold_standard, clustermethod, datat
 
   randresult <- fossil::rand.index(gold_standard, c1$partition)
 
-  message("Gold standard")
-  message(gold_standard)
-  message("Partitions")
-  message(c1$partition)
-  message("Rand Index: ")
-  message(randresult)
+  #message("Gold standard")
+  #message(gold_standard)
+  #message("Partitions")
+  #message(c1$partition)
+  #message("Rand Index: ")
+  #message(randresult)
 
   out <- list(result = c1, partition = c1$partition,
               nc = c1$nc, nccl = c1$nccl,

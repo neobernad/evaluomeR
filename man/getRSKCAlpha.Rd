@@ -5,7 +5,7 @@
 \title{Computes best alpha using Robust and Sparse Clustering
 getRSKCAlpha}
 \usage{
-getRSKCAlpha(df, k, L1, max_alpha = 0.5, seed = NULL)
+getRSKCAlpha(df, k, L1, max_alpha = 0.1, seed = NULL)
 }
 \arguments{
 \item{df}{Input data frame. The first column denotes the identifier of the
@@ -16,7 +16,7 @@ evaluate the individuals. Rows with NA values will be ignored.}
 
 \item{L1}{A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.}
 
-\item{max_alpha}{Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)}
+\item{max_alpha}{Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05). Default is 0.1.}
 
 \item{seed}{Random seed to be used.}
 }

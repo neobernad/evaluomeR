@@ -11,6 +11,9 @@ ATSC(
   cbi = "kmeans",
   max_alpha = 0.1,
   all_metrics = TRUE,
+  L1 = NULL,
+  alpha = NULL,
+  gold_standard = NULL,
   seed = NULL
 )
 }
@@ -39,9 +42,9 @@ The method used in 'hclust' CBI is "ward.D2".}
 
 \item{all_metrics}{Boolean. If true, clustering is performed upon all the dataset.}
 
-\item{seed}{Positive integer. A seed for internal bootstrap.}
-
 \item{L1}{A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.}
+
+\item{seed}{Positive integer. A seed for internal bootstrap.}
 }
 \value{
 A list containing:
