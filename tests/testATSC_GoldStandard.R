@@ -40,13 +40,13 @@ head(dataset)
 
 # Second clustering and optimal k
 
-
 r_atsc = evaluomeR::ATSC(data=dataset, alpha=0.1, k.range=c(3,10), cbi="kmeans", gold_standard=gold_standard_vector)
 
 r_atsc$optimalK
 r_atsc$trimmedRows
 r_atsc$trimmedColumns
-new_dataset = r_atsc$trimmmedDataset
+r_atsc$gold_standard_trimmed
+r_atsc$trimmmedDataset
 
 #evaluomeR::getRSKCAlpha(dataset, k=3, L1=3, max_alpha = 0.05)
 

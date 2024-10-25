@@ -1099,6 +1099,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   rskcOut = RSKC(data[, !colnames(data) %in% "Description"], L1=L1, alpha=alpha, ncl=optimalK)
   data_trimmed = data
   trimmedRows = c()
+  gold_standard_trimmed = c()
   if (alpha > 0 && length(rskcOut$oW) > 1) { # Rows were trimmed, detect which
     trimmedRows  = c(rskcOut$oE,rskcOut$oW)
     trimmedRows = unique(trimmedRows)
@@ -1108,6 +1109,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     if (!is.null(gold_standard)) { # Remove trimmed cases from gold standard vector
       message("\tTrimming gold standard as well")
       gold_standard = gold_standard[-trimmedRows]
+      gold_standard_trimmed = gold_standard
     }
 
   }
@@ -1135,6 +1137,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   message(paste0("New optimal k with ATSC: ", optimalK_ATSC))
 
 
+
   return (list(
     # Before ATSC
     stab=stab, qual=qual, optimalK=optimalK,
@@ -1142,7 +1145,8 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     stab_ATSC=stab_ATSC, qual_ATSC=qual_ATSC, optimalK_ATSC=optimalK_ATSC,
     # Additional parameters of interes
     rskcOut=rskcOut, trimmedRows=trimmedRows, trimmedColumns=trimmedColumns,
-    trimmmedDataset=data_trimmed, L1=L1, alpha=alpha
+    trimmmedDataset=data_trimmed, L1=L1, alpha=alpha,
+    gold_standard_trimmed=gold_standard_trimmed
   ))
 
 }
