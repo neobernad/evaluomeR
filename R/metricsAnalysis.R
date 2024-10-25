@@ -1049,7 +1049,8 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
 #'
 ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
                  max_alpha = 0.1, all_metrics=TRUE,
-                 L1=NULL, alpha=NULL, seed=NULL) {
+                 L1=NULL, alpha=NULL, gold_standard=NULL,
+                 seed=NULL) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -1063,11 +1064,15 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   }
   message(paste0("Computing optimal k value with '", cbi, "'"))
   data = as.data.frame(SummarizedExperiment::assay(data))
+  # Stability indexes
   stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
-                                        all_metrics = all_metrics, seed=seed)
+                                        all_metrics = all_metrics,
+                                        gold_standard=gold_standard, seed=seed)
   stab = evaluomeR::standardizeStabilityData(stabRange, k.range = k.range)
+  # Quality indexes
   qualRange = evaluomeR::qualityRange(data=data, cbi=cbi, k=k.range,
                                       all_metrics = all_metrics, seed = seed)
+  # Optimal k analysis
   qual = evaluomeR::standardizeQualityData(qualRange, k.range = k.range)
   rOptimalK = evaluomeR::getOptimalKValue(stabRange, qualRange)
   optimalK = as.numeric(rOptimalK$Global_optimal_k)
@@ -1111,7 +1116,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   }
 
   message("Computing optimal k value on the dataset processed by a trimmed sparse clustering method.")
-
+  # Repeat optimal k analysis for 'data_trimmed'
   stabRange_ATSC = evaluomeR::stabilityRange(data=data_trimmed, cbi=cbi, k=k.range, bs=bs,
                                              all_metrics = all_metrics, seed=seed)
   stab_ATSC = evaluomeR::standardizeStabilityData(stabRange_ATSC, k.range = k.range)

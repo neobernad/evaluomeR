@@ -1,8 +1,8 @@
 library(evaluomeR)
 library(RSKC)
 
-data("ontMetricsOBO")
-dataset = ontMetricsOBO
+#data("ontMetricsOBO")
+#dataset = ontMetricsOBO
 
 data("golub")
 dataset = golub
@@ -26,9 +26,10 @@ head(dataset)
 # Second clustering and optimal k
 
 
-r_atsc = evaluomeR::ATSC(data=dataset, k.range=c(3,10), cbi="kmeans")
+r_atsc = evaluomeR::ATSC(data=dataset, alpha=0.1, k.range=c(3,10), cbi="kmeans")
 
 r_atsc$optimalK
+r_atsc$trimmedRows
 r_atsc$trimmedColumns
 new_dataset = r_atsc$trimmmedDataset
 
