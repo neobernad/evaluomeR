@@ -988,17 +988,19 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
   for (alpha in alpha_values) {
     message(paste0("Running stability and quality indexes with alpha=",
                    alpha," k=",k, " L1=", L1))
-    stab = stability(data=df, k=k,
-                     bs=100, seed=seed,
+    invisible(suppressMessages({
+      stab = stability(data=df, k=k,
+                       bs=100, seed=seed,
+                       all_metrics=TRUE,
+                       cbi="rskc", L1=L1, alpha=alpha)
+      stab_table = standardizeStabilityData(stab)
+
+      qual = quality(data=df, k=k,
+                     seed=seed,
                      all_metrics=TRUE,
                      cbi="rskc", L1=L1, alpha=alpha)
-    stab_table = standardizeStabilityData(stab)
-
-    qual = quality(data=df, k=k,
-                   seed=seed,
-                   all_metrics=TRUE,
-                   cbi="rskc", L1=L1, alpha=alpha)
-    qual_table = standardizeQualityData(qual)
+      qual_table = standardizeQualityData(qual)
+    }))
 
     run_list[[index]] <- rskc_run(stab = stab_table, qual = qual_table, alpha=alpha)
     index = index + 1
@@ -1012,9 +1014,10 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
   if (best_run$best_alpha_stab <= best_run$best_alpha_qual) {
     best_alpha = best_run$best_alpha_stab
   }
-  message(paste0("Using alpha=", best_alpha, " as it trims less data."))
+  #message(paste0("Using alpha=", best_alpha, " as it trims less data."))
 
-  return (as.numeric(best_alpha))
+  return (list(best_alpha_stab=as.numeric(best_run$best_alpha_stab),
+               best_alpha_qual=as.numeric(best_run$best_alpha_qual)))
 }
 
 #' @title Automated Trimmed & Sparse Clustering
@@ -1085,10 +1088,9 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   }
 
   if (is.null(alpha)) {
-    invisible(suppressMessages({
-      alpha = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
+      best_alphas = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
                                     max_alpha = max_alpha, seed=seed)
-    }))
+      alpha = best_alphas$best_alpha_qual
   }
   #invisible(suppressMessages({}))
 
