@@ -1105,6 +1105,13 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     trimmedRows = sort(trimmedRows)
     message(paste0("\tNumber of trimmed cases: ", length(trimmedRows)))
     data_trimmed = data_trimmed[-trimmedRows, ]
+    if (!is.null(gold_standard)) { # Remove trimmed cases from gold standard vector
+      message("\tTrimming gold standard")
+      message(gold_standard)
+      message("---")
+      gold_standard = gold_standard[-trimmedRows]
+      message(gold_standard)
+    }
 
   }
   # Check if L1 removed columns (feature weight == 0)
@@ -1118,7 +1125,8 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   message("Computing optimal k value on the dataset processed by a trimmed sparse clustering method.")
   # Repeat optimal k analysis for 'data_trimmed'
   stabRange_ATSC = evaluomeR::stabilityRange(data=data_trimmed, cbi=cbi, k=k.range, bs=bs,
-                                             all_metrics = all_metrics, seed=seed)
+                                             all_metrics = all_metrics,
+                                             gold_standard=gold_standard, seed=seed)
   stab_ATSC = evaluomeR::standardizeStabilityData(stabRange_ATSC, k.range = k.range)
 
   qualRange_ATSC = evaluomeR::qualityRange(data=data_trimmed, cbi=cbi, k=k.range,
