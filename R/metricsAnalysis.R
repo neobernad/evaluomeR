@@ -1065,6 +1065,9 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   if (k.max < k.min) {
     stop("The first value of k.range cannot be greater than its second value")
   }
+  if (is.null(seed)) {
+    seed = pkg.env$seed
+  }
   message(paste0("Computing optimal k value with '", cbi, "'"))
   data = as.data.frame(SummarizedExperiment::assay(data))
   # Stability indexes
@@ -1098,6 +1101,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   message(paste0("\tUsing L1 '", L1, "' and alpha '", alpha, "'"))
 
   message("Running Trimmed & Sparse Clustering algorithm")
+  set.seed(seed)
   rskcOut = RSKC(data[, !colnames(data) %in% "Description"], L1=L1, alpha=alpha, ncl=optimalK)
   data_trimmed = data
   trimmedRows = c()
