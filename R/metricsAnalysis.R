@@ -916,8 +916,9 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
   dataMatrix = as.matrix(df_data)
   wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
   km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
-  L1 = floor(km.perm$bestw)
-  message(paste0("Best L1 found is: ", km.perm$bestw, ", using floor: ", L1))
+  #L1 = floor(km.perm$bestw)
+  L1 = km.perm$bestw
+  message(paste0("Best L1 found is: ", L1))
 
   return (as.numeric(L1))
 }
