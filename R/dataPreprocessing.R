@@ -248,7 +248,6 @@ performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
                summary = pca_summary,
                dimdesc = pca_dimdesc
   ))
-
 }
 
 
@@ -344,3 +343,4 @@ determineNumberOfFactors <- function(dataset) {
   return (num_components)
 
 }
+

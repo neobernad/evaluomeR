@@ -1,5 +1,4 @@
 library(evaluomeR)
-library(RSKC)
 
 data("ontMetricsOBO")
 dataset = ontMetricsOBO
@@ -21,12 +20,4 @@ if (pca_suitability$pca_suitable) {
 
 head(dataset)
 
-
-
-test = RSKC(dataset[-1], L=2, alpha=0.8, ncl=3)
-union_vector = c(test$oE,test$oW)
-print(union_vector)
-length(unique(union_vector))
-
-dataset_cleaned <- dataset[-union_vector, ]
 
