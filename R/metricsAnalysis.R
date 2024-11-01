@@ -1051,8 +1051,8 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
 #' \item{trimmedDataset}{A data frame containing the final processed dataset after trimming rows and columns.}
 #' @export
 #'
-ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
-                 max_alpha = 0.1, all_metrics=TRUE,
+ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
+                 max_alpha = 0.1,
                  L1=NULL, alpha=NULL, gold_standard=NULL,
                  seed=NULL) {
   k.range.length = length(k.range)
@@ -1069,7 +1069,9 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
+  all_metrics=TRUE
   message(paste0("Computing optimal k value with '", cbi, "'"))
+
   data = as.data.frame(SummarizedExperiment::assay(data))
   # Stability indexes
   stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
