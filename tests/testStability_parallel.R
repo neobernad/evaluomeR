@@ -1,6 +1,7 @@
 library(evaluomeR)
 library(RSKC)
 library(sparcl)
+library(parallel)
 
 # CASO 1
 
