@@ -944,7 +944,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' data("ontMetrics")
 #' alpha = getRSKCAlpha(ontMetrics, k=3, L1=2, seed=100)
 #'
-getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
+getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL, numCores=1) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -983,28 +983,72 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
            "best_qual"=best_qual)
     )
   }
-
+  
   alpha_values = seq(0, max_alpha, 0.01)
-  index = 1
-  for (alpha in alpha_values) {
-    message(paste0("Running stability and quality indexes with alpha=",
-                   alpha," k=",k, " L1=", L1))
-    invisible(suppressMessages({
-      stab = stability(data=df, k=k,
-                       bs=100, seed=seed,
+  num_alphas = length(alpha_values)
+  
+  if(numCores>1){
+    # El máximo de procesos paralelos será igual al número de alphas a ejecutar
+    if(numCores > num_alphas){
+      numCores <- num_alphas;
+    }
+    
+    message("Número de cores que participan en la paralelización: ", numCores)
+    cl <- makeCluster(numCores)
+    on.exit(stopCluster(cl), add = TRUE)
+    # A partir del entorno actual de la función busca esas variables y las pasa a cl
+    clusterExport(cl, c("df", "k", "L1", "seed"), envir=environment())
+    
+    # Cargamos el paquete de evaluomeR
+    clusterEvalQ(cl, {
+      library(evaluomeR)
+      library(RSKC)
+    })
+    run_list <- parLapply(cl, alpha_values, function(alpha){
+      message(paste0("Running stability and quality indexes with alpha=",
+                     alpha," k=",k, " L1=", L1))
+      invisible(suppressMessages({
+        stab = stability(data=df, k=k,
+                         bs=100, seed=seed,
+                         all_metrics=TRUE,
+                         cbi="rskc", L1=L1, alpha=alpha)
+        stab_table = standardizeStabilityData(stab)
+        
+        qual = quality(data=df, k=k,
+                       seed=seed,
                        all_metrics=TRUE,
                        cbi="rskc", L1=L1, alpha=alpha)
-      stab_table = standardizeStabilityData(stab)
-
-      qual = quality(data=df, k=k,
-                     seed=seed,
-                     all_metrics=TRUE,
-                     cbi="rskc", L1=L1, alpha=alpha)
-      qual_table = standardizeQualityData(qual)
-    }))
-
-    run_list[[index]] <- rskc_run(stab = stab_table, qual = qual_table, alpha=alpha)
-    index = index + 1
+        qual_table = standardizeQualityData(qual)
+      }))
+      
+      # Evitamos exportar funciones a los procesos paralelos para reducir overhead
+      return(structure(list(stab = stab_table, mean_stab = mean(as.double(stab_table)),
+                     qual = qual_table, mean_qual = mean(as.double(qual_table)),
+                     alpha = alpha), class = "rskc_run"))
+    })
+  }else{
+    
+    index = 1
+    for (alpha in alpha_values) {
+      message(paste0("Running stability and quality indexes with alpha=",
+                     alpha," k=",k, " L1=", L1))
+      invisible(suppressMessages({
+        stab = stability(data=df, k=k,
+                         bs=100, seed=seed,
+                         all_metrics=TRUE,
+                         cbi="rskc", L1=L1, alpha=alpha)
+        stab_table = standardizeStabilityData(stab)
+  
+        qual = quality(data=df, k=k,
+                       seed=seed,
+                       all_metrics=TRUE,
+                       cbi="rskc", L1=L1, alpha=alpha)
+        qual_table = standardizeQualityData(qual)
+      }))
+  
+      run_list[[index]] <- rskc_run(stab = stab_table, qual = qual_table, alpha=alpha)
+      index = index + 1
+    }
   }
 
   best_run = getBestRun(run_list)
@@ -1054,7 +1098,7 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL) {
 ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
                  max_alpha = 0.1,
                  L1=NULL, alpha=NULL, gold_standard=NULL,
-                 seed=NULL) {
+                 seed=NULL, numCores=1) {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -1076,11 +1120,11 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   # Stability indexes
   stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
                                         all_metrics = all_metrics,
-                                        gold_standard=gold_standard, seed=seed)
+                                        gold_standard=gold_standard, seed=seed, numCores=numCores)
   stab = evaluomeR::standardizeStabilityData(stabRange, k.range = k.range)
   # Quality indexes
   qualRange = evaluomeR::qualityRange(data=data, cbi=cbi, k=k.range,
-                                      all_metrics = all_metrics, seed = seed)
+                                      all_metrics = all_metrics, seed = seed, numCores=1)
   # Optimal k analysis
   qual = evaluomeR::standardizeQualityData(qualRange, k.range = k.range)
   rOptimalK = evaluomeR::getOptimalKValue(stabRange, qualRange)
@@ -1095,7 +1139,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
 
   if (is.null(alpha)) {
       best_alphas = evaluomeR::getRSKCAlpha(data, k=optimalK, L1=L1,
-                                    max_alpha = max_alpha, seed=seed)
+                                    max_alpha = max_alpha, seed=seed, numCores=numCores)
       alpha = best_alphas$best_alpha_qual
   }
   #invisible(suppressMessages({}))
@@ -1134,11 +1178,11 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   # Repeat optimal k analysis for 'data_trimmed'
   stabRange_ATSC = evaluomeR::stabilityRange(data=data_trimmed, cbi=cbi, k=k.range, bs=bs,
                                              all_metrics = all_metrics,
-                                             gold_standard=gold_standard, seed=seed)
+                                             gold_standard=gold_standard, seed=seed, numCores=numCores)
   stab_ATSC = evaluomeR::standardizeStabilityData(stabRange_ATSC, k.range = k.range)
 
   qualRange_ATSC = evaluomeR::qualityRange(data=data_trimmed, cbi=cbi, k=k.range,
-                                           all_metrics = all_metrics, seed = seed)
+                                           all_metrics = all_metrics, seed = seed, numCores=1)
   qual_ATSC = evaluomeR::standardizeQualityData(qualRange_ATSC, k.range = k.range)
 
   rOptimalK_ATSC = evaluomeR::getOptimalKValue(stabRange_ATSC, qualRange_ATSC)
