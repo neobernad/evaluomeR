@@ -894,7 +894,8 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
 #' @param df Input data frame. The first column denotes the identifier of the
 #' evaluated individuals. The remaining columns contain the metrics used to
 #' evaluate the individuals. Rows with NA values will be ignored.
-#' @param k K value (number of clusters)
+#' @param k K value (number of clusters), only used when clustering = "kmeans" 
+#' @param clustering Clustering method to be used
 #' @param seed Random seed to be used.
 #'
 #' @return A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
@@ -902,24 +903,34 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
 #'
 #' @examples
 #' data("ontMetrics")
-#' l1_boundry = getRSKCL1Boundry(ontMetrics, k=3, seed=100)
-#'
-getRSKCL1Boundry <- function(df, k, seed=NULL) {
+#' K-means (default)
+#' l1_boundry = getRSKCL1Boundry(ontMetrics, k=3, clustering="kmeans", seed=100, silent=TRUE)
+#' Hierarchical
+#' l1_boundry = getRSKCL1Boundry(ontMetrics, clustering="hierarchical", seed=100)
+#' 
+getRSKCL1Boundry <- function(df, k, clustering="kmeans", seed=NULL) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
 
   df <- as.data.frame(assay(df))
   df_data = df[-1] # Removing 'Description' column as it is not numeric
-
-  message(paste0("Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
   dataMatrix = as.matrix(df_data)
   wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
-  km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
-  #L1 = floor(km.perm$bestw)
+  
+  if(clustering == "kmeans"){
+    message(paste0("Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
+    km.perm <- sparcl::KMeansSparseCluster.permute(dataMatrix,K=k,wbounds=wbounds,nperms=5,silent=TRUE)
+    #L1 = floor(km.perm$bestw)
+    
+  } else if (clustering == "hierarchical"){
+    message(paste0("Computing best L1 boundry with 'sparcl::HierarchicalSparseCluster.permute'"))
+    km.perm <- sparcl::HierarchicalSparseCluster.permute(dataMatrix,wbounds=wbounds,nperms=5)
+    #L1 = floor(km.perm$bestw)
+  }
+  
   L1 = km.perm$bestw
   message(paste0("Best L1 found is: ", L1))
-
   return (as.numeric(L1))
 }
 
@@ -936,6 +947,7 @@ getRSKCL1Boundry <- function(df, k, seed=NULL) {
 #' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
 #' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05). Default is 0.1.
 #' @param seed Random seed to be used.
+#' @param numCores Number of cores to be used (>1 will use parallel processing)
 #'
 #' @return Best suitable alpha.
 #' @export
@@ -1098,7 +1110,7 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL, numCores=1) {
 ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
                  max_alpha = 0.1,
                  L1=NULL, alpha=NULL, gold_standard=NULL,
-                 seed=NULL, numCores=1) {
+                 seed=NULL, numCores=1, clusteringSparsity="kmeans") {
   k.range.length = length(k.range)
   if (k.range.length != 2) {
     stop("k.range length must be 2")
@@ -1134,7 +1146,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   # Automated Trimmed & Sparse Clustering
   message("Determining best L1 and alpha parameter automatically, it might take a while...")
   if (is.null(L1)) {
-    L1 = evaluomeR::getRSKCL1Boundry(data, k=optimalK, seed=seed)
+    L1 = evaluomeR::getRSKCL1Boundry(data, k=optimalK, clustering=clusteringSparsity, seed=seed)
   }
 
   if (is.null(alpha)) {

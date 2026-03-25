@@ -33,6 +33,7 @@
 #' @param seed Positive integer. A seed for internal bootstrap.
 #' @param gold_standard: Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
 #' Only applicable if parameter 'all_metrics' is set to TRUE.
+#' @param numCores Number of cores to be used (>1 will use parallel processing)
 #'
 #' @return A \code{\link{ExperimentList}} containing the stability and cluster measurements
 #'  for k clusters.
