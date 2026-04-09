@@ -1,6 +1,27 @@
 library(evaluomeR)
+library(RSKC)
+library(sparcl)
+library(parallel)
 
-seed = 100
+data("ontMetrics")
+data("nci60_k8")
+
+seed=100
+
+#Función auxiliar para series de ejecuciones
+ejecutar_experimento_Kopt <- function(dataset, k.range, bs, numCores, seed, nEjec, all_metrics=FALSE){
+  tiempos <- numeric(nEjec)
+  for(i in 1:nEjec){
+    t <- system.time({
+      rs <- stabilityRange(dataset, k.range=k.range, bs=bs, all_metrics=all_metrics, numCores=numCores, seed=seed)
+      rq <- qualityRange(dataset, k.range=k.range, seed=seed)
+      k <- getOptimalKValue(rs, rq, k.range=k.range)
+    })
+    tiempos[i] <- t["elapsed"]
+  }
+  return(list(tiempos = tiempos, media = mean(tiempos)))
+}
+
 
 # Casos para comprobar la rapidez de getOptimalKValue
 
@@ -61,81 +82,49 @@ cat("Tiempo de cálculo 3 de k óptimo:", calculo3_kopt["elapsed"], "seg\n")
 # CASO 1
 
 # Calculo secuencial de k óptimo
-kopt1_secuencial <- system.time({
-  stabData1 <- stabilityRange(ontMetrics, k.range=c(2,5), bs=50)
-  qualData1 <- qualityRange(ontMetrics, k.range=c(2,5))
-  kopt1_sec <- getOptimalKValue(stabData1, qualData1, k.range=c(2,5))
-})
+kopt1_secuencial <- ejecutar_experimento_Kopt(ontMetrics, k.range=c(2,5), bs=50, numCores=1, seed=100, nEjec=5)
 
 # Calculo paralelo de k óptimo
-kopt1_paralelo <- system.time({
-  stabData1 <- stabilityRange(ontMetrics, k.range=c(2,5), bs=50, numCores=6)
-  qualData1 <- qualityRange(ontMetrics, k.range=c(2,5))
-  kopt1_par <- getOptimalKValue(stabData1, qualData1, k.range=c(2,5))
-})
+kopt1_paralelo <- ejecutar_experimento_Kopt(ontMetrics, k.range=c(2,5), bs=50, numCores=12, seed=100, nEjec=5)
 
-cat("Tiempo secuencial k_optimo caso 1:", kopt1_secuencial["elapsed"], "seg\n")
-cat("Tiempo paralelo k_optimo caso 1:", kopt1_paralelo["elapsed"], "seg\n")
+cat("Tiempo secuencial k_optimo caso 1:", kopt1_secuencial$media, "seg\n")
+cat("Tiempo paralelo k_optimo caso 1:", kopt1_paralelo$media, "seg\n")
 
 
 # CASO 2
 
 # Calculo secuencial de k óptimo
-kopt2_secuencial <- system.time({
-  stabData2 <- stabilityRange(ontMetrics, k.range=c(2,10), bs=100)
-  qualData2 <- qualityRange(ontMetrics, k.range=c(2,10))
-  kopt2_sec <- getOptimalKValue(stabData2, qualData2, k.range=c(2,10))
-})
+kopt2_secuencial <- ejecutar_experimento_Kopt(ontMetrics, k.range=c(2,10), bs=100, numCores=1, seed=100, nEjec=5)
 
 # Calculo paralelo de k óptimo
-kopt2_paralelo <- system.time({
-  stabData2 <- stabilityRange(ontMetrics, k.range=c(2,10), bs=100, numCores=6)
-  qualData2 <- qualityRange(ontMetrics, k.range=c(2,10))
-  kopt2_par <- getOptimalKValue(stabData2, qualData2, k.range=c(2,10))
-})
+kopt2_paralelo <- ejecutar_experimento_Kopt(ontMetrics, k.range=c(2,10), bs=100, numCores=12, seed=100, nEjec=5)
 
-cat("Tiempo secuencial k_optimo caso 2:", kopt2_secuencial["elapsed"], "seg\n")
-cat("Tiempo paralelo k_optimo caso 2:", kopt2_paralelo["elapsed"], "seg\n")
+cat("Tiempo secuencial k_optimo caso 2:", kopt2_secuencial$media, "seg\n")
+cat("Tiempo paralelo k_optimo caso 2:", kopt2_paralelo$media, "seg\n")
 
 
 # CASO 3
 
 # Calculo secuencial de k óptimo
-kopt3_secuencial <- system.time({
-  stabData3 <- stabilityRange(nci60_k8, k.range=c(2,10), bs=100)
-  qualData3 <- qualityRange(nci60_k8, k.range=c(2,10))
-  kopt3_sec <- getOptimalKValue(stabData3, qualData3, k.range=c(2,10))
-})
+kopt3_secuencial <- ejecutar_experimento_Kopt(nci60_k8, k.range=c(2,10), bs=100, numCores=1, seed=100, nEjec=5)
 
 # Calculo paralelo de k óptimo
-kopt3_paralelo <- system.time({
-  stabData3 <- stabilityRange(nci60_k8, k.range=c(2,10), bs=100, numCores=6)
-  qualData3 <- qualityRange(nci60_k8, k.range=c(2,10))
-  kopt3_par <- getOptimalKValue(stabData3, qualData3, k.range=c(2,10))
-})
+kopt3_paralelo <- ejecutar_experimento_Kopt(nci60_k8, k.range=c(2,10), bs=100, numCores=12, seed=100, nEjec=5)
 
-cat("Tiempo secuencial k_optimo caso 3:", kopt3_secuencial["elapsed"], "seg\n")
-cat("Tiempo paralelo k_optimo caso 3:", kopt3_paralelo["elapsed"], "seg\n")
+cat("Tiempo secuencial k_optimo caso 3:", kopt3_secuencial$media, "seg\n")
+cat("Tiempo paralelo k_optimo caso 3:", kopt3_paralelo$media, "seg\n")
 
 
 # CASO 4
 
 # Calculo secuencial de k óptimo
-kopt4_secuencial <- system.time({
-  stabData4 <- stabilityRange(nci60_k8, k.range=c(2,15), bs=150)
-  qualData4 <- qualityRange(nci60_k8, k.range=c(2,15))
-  kopt4_sec <- getOptimalKValue(stabData4, qualData4, k.range=c(2,15))
-})
+kopt4_secuencial <- ejecutar_experimento_Kopt(nci60_k8, k.range=c(2,15), bs=150, numCores=1, seed=100, nEjec=5)
 
 # Calculo paralelo de k óptimo
-kopt4_paralelo <- system.time({
-  stabData4 <- stabilityRange(nci60_k8, k.range=c(2,15), bs=150, numCores=6)
-  qualData4 <- qualityRange(nci60_k8, k.range=c(2,15))
-  kopt4_par <- getOptimalKValue(stabData4, qualData4, k.range=c(2,15))
-})
+kopt4_paralelo <- ejecutar_experimento_Kopt(nci60_k8, k.range=c(2,15), bs=150, numCores=12, seed=100, nEjec=5)
 
-cat("Tiempo secuencial k_optimo caso 4:", kopt4_secuencial["elapsed"], "seg\n")
-cat("Tiempo paralelo k_optimo caso 4:", kopt4_paralelo["elapsed"], "seg\n")
+cat("Tiempo secuencial k_optimo caso 4:", kopt4_secuencial$media, "seg\n")
+cat("Tiempo paralelo k_optimo caso 4:", kopt4_paralelo$media, "seg\n")
 
 
 # Comprobamos si los resultados son iguales
