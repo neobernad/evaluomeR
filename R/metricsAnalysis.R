@@ -1132,7 +1132,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   # Stability indexes
   stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
                                         all_metrics = all_metrics,
-                                        gold_standard=gold_standard, seed=seed, numCores=numCores)
+                                        gold_standard=gold_standard, seed=seed, numCores=1)
   stab = evaluomeR::standardizeStabilityData(stabRange, k.range = k.range)
   # Quality indexes
   qualRange = evaluomeR::qualityRange(data=data, cbi=cbi, k=k.range,
@@ -1190,7 +1190,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   # Repeat optimal k analysis for 'data_trimmed'
   stabRange_ATSC = evaluomeR::stabilityRange(data=data_trimmed, cbi=cbi, k=k.range, bs=bs,
                                              all_metrics = all_metrics,
-                                             gold_standard=gold_standard, seed=seed, numCores=numCores)
+                                             gold_standard=gold_standard, seed=seed, numCores=1)
   stab_ATSC = evaluomeR::standardizeStabilityData(stabRange_ATSC, k.range = k.range)
 
   qualRange_ATSC = evaluomeR::qualityRange(data=data_trimmed, cbi=cbi, k=k.range,
