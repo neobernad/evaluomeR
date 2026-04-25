@@ -602,8 +602,9 @@ compare_with_gold_standard <- function(data, gold_standard, clustermethod, datat
   }
 
   c1 <- clustermethod(data, ...)
-
-  randresult <- fossil::rand.index(gold_standard, c1$partition)
+  
+  #randresult <- fossil::rand.index(gold_standard, c1$partition)
+  randresult <- mclust::adjustedRandIndex(gold_standard, c1$partition)
 
   #message("Gold standard")
   #message(gold_standard)

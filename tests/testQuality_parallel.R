@@ -9,11 +9,11 @@ data("nci60_k8")
 seed=100
 
 #Función auxiliar para series de ejecuciones
-ejecutar_experimento_Q <- function(dataset, k.range, bs, numCores, seed, nEjec, all_metrics=FALSE){
+ejecutar_experimento_Q <- function(dataset, k.range, numCores, seed, nEjec, all_metrics=FALSE){
   tiempos <- numeric(nEjec)
   for(i in 1:nEjec){
     t <- system.time({
-      r <- qualityRange(dataset, k.range=k.range, bs=bs, all_metrics=all_metrics, numCores=numCores, seed=seed)
+      r <- qualityRange(dataset, k.range=k.range, all_metrics=all_metrics, numCores=numCores, seed=seed)
     })
     tiempos[i] <- t["elapsed"]
   }

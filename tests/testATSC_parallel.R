@@ -210,8 +210,8 @@ cat("Tiempo ATSC paralelo total", ATSC_nci60_k8_par$media$total, "seg\n")
 
 
 # breastCancer
-
-ATSC_breastCancer_sec <- ATSC_partes(breastCancer, k.range=c(3,10), cbi="kmeans", max_alpha=0.10, numCores=1, seed=100)
+breastCancer_clean<- breastCancer[, -2]
+ATSC_breastCancer_sec <- ATSC_partes(breastCancer_clean, k.range=c(3,10), cbi="kmeans", max_alpha=0.10, numCores=1, seed=100)
 
 cat("Fase 1: Indice de estabilidad", ATSC_breastCancer_sec$media$t1_stability, "seg\n")
 cat("Fase 1: Indice de calidad", ATSC_breastCancer_sec$media$t1_quality, "seg\n")
@@ -223,7 +223,7 @@ cat("Fase 6: Indice de estabilidad", ATSC_breastCancer_sec$media$t6_stability, "
 cat("Fase 6: Indice de calidad", ATSC_breastCancer_sec$media$t6_quality, "seg\n")
 cat("Tiempo ATSC total", ATSC_breastCancer_sec$media$total, "seg\n")
 
-ATSC_breastCancer_par <- ATSC_partes(breastCancer, k.range=c(3,10), cbi="kmeans", max_alpha=0.10, numCores=12, seed=100)
+ATSC_breastCancer_par <- ATSC_partes(breastCancer_clean, k.range=c(3,10), cbi="kmeans", max_alpha=0.10, numCores=12, seed=100)
 
 cat("Fase 1: Indice de estabilidad", ATSC_breastCancer_par$media$t1_stability, "seg\n")
 cat("Fase 1: Indice de calidad", ATSC_breastCancer_par$media$t1_quality, "seg\n")
@@ -236,7 +236,7 @@ cat("Fase 6: Indice de calidad", ATSC_breastCancer_par$media$t6_quality, "seg\n"
 cat("Tiempo ATSC paralelo total", ATSC_breastCancer_par$media$total, "seg\n")
 
 
-ATSC_breastCancer_par_PCA <- ejecutar_experimento_ATSC_conPCA(breastCancer, k.range=c(2,6), cbi="kmeans", correlation_threshold=0.85, seed=100, numCores=12)
+ATSC_breastCancer_par_PCA <- ejecutar_experimento_ATSC_conPCA(breastCancer_clean, k.range=c(2,6), cbi="kmeans", correlation_threshold=0.85, seed=100, numCores=12)
 
 cat("Tiempo ATSC paralelo breastCancer con PCA:", ATSC_breastCancer_par_PCA$media_tiempos, "seg\n")
 

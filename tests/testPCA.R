@@ -181,8 +181,9 @@ cat("Tiempo PCA golub:", t_PCA_golub["elapsed"], "seg\n")
 
 # breastCancer
 
+breastCancer_clean <- breastCancer[, -2]
 t_PCA_breastCancer <- system.time({
-  r_cleanDataset = evaluomeR::cleanDataset(breastCancer, correlation_threshold = 0.85)
+  r_cleanDataset = evaluomeR::cleanDataset(breastCancer_clean, correlation_threshold = 0.85)
   dataset =  r_cleanDataset$dataset
   R =  r_cleanDataset$R
   
@@ -195,7 +196,7 @@ t_PCA_breastCancer <- system.time({
   }
 })
 
-cat("Métricas breastCancer antes de PCA:", ncol(breastCancer)-1, "\n")
+cat("Métricas breastCancer antes de PCA:", ncol(breastCancer_clean)-1, "\n")
 cat("Métricas breastCancer después de PCA:", ncol(breastCancer_postPCA)-1, "\n")
 cat("Tiempo PCA breastCancer:", t_PCA_breastCancer["elapsed"], "seg\n")
 
@@ -239,9 +240,9 @@ cat("Calidad ATSC ontMetrics con PCA:", ATSC2_conPCA$media_quality, "\n")
 
 # breastCancer
 
-ATSC3_sinPCA <- ejecutar_experimento_ATSC_sinPCA(breastCancer, k.range=c(2,6), cbi="kmeans", seed=100)
+ATSC3_sinPCA <- ejecutar_experimento_ATSC_sinPCA(breastCancer_clean, k.range=c(2,6), cbi="kmeans", seed=100)
 
-ATSC3_conPCA <- ejecutar_experimento_ATSC_conPCA(breastCancer, k.range=c(2,6), cbi="kmeans", correlation_threshold=0.85, seed=100)
+ATSC3_conPCA <- ejecutar_experimento_ATSC_conPCA(breastCancer_clean, k.range=c(2,6), cbi="kmeans", correlation_threshold=0.85, seed=100)
 
 cat("Tiempo ATSC breastCancer sin PCA:", ATSC3_sinPCA$media_tiempos, "\n")
 cat("K óptimo ATSC breastCancer sin PCA:", ATSC3_sinPCA$media_k, "\n")
