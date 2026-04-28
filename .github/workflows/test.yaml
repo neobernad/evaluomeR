@@ -41,17 +41,16 @@ jobs:
         uses: r-lib/actions/setup-r-dependencies@v2
         with:
           extra-packages: |
-            any::devtools
+            any::pak
             any::testthat
 
       - name: Install package
         run: |
-          devtools::install_local()
+          pak::pak("local::.")
         shell: Rscript {0}
 
       - name: Run tests
         run: |
-          # Run all test scripts in the tests directory
           test_files <- list.files("tests", pattern = "^test.*\\.R$", full.names = TRUE)
           if (length(test_files) == 0) {
             cat("No test files found\n")
@@ -79,6 +78,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.os }}-r${{ matrix.r-version }}
-          path: |
-            tests/
+          path: tests/
           retention-days: 30
