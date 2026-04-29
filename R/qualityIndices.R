@@ -48,9 +48,24 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
     # Versión paralela
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k,
-                                  k.max = k, bs = 1, cbi, all_metrics, seed=seed, numCores=numCores, ...))
-    silhouetteData =  suppressWarnings(
-      runSilhouetteTableRange(data, k.min = k, k.max = k))
+                                  k.max = k, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
+    if(quality_index == "ch"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      ch_results = length(names.metr)
+      for(i.metr in 1:length(names.metr)){
+        ch_results[i.metr] <- m.global[[i.metr]][k, 1]
+      }
+      return(data.frame(Metric=names.metr, CH = ch_results))
+    } else if(quality_index == "silhouette"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      sil_results = length(names.metr)
+      for(i.metr in 1:length(names.metr)){
+        sil_results[i.metr] <- m.global[[i.metr]][k, 1]
+      }
+      return(data.frame(Metric=names.metr, Silhouette = sil_results))
+    }
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, k.min = k,
@@ -146,9 +161,32 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
     # Versión paralela
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k.min,
-                                  k.max = k.max, bs = 1, cbi, all_metrics, seed=seed, numCores=numCores, ...))
-    silhouetteData =  suppressWarnings(
-      runSilhouetteTableRange(data, k.min = k.min, k.max = k.max))
+                                  k.max = k.max, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
+    if(quality_index == "ch"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      chRes <- list()
+      for(j.k in k.min:k.max){
+        ch_results = length(names.metr)
+        for(i.metr in 1:length(names.metr)){
+          ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
+        }
+        chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
+      }
+      return(chRes)
+    } else if(quality_index == "silhouette"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      silRes <- list()
+      for(j.k in k.min:k.max){
+        sil_results = length(names.metr)
+        for(i.metr in 1:length(names.metr)){
+          sil_results[i.metr] <- m.global[[i.metr]][j.k, 1]
+        }
+        silRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, Silhouette = sil_results)
+      }
+      return(silRes)
+    }
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, k.min = k.min,
@@ -243,9 +281,33 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", all_metrics=FALSE,
   if(numCores>1){
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, bs = 1, seed=seed, cbi=cbi, all_metrics=all_metrics,
-                                  k.set=k.set, numCores=numCores, ...))
-    silhouetteData =  suppressWarnings(
-      runSilhouetteTableRange(data, k.set=k.set))
+                                  k.set=k.set, quality_index = quality_index, numCores=numCores, ...))
+    if(quality_index == "ch"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      chRes <- list()
+      for(j.k in k.set){
+        ch_results = length(names.metr)
+        for(i.metr in 1:length(names.metr)){
+          ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
+        }
+        chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
+      }
+      return(chRes)
+    }else if(quality_index == "silhouette"){
+      names.metr = pkg.env$names.metr
+      m.global = pkg.env$m.global
+      silRes <- list()
+      for(j.k in k.set){
+        sil_results = length(names.metr)
+        for(i.metr in 1:length(names.metr)){
+          sil_results[i.metr] <- m.global[[i.metr]][j.k, 1]
+        }
+        silRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, Silhouette = sil_results)
+      }
+      return(silRes)
+    }
+    
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi=cbi, all_metrics=all_metrics,
@@ -291,6 +353,8 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
     message("\n Quality index used: Silhouette")
   } else if (quality_index == "ch"){
     message("\n Quality index used: Calinski-Harabasz")
+  } else {
+    stop("runQualityIndicesSilhouette: Quality index must be either 'Silhouette' or 'ch' (Calinski-Harabasz)")
   }
 
   data <- removeNAValues(data)
@@ -434,12 +498,20 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
 # Versión paralela de la función runQualityIndicesSilhouette
 # Función paralelizada que divide el número de métricas entre un número de clusters (añadimos numCores)
 runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
-                                                 cbi, all_metrics, seed=NULL, k.set=NULL, numCores=NULL,...) {
+                                                 cbi, all_metrics, seed=NULL, k.set=NULL, numCores=NULL, quality_index="silhouette",...) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
   if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
     stop("runQualityIndicesSilhouette: All k parameters are null!")
+  }
+  
+  if (quality_index == "silhouette"){
+    message("\n Quality index used: Silhouette")
+  } else if (quality_index == "ch"){
+    message("\n Quality index used: Calinski-Harabasz")
+  } else {
+    stop("runQualityIndicesSilhouette: Quality index must be either 'Silhouette' or 'ch' (Calinski-Harabasz)")
   }
   
   data <- removeNAValues(data)
@@ -448,7 +520,11 @@ runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, b
   datos.bruto=data
   names.metr=names(datos.bruto)[-c(1)]
   pkg.env$names.metr = names.metr
-  names.index=c("sil")
+  if (quality_index == "silhouette"){
+    names.index=c("sil")
+  } else if(quality_index == "ch") {
+    names.index=c("ch")
+  }
   pkg.env$names.index = names.index
   k.min=k.min
   k.max=k.max
@@ -489,7 +565,7 @@ runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, b
   on.exit(stopCluster(cl), add = TRUE)
   
   # A partir del entorno actual de la función busca esas variables y las pasa a cl
-  clusterExport(cl, c("datos.bruto", "names.metr", "cbi", "seed", "k.range", "nrow", "num.metrics", "k.range.length", "all_metrics"), envir=environment())
+  clusterExport(cl, c("datos.bruto", "names.metr", "cbi", "seed", "k.range", "nrow", "num.metrics", "k.range.length", "all_metrics", "quality_index"), envir=environment())
   
   # Cargamos el paquete de evaluomeR
   clusterEvalQ(cl, {
@@ -559,21 +635,28 @@ runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, b
         metric.onto=data_to_cluster
         # part.onto=as.numeric(e.res$kmk.dynamic.bs.or)
         part.onto = bootClusterResult$partition
-        sil.w=silhouette(part.onto, dist(metric.onto))
-        sil.c = NULL
-        sil.c$n=length(sil.w[,1])
-        sil.c$cluster.size = as.numeric(summary(sil.w)$clus.sizes)
-        sil.c$cluster.pos = part.onto
-        sil.c$cluster.labels = e.res$name.ontology
-        sil.c$cluster.number = length(summary(sil.w)$cluster.size)
-        sil.c$clus.avg.silwidths = summary(sil.w)$clus.avg.widths
-        sil.c$avg.silwidths = summary(sil.w)$avg.width
-        e.res$sil.w = sil.w
-        e.res$sil.c = sil.c
+        if (quality_index == "silhouette"){
+          sil.w=silhouette(part.onto, dist(metric.onto))
+          sil.c = NULL
+          sil.c$n=length(sil.w[,1])
+          sil.c$cluster.size = as.numeric(summary(sil.w)$clus.sizes)
+          sil.c$cluster.pos = part.onto
+          sil.c$cluster.labels = e.res$name.ontology
+          sil.c$cluster.number = length(summary(sil.w)$cluster.size)
+          sil.c$clus.avg.silwidths = summary(sil.w)$clus.avg.widths
+          sil.c$avg.silwidths = summary(sil.w)$avg.width
+          e.res$sil.w = sil.w
+          e.res$sil.c = sil.c
+          # SUSTITUIMOS POR NUESTRA ESTRUCTURA
+          quality_valores[j.k,] = mean(sil.w[,"sil_width"])
+        } else if (quality_index == "ch"){
+          ch.result=calinhara(metric.onto, part.onto, cn=j.k)
+          e.res$ch.result = ch.result
+          # SUSTITUIMOS POR NUESTRA ESTRUCTURA
+          quality_valores[j.k,] = ch.result
+        }
         #estable[[contador]] = e.res
         
-        # SUSTITUIMOS POR NUESTRA ESTRUCTURA
-        quality_valores[j.k,] = mean(sil.w[,"sil_width"])
       }
     }
     return(list(quality_valores = quality_valores))
