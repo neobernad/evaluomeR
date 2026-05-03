@@ -1,0 +1,7 @@
+url: https://neobernad.github.io/evaluomeR/
+
+template:
+  bootstrap: 5
+
+development:
+  mode: auto
