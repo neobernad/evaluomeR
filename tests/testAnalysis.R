@@ -29,7 +29,7 @@ x = as.data.frame(assay(rnaMetrics))
 a = clusterbootWrapper(data=x[c("RIN", "DegFact")], B=100,
                    bootmethod="boot",
                    cbi="kmeans",
-                   krange=2, seed=100)
+                   krange=2, seed=100, gold_standard=NULL)
 a$bootmean # 0.8534346 for "RIN"
 mean(a$bootmean) # 0.8534346 for "RIN"
 stab = stability(data=x, k=2, bs=100, seed=100)
