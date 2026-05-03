@@ -46,6 +46,7 @@ jobs:
 
       - name: Build site
         run: |
+          pkgdown::clean_site(force = TRUE)
           pkgdown::build_site()
         shell: Rscript {0}
 
