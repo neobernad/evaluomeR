@@ -11,7 +11,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -24,6 +24,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -44,10 +46,10 @@ jobs:
             any::pkgdown
             any::rmarkdown
             any::knitr
+          cache-version: 2
 
       - name: Install package
         run: R CMD INSTALL .
-        shell: bash
 
       - name: Build pkgdown site
         run: |
@@ -64,17 +66,13 @@ jobs:
 
   deploy:
     needs: pkgdown
-
     runs-on: ubuntu-latest
-
     permissions:
       pages: write
       id-token: write
-
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
-
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
