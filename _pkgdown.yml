@@ -3,5 +3,10 @@ url: https://neobernad.github.io/evaluomeR/
 template:
   bootstrap: 5
 
+articles:
+  - title: "Publications"
+    contents:
+      - publications
+
 development:
   mode: auto
