@@ -19,8 +19,12 @@ ejecutar_experimento_Quality_indices <- function(dataset, k, numCores, seed, qua
     if(quality_index=="ch"){
       resultados_calidad[i] = mean(r$CH)
     }else{
-      qual = evaluomeR::standardizeQualityData(r, k.range = c(k,k))
-      resultados_calidad[i] = mean(qual[[1]])
+      if(numCores == 1){
+        qual = evaluomeR::standardizeQualityData(r, k.range = c(k,k))
+        resultados_calidad[i] = mean(qual[[1]])
+      }else{
+        resultados_calidad[i] = mean(r$Silhouette)
+      }
     }
     tiempos[i] <- t["elapsed"]
   }
