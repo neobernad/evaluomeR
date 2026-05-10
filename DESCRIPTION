@@ -45,7 +45,7 @@ Imports:
     FactoMineR (>= 2.11), 
     factoextra (>= 1.0.7),
     nFactors (>= 2.4.1.1)
-Suggests: BiocStyle, knitr, rmarkdown, magrittr
+Suggests: BiocStyle, knitr, rmarkdown, magrittr, pkgdown
 VignetteBuilder: knitr
 RdMacros: Rdpack
 RoxygenNote: 7.3.2
