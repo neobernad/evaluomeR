@@ -1,2 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
+^tests/testStability_parallel\.R$
+^tests/testQuality_parallel\.R$
+^tests/testATSC_parallel\.R$
+^tests/testAlpha_parallel\.R$
+^tests/testK_optimo_parallel\.R$
