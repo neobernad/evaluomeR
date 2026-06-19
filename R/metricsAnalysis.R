@@ -812,11 +812,11 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
 }
 
 
-#' @title Get the range of each metric per cluster from the optimal cluster.
-#' getMetricRangeByCluster
-#' @aliases getMetricRangeByCluster
+#' @title Get the relevancy of each metric.
+#' @name getMetricsRelevancy
+#' @aliases getMetricsRelevancy
 #' @description
-#' Obtains the ranges of the metrics obtained by each optimal cluster.
+#' Obtains the relevancy of the metrics using RSKC.
 #'
 #' @param df Input data frame. The first column denotes the identifier of the
 #' evaluated individuals. The remaining columns contain the metrics used to
@@ -1000,15 +1000,15 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL, numCores=1) {
   num_alphas = length(alpha_values)
   
   if(numCores>1){
-    # El máximo de procesos paralelos será igual al número de alphas a ejecutar
+    # The maximum parallel processes equals the number of alpha values to evaluate
     if(numCores > num_alphas){
       numCores <- num_alphas;
     }
     
-    message("Número de cores que participan en la paralelización: ", numCores)
+    message("Number of cores in parallelization: ", numCores)
     cl <- makeCluster(numCores)
     on.exit(stopCluster(cl), add = TRUE)
-    # A partir del entorno actual de la función busca esas variables y las pasa a cl
+    # Export variables from the current environment to the cluster
     clusterExport(cl, c("df", "k", "L1", "seed"), envir=environment())
     
     # Cargamos el paquete de evaluomeR
@@ -1090,9 +1090,30 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL, numCores=1) {
 #' Another optimal k value analysis is then executed over the trimmed dataset, to conclude with the an optimal partition.
 #'
 #'
-#' @inheritParams stabilityRange
+#' @param data A \code{\link{SummarizedExperiment}}.
+#' The SummarizedExperiment must contain an assay with the following structure:
+#' A valid header with names. The first column of the header is the ID or name
+#' of the instance of the dataset (e.g., ontology, pathway, etc.) on which the
+#' metrics are measured.
+#' The other columns of the header contains the names of the metrics.
+#' The rows contains the measurements of the metrics for each instance in the dataset.
+#' @param k.range Concatenation of two positive integers.
+#' The first value \code{k.range[1]} is considered as the lower bound of the range,
+#' whilst the second one, \code{k.range[2]}, as the higher. Both values must be
+#' contained in [2,15] range.
+#' @param bs Positive integer. Bootstrap value to perform the resampling.
+#' @param cbi Clusterboot interface name (default: "clara"):
+#' "kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "rskc".
+#' @param max_alpha Maximum value of alpha, iterating over seq(0, max_alpha, 0.01).
 #' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
-#' @param max_alpha Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)
+#' If NULL, it is computed automatically.
+#' @param alpha Trimming portion for RSKC, see \code{\link{RSKC}}.
+#' If NULL, it is computed automatically via \code{max_alpha}.
+#' @param gold_standard Numeric vector. A vector of clusters from a gold standard
+#' classification. Only used when \code{all_metrics = TRUE}.
+#' @param seed Positive integer. A seed for internal bootstrap.
+#' @param numCores Number of cores to be used for the alpha search (>1 will use parallel processing).
+#' @param clusteringSparsity Clustering method used to determine the L1 bound (default: "kmeans").
 #'
 #' @return A list containing:
 #' \item{stab}{A data frame containing standardized stability.}

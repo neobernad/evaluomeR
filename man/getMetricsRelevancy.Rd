@@ -2,9 +2,7 @@
 % Please edit documentation in R/metricsAnalysis.R
 \name{getMetricsRelevancy}
 \alias{getMetricsRelevancy}
-\alias{getMetricRangeByCluster}
-\title{Get the range of each metric per cluster from the optimal cluster.
-getMetricRangeByCluster}
+\title{Get the relevancy of each metric.}
 \usage{
 getMetricsRelevancy(df, k, alpha = 0, L1 = NULL, seed = NULL)
 }

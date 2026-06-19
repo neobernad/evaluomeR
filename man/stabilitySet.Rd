@@ -13,6 +13,7 @@ stabilitySet(
   all_metrics = FALSE,
   seed = NULL,
   gold_standard = NULL,
+  numCores = 1,
   ...
 )
 }
@@ -40,6 +41,13 @@ The method used in 'hclust' CBI is "ward.D2".}
 \item{all_metrics}{Boolean. If true, clustering is performed upon all the dataset.}
 
 \item{seed}{Positive integer. A seed for internal bootstrap.}
+
+\item{gold_standard}{Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
+Only applicable if parameter 'all_metrics' is set to TRUE.}
+
+\item{numCores}{Number of cores to be used (>1 will use parallel processing).}
+
+\item{...}{Additional arguments passed to internal clustering functions.}
 }
 \value{
 A \code{\link{ExperimentList}} containing the stability and cluster measurements

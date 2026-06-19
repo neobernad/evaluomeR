@@ -198,6 +198,7 @@ PCASuitability <- function(R, sig_level = 0.05) {
 #' @param dataset A data frame to be analyzed via PCA.
 #' @param ncp An integer specifying the number of principal components to retain, default is 5.
 #' @param scale A boolean indicating whether to scale the data, default is TRUE.
+#' @param visualize Boolean. If TRUE, display a biplot of the PCA results (default FALSE).
 #'
 #' @return A list containing the PCA results, summary of eigenvalues, contributions, coordinates, and more.
 #'
@@ -257,7 +258,6 @@ performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
 #'
 #' @param pca_result The result of a PCA analysis (object returned from `performPCA`).
 #' @param title An optional title for the scree plot. If NULL, a default title will be used.
-#' @param ncp Number of principal components
 #'
 #' @return A ggplot object representing the scree plot.
 #'

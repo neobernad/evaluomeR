@@ -31,9 +31,10 @@
 #' @param getImages Boolean. If true, a plot is displayed.
 #' @param all_metrics Boolean. If true, clustering is performed upon all the dataset.
 #' @param seed Positive integer. A seed for internal bootstrap.
-#' @param gold_standard: Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
+#' @param gold_standard Numeric vector. A vector of clusters from a gold standard classification, e.g. c(1,2,1,1,2).
 #' Only applicable if parameter 'all_metrics' is set to TRUE.
 #' @param numCores Number of cores to be used (>1 will use parallel processing)
+#' @param ... Additional arguments passed to internal clustering functions.
 #'
 #' @return A \code{\link{ExperimentList}} containing the stability and cluster measurements
 #'  for k clusters.
@@ -58,7 +59,7 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
   checkKValue(k)
   
   if(numCores>1){
-    # Versión paralela
+    # Parallel version
     runStabilityIndex_parallel(data, k.min=k, k.max=k, bs=bs, cbi=cbi,
                       all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
     stabilityDataFrame <- suppressWarnings(
@@ -133,7 +134,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   data <- as.data.frame(SummarizedExperiment::assay(data))
   
   if(numCores>1){
-    # Versión paralela
+    # Parallel version
     runStabilityIndex_parallel(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
     stabilityDataFrame <- suppressWarnings(
       runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
@@ -205,7 +206,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
   data <- as.data.frame(SummarizedExperiment::assay(data))
   
   if(numCores>1){
-    # Versión paralela
+    # Parallel version
     runStabilityIndex_parallel(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
     stabilityDataFrame <- suppressWarnings(
       runStabilityIndexTableRange(data, k.set = k.set))
@@ -450,8 +451,8 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
   #return(NULL)
 }
 
-# Versión paralela de la función runStabilityIndex
-# Función paralelizada que divide el número de métricas entre un número de clusters (añadimos numCores)
+# Parallel version of runStabilityIndex
+# Parallelized function that divides the metrics across workers (adds numCores)
 runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
                                        cbi, all_metrics, seed, k.set=NULL,
                                        gold_standard=NULL, numCores=NULL,...) {
@@ -506,22 +507,22 @@ runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
     pkg.env$names.metr = names.metr
   }
   
-  # Se puede también detectar el número de cores o se puede asignar manualmente aquí si se prefiere
+  # Optionally detect number of cores automatically or assign manually
   # numCores <- detectCores() 
-  message("Número de cores que participan en la paralelización: ", numCores)
+  message("Number of cores in parallelization: ", numCores)
   cl <- makeCluster(numCores)
   on.exit(stopCluster(cl), add = TRUE)
   
-  # A partir del entorno actual de la función busca esas variables y las pasa a cl
+  # Export variables from the current environment to the cluster
   clusterExport(cl, c("datos.bruto", "names.metr", "cbi", "seed", "k.range", "k.range.length", "bs.values", "gold_standard", "all_metrics"), envir=environment())
   
   # Cargamos el paquete de evaluomeR
   clusterEvalQ(cl, {library(evaluomeR)})
   
-  # Bucle a paralelizar, número de métricas
+  # Parallel loop over metrics
   resultados <- parLapply(cl, 1:num.metrics, function(i.metr){
     
-    # Guardamos los resultados de una métrica específica
+    # Store results for each metric
     stab_valores <- rep(NA, max(k.range))
     
     csv_data <- vector("list", max(k.range))

@@ -45,7 +45,7 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
   data <- as.data.frame(assay(data))
   
   if(numCores>1){
-    # Versión paralela
+    # Parallel version
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k,
                                   k.max = k, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
@@ -158,7 +158,7 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
   data <- as.data.frame(assay(data))
 
   if(numCores>1){
-    # Versión paralela
+    # Parallel version
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k.min,
                                   k.max = k.max, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
@@ -495,8 +495,8 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
   pkg.env$estable = estable
 }
 
-# Versión paralela de la función runQualityIndicesSilhouette
-# Función paralelizada que divide el número de métricas entre un número de clusters (añadimos numCores)
+# Parallel version of runQualityIndicesSilhouette
+# Parallelized function that divides the metrics across workers (adds numCores)
 runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
                                                  cbi, all_metrics, seed=NULL, k.set=NULL, numCores=NULL, quality_index="silhouette",...) {
   if (is.null(seed)) {
@@ -558,13 +558,13 @@ runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, b
     pkg.env$names.metr = names.metr
   }
   
-  # Se puede también detectar el número de cores o se puede asignar manualmente aquí si se prefiere
+  # Optionally detect number of cores automatically or assign manually
   # numCores <- detectCores() 
-  message("Número de cores que participan en la paralelización: ", numCores)
+  message("Number of cores in parallelization: ", numCores)
   cl <- makeCluster(numCores)
   on.exit(stopCluster(cl), add = TRUE)
   
-  # A partir del entorno actual de la función busca esas variables y las pasa a cl
+  # Export variables from the current environment to the cluster
   clusterExport(cl, c("datos.bruto", "names.metr", "cbi", "seed", "k.range", "nrow", "num.metrics", "k.range.length", "all_metrics", "quality_index"), envir=environment())
   
   # Cargamos el paquete de evaluomeR
@@ -575,7 +575,7 @@ runQualityIndicesSilhouette_parallel <- function(data, k.min=NULL, k.max=NULL, b
   
   resultados <- parLapply(cl, 1:num.metrics, function(i.metr){
     
-    # Guardamos los resultados de una métrica específica
+    # Store results for each metric
     quality_valores <- matrix(NA, nrow=nrow, ncol=k.range.length)
     
     

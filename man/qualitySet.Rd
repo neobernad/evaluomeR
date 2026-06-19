@@ -11,6 +11,8 @@ qualitySet(
   all_metrics = FALSE,
   getImages = FALSE,
   seed = NULL,
+  numCores = 1,
+  quality_index = "silhouette",
   ...
 )
 }
@@ -36,6 +38,12 @@ The method used in 'hclust' CBI is "ward.D2".}
 \item{getImages}{Boolean. If true, a plot is displayed.}
 
 \item{seed}{Positive integer. A seed for internal bootstrap.}
+
+\item{numCores}{Number of cores to be used (>1 will use parallel processing).}
+
+\item{quality_index}{String indicating quality index to be computed: "silhouette" (default) or "ch" (Calinski-Harabasz).}
+
+\item{...}{Additional arguments passed to internal clustering functions.}
 }
 \value{
 A list of \code{\link{SummarizedExperiment}} containing the silhouette width measurements and
