@@ -32,3 +32,39 @@
 #' \insertRef{davis2018metrics}{evaluomeR}
 #' @usage data("bioMetrics")
 "bioMetrics"
+
+#' @title Dataset: Structural ontology metrics (OBO Foundry subset)
+#' @description
+#' Structural ontology metrics measured on the OBO Foundry corpus of
+#' bio-ontologies. A subset of the ontMetrics dataset restricted to OBO
+#' Foundry ontologies.
+#' @usage data("ontMetricsOBO")
+"ontMetricsOBO"
+
+#' @title Dataset: NCI-60 cancer cell line metrics (k=8 partition)
+#' @description
+#' Bioinformatics metrics computed on the NCI-60 cancer cell line panel,
+#' pre-partitioned into 8 clusters. Used for benchmarking clustering methods.
+#' @usage data("nci60_k8")
+"nci60_k8"
+
+#' @title Dataset: NCI-60 cancer cell line metrics (k=10 partition)
+#' @description
+#' Bioinformatics metrics computed on the NCI-60 cancer cell line panel,
+#' pre-partitioned into 10 clusters. Used for benchmarking clustering methods.
+#' @usage data("nci60_k10")
+"nci60_k10"
+
+#' @title Dataset: Golub leukemia gene expression metrics
+#' @description
+#' Bioinformatics metrics derived from the Golub et al. leukemia gene
+#' expression dataset. Used for benchmarking ATSC and clustering methods.
+#' @usage data("golub")
+"golub"
+
+#' @title Dataset: Breast cancer gene expression metrics
+#' @description
+#' Bioinformatics metrics derived from a breast cancer gene expression
+#' dataset. Used for benchmarking ATSC and PCA-based clustering pipelines.
+#' @usage data("breastCancer")
+"breastCancer"
