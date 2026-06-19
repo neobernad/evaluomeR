@@ -581,13 +581,20 @@ checkStabilityQualityData <- function(stabData, qualData) {
 #
 # It transforms the output of qualityRange method
 # into a dataframe like this:
-# (rownames)       k_2       k_3       k_4
-# DegFact          0.6171262 0.6278294 0.4882649
-# ...
-# So that the input of getOptimalKValue has always a
-# standardized dataframe to process.
-#
-
+#' @title Standardize quality data from qualityRange output
+#' @name standardizeQualityData
+#' @aliases standardizeQualityData
+#' @description
+#' Transforms the output of \code{\link{qualityRange}} into a data frame
+#' with metrics as row names and one column per k value, suitable as input
+#' for \code{\link{getOptimalKValue}}.
+#'
+#' @param qualData Output object from \code{\link{qualityRange}}.
+#' @param k.range Optional two-element integer vector to subset the k range.
+#'
+#' @return A data frame with metrics as row names and k columns.
+#'
+#' @export
 standardizeQualityData <- function(qualData, k.range=NULL) {
   lengthQuality = length(qualData)
   qualRangeStart = getFormattedK(names(qualData)[1])
@@ -637,12 +644,20 @@ standardizeQualityData <- function(qualData, k.range=NULL) {
 #
 # It transforms the output of stabilityRange method
 # into a dataframe like this:
-# (rownames)       k_2       k_3       k_4
-# RIN              0.6171262 0.6278294 0.4882649
-# ...
-# So that the input of getOptimalKValue has always a
-# standardized dataframe to process.
-#
+#' @title Standardize stability data from stabilityRange output
+#' @name standardizeStabilityData
+#' @aliases standardizeStabilityData
+#' @description
+#' Transforms the output of \code{\link{stabilityRange}} into a data frame
+#' with metrics as row names and one column per k value, suitable as input
+#' for \code{\link{getOptimalKValue}}.
+#'
+#' @param stabData Output object from \code{\link{stabilityRange}}.
+#' @param k.range Optional two-element integer vector to subset the k range.
+#'
+#' @return A data frame with metrics as row names and k columns.
+#'
+#' @export
 standardizeStabilityData <- function(stabData, k.range=NULL) {
   stabDf = as.data.frame(assay(stabData)) # Getting first assay, which is 'stabData$stability_mean'
   lengthColnames = length(colnames(stabDf))

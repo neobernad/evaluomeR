@@ -5,7 +5,7 @@
 #' @param dataset A data frame from which non-numeric columns are to be removed.
 #'
 #' @return A data frame containing only numeric columns. Also prints non-numeric columns found.
-
+#' @noRd
 removeNonNumericColumns <- function(dataset) {
   message("Removing non-numeric columns...")
   # Get only numeric columns
@@ -77,7 +77,7 @@ cleanDataset <- function(dataset, correlation_threshold = 1) {
 #' @param correlation_threshold A numeric threshold for identifying perfect correlations.
 #'
 #' @return A list containing the cleaned dataset and the remaining column names, along with the correlation matrix R.
-#'
+#' @noRd
 removeCorrelations <- function(numeric_dataset, correlation_threshold = 1) {
   message("Removing correlations...")
 
