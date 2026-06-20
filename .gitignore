@@ -1,3 +1,6 @@
+# Local IDE / agent config (not shared via repo)
+.cursor/
+
 *.Rproj
 .Rproj
 .Rproj.user

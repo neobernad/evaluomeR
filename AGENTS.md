@@ -335,11 +335,20 @@ Each use case under `usecases/` follows the pattern:
 
 ## Agent Workflow
 
-### Ponytail (active)
+### Ponytail (optional, local install)
 
 [Ponytail](https://github.com/DietrichGebert/ponytail) lazy-senior-dev mode is
-enabled via `.cursor/rules/ponytail.mdc`. Default intensity: **full**. Say
-`stop ponytail` / `normal mode` to turn it off for a session.
+**not committed to this repo** — agent tooling is a per-developer choice. To
+enable it in Cursor locally:
+
+```bash
+mkdir -p .cursor/rules
+curl -fsSL https://raw.githubusercontent.com/DietrichGebert/ponytail/main/.cursor/rules/ponytail.mdc \
+  -o .cursor/rules/ponytail.mdc
+```
+
+Default intensity: **full**. Say `stop ponytail` / `normal mode` to turn it off
+for a session. `.cursor/` is gitignored.
 
 ### Area-specific tests (required after code changes)
 
