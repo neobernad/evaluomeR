@@ -80,7 +80,8 @@ insertRow <- function(existingDF, newrow, r) {
 ## Checks if k is in range [2,15]
 checkKValue <- function(k) {
   if (k < 2 || k > 15) {
-    stop("k value is not in range [2,15]")
+    error=paste("k value (",k,") is not in range [2,15]", sep="")
+    stop(error)
   }
 }
 
@@ -97,6 +98,9 @@ checkDirectory <- function(path) {
 
 sample.range <- function(x) {diff(range(x))}
 sample.min <- function(x) {min(x)}
+
+# Convenience: extract the first assay of a SummarizedExperiment as a data frame
+assayAsDF <- function(data) as.data.frame(assay(data))
 
 # data: One dataframe, thus one assay
 createSE <- function(data) {

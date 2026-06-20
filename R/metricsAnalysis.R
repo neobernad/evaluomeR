@@ -15,7 +15,7 @@
 #' plotMetricsMinMax(ontMetrics)
 #'
 plotMetricsMinMax <- function(data) {
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   # Prepare data for plotting
   # Data matrix without descritive column
   matrix = data.matrix(data[,-1])
@@ -87,7 +87,7 @@ plotMetricsMinMax <- function(data) {
 #' plotMetricsBoxplot(ontMetrics)
 #'
 plotMetricsBoxplot <- function(data) {
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   num_metrics_plot=20
   data.metrics = data[,-1] # Removing Description column
 
@@ -156,7 +156,7 @@ plotMetricsBoxplot <- function(data) {
 #' plotMetricsCluster(ontMetrics, scale=TRUE)
 #'
 plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   data.metrics = data[,-1] # Removing Description column
   if (isTRUE(scale)) {
     data.metrics = base::scale(data.metrics)
@@ -194,7 +194,7 @@ plotMetricsCluster <- function(data, scale=FALSE, k=NULL) {
 #' plotMetricsViolin(ontMetrics)
 #'
 plotMetricsViolin <- function(data, nplots=20) {
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   data.metrics = data[,-1] # Removing Description column
   nplots=20
 
@@ -446,7 +446,7 @@ plotMetricsClusterComparison <- function(data, k.vector1, k.vector2=NULL, seed=N
     stop("k.vector1 and k.vector2 are identical")
   }
 
-  data <- as.data.frame(SummarizedExperiment::assay(data))
+  data <- assayAsDF(data)
 
   numMetrics = length(colnames(data))-1
 
@@ -730,7 +730,7 @@ annotateClustersByMetric <- function(df, k.range, bs, seed){
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
-  df <- as.data.frame(assay(df))
+  df <- assayAsDF(df)
   # Create a dataframe by removing NAs from the original data.
   df_clean = na.omit(df)
 
@@ -802,7 +802,7 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
-  df <- as.data.frame(assay(df))
+  df <- assayAsDF(df)
   annotated_clusters_by_metric = annotateClustersByMetric(df, k.range, bs, seed)
 
   metrics = c()
@@ -860,7 +860,7 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
 #    alpha = 0.1
 #  }
 
-  df <- as.data.frame(assay(df))
+  df <- assayAsDF(df)
 
   if (is.null(L1)) {
     print(paste0("No L1 provided. Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
@@ -928,7 +928,7 @@ getRSKCL1Boundry <- function(df, k, clustering="kmeans", seed=NULL) {
     seed = pkg.env$seed
   }
 
-  df <- as.data.frame(assay(df))
+  df <- assayAsDF(df)
   df_data = df[-1] # Removing 'Description' column as it is not numeric
   dataMatrix = as.matrix(df_data)
   wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
@@ -976,7 +976,7 @@ getRSKCAlpha <- function(df, k, L1, max_alpha = 0.1, seed=NULL, numCores=1) {
     seed = pkg.env$seed
   }
 
-  df <- as.data.frame(assay(df))
+  df <- assayAsDF(df)
 
   # Helper structures
   ## Structure to keep track of stability and qualit of each RSKC run.
@@ -1164,7 +1164,7 @@ ATSC <- function(data, k.range=c(2,15), bs=100, cbi="clara",
   all_metrics=TRUE
   message(paste0("Computing optimal k value with '", cbi, "'"))
 
-  data = as.data.frame(SummarizedExperiment::assay(data))
+  data = assayAsDF(data)
   # Stability indexes
   stabRange = evaluomeR::stabilityRange(data=data, cbi=cbi, k=k.range, bs=bs,
                                         all_metrics = all_metrics,
