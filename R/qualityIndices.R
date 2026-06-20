@@ -1,3 +1,16 @@
+# Internal: build one data.frame of quality results for a single k value from pkg.env globals.
+# quality_index: "ch" returns column CH, "silhouette" returns column Silhouette.
+.buildQualityIndexFrame <- function(k.value, names.metr, m.global, quality_index) {
+  col_values <- vapply(seq_along(names.metr),
+                       function(i) m.global[[i]][k.value, 1L],
+                       numeric(1))
+  if (quality_index == "ch") {
+    data.frame(Metric = names.metr, CH = col_values, stringsAsFactors = FALSE)
+  } else {
+    data.frame(Metric = names.metr, Silhouette = col_values, stringsAsFactors = FALSE)
+  }
+}
+
 #' @title Goodness of classifications.
 #' @name quality
 #' @aliases quality
@@ -49,35 +62,15 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k,
                                   k.max = k, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
-    if(quality_index == "ch"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      ch_results = length(names.metr)
-      for(i.metr in 1:length(names.metr)){
-        ch_results[i.metr] <- m.global[[i.metr]][k, 1]
-      }
-      return(data.frame(Metric=names.metr, CH = ch_results))
-    } else if(quality_index == "silhouette"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      sil_results = length(names.metr)
-      for(i.metr in 1:length(names.metr)){
-        sil_results[i.metr] <- m.global[[i.metr]][k, 1]
-      }
-      return(data.frame(Metric=names.metr, Silhouette = sil_results))
+    if(quality_index == "ch" || quality_index == "silhouette"){
+      return(.buildQualityIndexFrame(k, pkg.env$names.metr, pkg.env$m.global, quality_index))
     }
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, k.min = k,
                                   k.max = k, bs = 1, cbi, all_metrics, quality_index = quality_index, seed=seed, ...))
     if(quality_index == "ch"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      ch_results = length(names.metr)
-      for(i.metr in 1:length(names.metr)){
-        ch_results[i.metr] <- m.global[[i.metr]][k, 1]
-      }
-      return(data.frame(Metric=names.metr, CH = ch_results))
+      return(.buildQualityIndexFrame(k, pkg.env$names.metr, pkg.env$m.global, quality_index))
     }
     
     silhouetteData =  suppressWarnings(
@@ -162,48 +155,24 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, k.min = k.min,
                                   k.max = k.max, bs = 1, cbi, all_metrics, seed=seed, quality_index = quality_index, numCores=numCores, ...))
-    if(quality_index == "ch"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      chRes <- list()
-      for(j.k in k.min:k.max){
-        ch_results = length(names.metr)
-        for(i.metr in 1:length(names.metr)){
-          ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-        }
-        chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
-      }
-      return(chRes)
-    } else if(quality_index == "silhouette"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      silRes <- list()
-      for(j.k in k.min:k.max){
-        sil_results = length(names.metr)
-        for(i.metr in 1:length(names.metr)){
-          sil_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-        }
-        silRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, Silhouette = sil_results)
-      }
-      return(silRes)
+    if(quality_index == "ch" || quality_index == "silhouette"){
+      k.vals <- k.min:k.max
+      return(setNames(
+        lapply(k.vals, .buildQualityIndexFrame, pkg.env$names.metr, pkg.env$m.global, quality_index),
+        paste0("k=", k.vals)
+      ))
     }
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, k.min = k.min,
                                   k.max = k.max, bs = 1, cbi, all_metrics, quality_index = quality_index, seed=seed, ...))
-    
+
     if(quality_index == "ch"){
-       names.metr = pkg.env$names.metr
-       m.global = pkg.env$m.global
-       chRes <- list()
-       for(j.k in k.min:k.max){
-         ch_results = length(names.metr)
-         for(i.metr in 1:length(names.metr)){
-           ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-         }
-         chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
-       }
-       return(chRes)
+      k.vals <- k.min:k.max
+      return(setNames(
+        lapply(k.vals, .buildQualityIndexFrame, pkg.env$names.metr, pkg.env$m.global, quality_index),
+        paste0("k=", k.vals)
+      ))
     }
     silhouetteData =  suppressWarnings(
       runSilhouetteTableRange(data, k.min = k.min, k.max = k.max))
@@ -282,48 +251,22 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", all_metrics=FALSE,
     suppressWarnings(
       runQualityIndicesSilhouette_parallel(data, bs = 1, seed=seed, cbi=cbi, all_metrics=all_metrics,
                                   k.set=k.set, quality_index = quality_index, numCores=numCores, ...))
-    if(quality_index == "ch"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      chRes <- list()
-      for(j.k in k.set){
-        ch_results = length(names.metr)
-        for(i.metr in 1:length(names.metr)){
-          ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-        }
-        chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
-      }
-      return(chRes)
-    }else if(quality_index == "silhouette"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      silRes <- list()
-      for(j.k in k.set){
-        sil_results = length(names.metr)
-        for(i.metr in 1:length(names.metr)){
-          sil_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-        }
-        silRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, Silhouette = sil_results)
-      }
-      return(silRes)
+    if(quality_index == "ch" || quality_index == "silhouette"){
+      return(setNames(
+        lapply(k.set, .buildQualityIndexFrame, pkg.env$names.metr, pkg.env$m.global, quality_index),
+        paste0("k=", k.set)
+      ))
     }
-    
+
   }else{
     suppressWarnings(
       runQualityIndicesSilhouette(data, bs = 1, seed=seed, cbi=cbi, all_metrics=all_metrics,
                                   k.set=k.set, quality_index = quality_index, ...))
     if(quality_index == "ch"){
-      names.metr = pkg.env$names.metr
-      m.global = pkg.env$m.global
-      chRes <- list()
-      for(j.k in k.set){
-        ch_results = length(names.metr)
-        for(i.metr in 1:length(names.metr)){
-          ch_results[i.metr] <- m.global[[i.metr]][j.k, 1]
-        }
-        chRes[[paste0("k=", j.k)]] = data.frame(Metric = names.metr, CH = ch_results)
-      }
-      return(chRes)
+      return(setNames(
+        lapply(k.set, .buildQualityIndexFrame, pkg.env$names.metr, pkg.env$m.global, quality_index),
+        paste0("k=", k.set)
+      ))
     }
     
     silhouetteData =  suppressWarnings(
