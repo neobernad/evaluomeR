@@ -5,14 +5,16 @@
 \title{Computes L1 boundry
 getRSKCL1Boundry}
 \usage{
-getRSKCL1Boundry(df, k, seed = NULL)
+getRSKCL1Boundry(df, k, clustering = "kmeans", seed = NULL)
 }
 \arguments{
 \item{df}{Input data frame. The first column denotes the identifier of the
 evaluated individuals. The remaining columns contain the metrics used to
 evaluate the individuals. Rows with NA values will be ignored.}
 
-\item{k}{K value (number of clusters)}
+\item{k}{K value (number of clusters), only used when clustering = "kmeans".}
+
+\item{clustering}{Clustering method to be used: "kmeans" (default) or "hierarchical".}
 
 \item{seed}{Random seed to be used.}
 }

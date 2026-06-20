@@ -9,7 +9,7 @@ data("nci60_k8")
 seed=100
 
 #Función auxiliar para series de ejecuciones
-ejecutar_experimento_L1 <- function(dataset, k = NULL, clustering=clustering, seed = 100, nEjec = 5){
+ejecutar_experimento_L1 <- function(dataset, k = NULL, clustering=clustering, seed = 100, nEjec = 1){
   tiempos <- numeric(nEjec)
   valores_L1 <- numeric(nEjec)
   for(i in 1:nEjec){
@@ -27,7 +27,7 @@ ejecutar_experimento_L1 <- function(dataset, k = NULL, clustering=clustering, se
 }
 
 #Función auxiliar para series de ejecuciones
-ejecutar_experimento_L1_ATSC <- function(dataset, k.range=c(2, 10), cbi = "kmeans", clustering=clustering, L1=L1, seed = 100, nEjec = 5){
+ejecutar_experimento_L1_ATSC <- function(dataset, k.range=c(2, 4), cbi = "kmeans", clustering=clustering, L1=L1, seed = 100, nEjec = 1){
   tiempos <- numeric(nEjec)
   k_optimos <- numeric(nEjec)
   estabilidades <- numeric(nEjec)

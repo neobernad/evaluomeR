@@ -5,7 +5,7 @@
 #' @param dataset A data frame from which non-numeric columns are to be removed.
 #'
 #' @return A data frame containing only numeric columns. Also prints non-numeric columns found.
-
+#' @noRd
 removeNonNumericColumns <- function(dataset) {
   message("Removing non-numeric columns...")
   # Get only numeric columns
@@ -77,7 +77,7 @@ cleanDataset <- function(dataset, correlation_threshold = 1) {
 #' @param correlation_threshold A numeric threshold for identifying perfect correlations.
 #'
 #' @return A list containing the cleaned dataset and the remaining column names, along with the correlation matrix R.
-#'
+#' @noRd
 removeCorrelations <- function(numeric_dataset, correlation_threshold = 1) {
   message("Removing correlations...")
 
@@ -198,6 +198,7 @@ PCASuitability <- function(R, sig_level = 0.05) {
 #' @param dataset A data frame to be analyzed via PCA.
 #' @param ncp An integer specifying the number of principal components to retain, default is 5.
 #' @param scale A boolean indicating whether to scale the data, default is TRUE.
+#' @param visualize Boolean. If TRUE, display a biplot of the PCA results (default FALSE).
 #'
 #' @return A list containing the PCA results, summary of eigenvalues, contributions, coordinates, and more.
 #'
@@ -257,7 +258,6 @@ performPCA <- function(dataset, ncp = NULL, scale = TRUE, visualize = FALSE) {
 #'
 #' @param pca_result The result of a PCA analysis (object returned from `performPCA`).
 #' @param title An optional title for the scree plot. If NULL, a default title will be used.
-#' @param ncp Number of principal components
 #'
 #' @return A ggplot object representing the scree plot.
 #'

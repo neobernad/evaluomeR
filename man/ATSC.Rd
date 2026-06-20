@@ -8,19 +8,20 @@ ATSC(
   data,
   k.range = c(2, 15),
   bs = 100,
-  cbi = "kmeans",
+  cbi = "clara",
   max_alpha = 0.1,
-  all_metrics = TRUE,
   L1 = NULL,
   alpha = NULL,
   gold_standard = NULL,
-  seed = NULL
+  seed = NULL,
+  numCores = 1,
+  clusteringSparsity = "kmeans"
 )
 }
 \arguments{
 \item{data}{A \code{\link{SummarizedExperiment}}.
 The SummarizedExperiment must contain an assay with the following structure:
-A valid header with names. The first  column of the header is the ID or name
+A valid header with names. The first column of the header is the ID or name
 of the instance of the dataset (e.g., ontology, pathway, etc.) on which the
 metrics are measured.
 The other columns of the header contains the names of the metrics.
@@ -33,18 +34,25 @@ contained in [2,15] range.}
 
 \item{bs}{Positive integer. Bootstrap value to perform the resampling.}
 
-\item{cbi}{Clusterboot interface name (default: "kmeans"):
-"kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "pamk".
-Any CBI appended with '_pam' makes use of \code{\link{pam}}.
-The method used in 'hclust' CBI is "ward.D2".}
+\item{cbi}{Clusterboot interface name (default: "clara"):
+"kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "rskc".}
 
-\item{max_alpha}{Maximum value of alpha,  iterating over seq(0, max_alpha, 0.05)}
+\item{max_alpha}{Maximum value of alpha, iterating over seq(0, max_alpha, 0.01).}
 
-\item{all_metrics}{Boolean. If true, clustering is performed upon all the dataset.}
+\item{L1}{A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
+If NULL, it is computed automatically.}
 
-\item{L1}{A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.}
+\item{alpha}{Trimming portion for RSKC, see \code{\link{RSKC}}.
+If NULL, it is computed automatically via \code{max_alpha}.}
+
+\item{gold_standard}{Numeric vector. A vector of clusters from a gold standard
+classification. Only used when all metrics are clustered together.}
 
 \item{seed}{Positive integer. A seed for internal bootstrap.}
+
+\item{numCores}{Number of cores to be used for the alpha search (>1 will use parallel processing).}
+
+\item{clusteringSparsity}{Clustering method used to determine the L1 bound (default: "kmeans").}
 }
 \value{
 A list containing:

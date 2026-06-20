@@ -112,11 +112,30 @@ getMeasureValue <- function(km5, measureName) {
 ######################################################
 
 ######################################################
-#function
-#   clusterbootWrapper(data, B, bootmethod="boot",
-#                     clustermethod=kmeansCBI, krange, seed, ...)
-#     Wrapper method for clusterboot functionality.
 
+#' @title Wrapper for clusterboot functionality
+#' @name clusterbootWrapper
+#' @aliases clusterbootWrapper
+#' @description
+#' Convenience wrapper around the \code{clusterboot} routine from the
+#' \code{fpc} package. Selects the appropriate CBI (cluster boot interface)
+#' method based on the \code{cbi} argument and forwards all arguments.
+#'
+#' @param data A numeric data frame or matrix.
+#' @param B Positive integer. Number of bootstrap replicates.
+#' @param bootmethod Character. Bootstrap method passed to \code{clusterboot}
+#'   (default: \code{"boot"}).
+#' @param cbi Character. Clusterboot interface name (one of the values
+#'   returned by \code{\link{evaluomeRSupportedCBI}}).
+#' @param krange Integer or integer vector. Number of clusters to use.
+#' @param gold_standard Numeric vector. Optional gold standard cluster
+#'   assignments.
+#' @param seed Positive integer. Random seed for reproducibility.
+#' @param ... Additional arguments forwarded to the selected CBI method.
+#'
+#' @return The object returned by \code{clusterboot}.
+#'
+#' @export
 clusterbootWrapper <- function(data, B, bootmethod="boot",
                                cbi, krange, gold_standard, seed, ...) {
   cbiHelperResult = helperGetCBI(cbi, krange, ...)

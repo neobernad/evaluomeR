@@ -2,9 +2,7 @@
 % Please edit documentation in R/metricsAnalysis.R
 \name{getMetricsRelevancy}
 \alias{getMetricsRelevancy}
-\alias{getMetricRangeByCluster}
-\title{Get the range of each metric per cluster from the optimal cluster.
-getMetricRangeByCluster}
+\title{Get the relevancy of each metric.}
 \usage{
 getMetricsRelevancy(df, k, alpha = 0, L1 = NULL, seed = NULL)
 }
@@ -22,11 +20,15 @@ evaluate the individuals. Rows with NA values will be ignored.}
 \item{seed}{Random seed to be used.}
 }
 \value{
-A dataframe including the min and the max value for each
-pair (metric, cluster).
+A list with three elements:
+\item{rskc}{The RSKC output object.}
+\item{trimmed_cases}{A vector of row indices trimmed from the input.}
+\item{relevancy}{A data frame with columns \code{metric} and \code{weight}
+indicating the relevancy of each metric.}
 }
 \description{
-Obtains the ranges of the metrics obtained by each optimal cluster.
+Computes metric relevancy using Robust and Sparse K-Means Clustering (RSKC).
+Returns the RSKC result, trimmed cases, and a metric-weight table.
 }
 \examples{
 data("ontMetrics")

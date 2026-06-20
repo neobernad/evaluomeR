@@ -14,7 +14,7 @@ data("breastCancer")
 seed=100
 
 #Función auxiliar para series de ejecuciones
-ejecutar_experimento_ATSC_sinPCA <- function(dataset, k.range, cbi="kmeans", seed=100, nEjec=5){
+ejecutar_experimento_ATSC_sinPCA <- function(dataset, k.range, cbi="kmeans", seed=100, nEjec=1){
   tiempos <- numeric(nEjec)
   k_optimos <- numeric(nEjec)
   estabilidades <- numeric(nEjec)
@@ -35,7 +35,7 @@ ejecutar_experimento_ATSC_sinPCA <- function(dataset, k.range, cbi="kmeans", see
 }
 
 #Función auxiliar para series de ejecuciones
-ejecutar_experimento_ATSC_conPCA <- function(dataset, k.range, cbi="kmeans", correlation_threshold, numCores=1, seed=100, nEjec=5){
+ejecutar_experimento_ATSC_conPCA <- function(dataset, k.range, cbi="kmeans", correlation_threshold, numCores=1, seed=100, nEjec=1){
   tiempos <- numeric(nEjec)
   k_optimos <- numeric(nEjec)
   estabilidades <- numeric(nEjec)

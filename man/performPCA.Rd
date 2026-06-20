@@ -12,6 +12,8 @@ performPCA(dataset, ncp = NULL, scale = TRUE, visualize = FALSE)
 \item{ncp}{An integer specifying the number of principal components to retain, default is 5.}
 
 \item{scale}{A boolean indicating whether to scale the data, default is TRUE.}
+
+\item{visualize}{Boolean. If TRUE, display a biplot of the PCA results (default FALSE).}
 }
 \value{
 A list containing the PCA results, summary of eigenvalues, contributions, coordinates, and more.
