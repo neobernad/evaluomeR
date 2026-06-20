@@ -330,3 +330,40 @@ from the R package build.
 
 Each use case under `usecases/` follows the pattern:
 `run.R` (analysis script) + `data/*.csv` (input) + `results-csv/` (output).
+
+---
+
+## Agent Workflow
+
+### Ponytail (active)
+
+[Ponytail](https://github.com/DietrichGebert/ponytail) lazy-senior-dev mode is
+enabled via `.cursor/rules/ponytail.mdc`. Default intensity: **full**. Say
+`stop ponytail` / `normal mode` to turn it off for a session.
+
+### Area-specific tests (required after code changes)
+
+There is no testthat harness. After editing package code, run the matching
+script(s) from an R session with `evaluomeR` installed:
+
+```r
+library(evaluomeR)
+source("tests/<script>.R")
+```
+
+| Area changed | R source | Test script(s) |
+|--------------|----------|----------------|
+| Stability | `R/stabilityIndex.R`, `R/internalFunctions.R` (bootstrap/Jaccard) | `tests/testStability.R` |
+| Quality | `R/qualityIndices.R` | `tests/testQuality.R`, `tests/testCH_index.R` |
+| Correlation / metrics plots | `R/correlation.R`, `R/metricsAnalysis.R` (plotting only) | `tests/testAnalysis.R`, `tests/testMetricsRelevancy.R` |
+| ATSC pipeline | `R/metricsAnalysis.R` (ATSC, RSKC helpers) | `tests/testATSC.R`, `tests/testATSC_GoldStandard.R`, `tests/testL1_clustering.R` |
+| Preprocessing / PCA | `R/dataPreprocessing.R`, `R/predictions.R` | `tests/testDataPreprocessing.R`, `tests/testPCA.R` |
+| Clustering backends (CBI) | `R/internalClusterboot.R`, `R/helpers.R` (`pkg.env$cbi`) | `tests/testCBI.R`, `tests/testARI.R` |
+| Helpers / package-wide | `R/helpers.R`, `R/data.R`, `DESCRIPTION`, `NAMESPACE` | `tests/testAll.R` |
+| CI / docs only | `.github/`, `man/`, `vignettes/` | `R CMD check` (no `tests/` scripts) |
+
+Parallel benchmark scripts (`tests/*_parallel.R`) are excluded from the package
+build; run them only when changing parallel execution paths.
+
+When a change spans multiple areas, run every matching script before claiming
+the work is done.
