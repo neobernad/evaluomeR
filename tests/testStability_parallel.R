@@ -12,6 +12,16 @@ data("nci60_k10")
 
 seed=100
 
+# --- Correctness check: serial and parallel must produce identical assay output ---
+.stab_correct_sec <- stabilityRange(ontMetrics, k.range=c(3,5), bs=20, numCores=1, seed=100)
+.stab_correct_par <- stabilityRange(ontMetrics, k.range=c(3,5), bs=20, numCores=2, seed=100)
+stopifnot(identical(
+  as.data.frame(assay(.stab_correct_sec)),
+  as.data.frame(assay(.stab_correct_par))
+))
+rm(.stab_correct_sec, .stab_correct_par)
+# ---------------------------------------------------------------------------------
+
 #Función auxiliar para series de ejecuciones
 ejecutar_experimento_S <- function(dataset, k.range, bs, numCores, seed, nEjec, all_metrics=FALSE){
   tiempos <- numeric(nEjec)
