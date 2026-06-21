@@ -30,11 +30,12 @@ a = clusterbootWrapper(data=x[c("RIN", "DegFact")], B=100,
                    bootmethod="boot",
                    cbi="kmeans",
                    krange=2, seed=100, gold_standard=NULL)
-# bootmean should indicate a stable clustering (Jaccard >= 0.75).
-# Exact value is kmeans-RNG-version-specific, so we check the range only.
-stopifnot(mean(a$bootmean) >= 0.75 && mean(a$bootmean) <= 1.0)
-
 stab = stability(data=x, k=2, bs=100, seed=100)
 stab_mean_RIN <- as.numeric(as.data.frame(assay(stab$stability_mean))[1, "Mean_stability_k_2"])
-# stability_mean for RIN should also be in the stable range.
+
+# clusterbootWrapper and stability() must agree on the same input/seed —
+# that is what the original comment documented (both should be 0.8534346 on
+# the R version where it was recorded). Pin the semantic property instead
+# of a version-specific constant.
 stopifnot(stab_mean_RIN >= 0.75 && stab_mean_RIN <= 1.0)
+stopifnot(isTRUE(all.equal(mean(a$bootmean), stab_mean_RIN, tolerance=1e-8)))
