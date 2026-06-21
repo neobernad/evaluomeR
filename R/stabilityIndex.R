@@ -54,7 +54,7 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
                       getImages=FALSE, all_metrics=FALSE, seed=NULL,
                       gold_standard=NULL, numCores=1,...) {
 
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
 
   checkKValue(k)
   
@@ -131,7 +131,7 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
   if (k.max < k.min) {
     stop("The first value of k.range cannot be greater than its second value")
   }
-  data <- as.data.frame(SummarizedExperiment::assay(data))
+  data <- assayAsDF(data)
   
   if(numCores>1){
     # Parallel version
@@ -203,7 +203,7 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
     checkKValue(k)
   }
 
-  data <- as.data.frame(SummarizedExperiment::assay(data))
+  data <- assayAsDF(data)
   
   if(numCores>1){
     # Parallel version

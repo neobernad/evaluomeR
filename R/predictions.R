@@ -164,7 +164,7 @@ globalMetric = function(data, k.range=c(2,15), nrep=10, criterion=c("BIC", "AIC"
     stop("Please 'nrep' parameter should be a positive integer > 1.")
   }
 
-  data = as.data.frame(SummarizedExperiment::assay(data))
+  data = assayAsDF(data)
   rownames(data) = data[, 1]
   data = data[, 2:ncol(data)]
 

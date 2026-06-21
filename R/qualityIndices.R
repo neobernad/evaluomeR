@@ -42,7 +42,7 @@ quality <- function(data, k=5, cbi="kmeans", getImages=FALSE,
 
   checkKValue(k)
 
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   
   if(numCores>1){
     # Parallel version
@@ -155,7 +155,7 @@ qualityRange <- function(data, k.range=c(3,5), cbi="kmeans", getImages=FALSE,
     stop("The first value of k.range cannot be greater than its second value")
   }
 
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
 
   if(numCores>1){
     # Parallel version
@@ -269,14 +269,14 @@ qualitySet <- function(data, k.set=c(2,4), cbi="kmeans", all_metrics=FALSE,
   if (k.set.length == 0) {
     stop("k.set list is empty")
   } else if (k.set.length == 1) {
-    stop("k.set list contains only one element. For one K analysis use 'stability' method")
+    stop("k.set list contains only one element. For one K analysis use 'quality' method")
   }
   k.set = sort(k.set)
   for (k in k.set) {
     checkKValue(k)
   }
 
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
 
   if(numCores>1){
     suppressWarnings(
@@ -1135,11 +1135,4 @@ runSilhouetteTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
   silhouetteData[sapply(silhouetteData, is.null)] <- NULL
   names(silhouetteData) <- paste("k_", k.range, sep = "")
   return(silhouetteData)
-}
-
-checkKValue <- function(k) {
-  if (k < 2 || k > 15) {
-    error=paste("k value (",k,") is not in range [2,15]", sep="")
-    stop(error)
-  }
 }
