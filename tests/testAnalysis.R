@@ -25,17 +25,14 @@ plotMetricsClusterComparison(rnaMetrics, k.vector1=3)
 
 x = as.data.frame(assay(rnaMetrics))
 
-# Multi metric clustering
+# Multi metric clustering: joint RIN+DegFact input must match stability(all_metrics=TRUE).
 a = clusterbootWrapper(data=x[c("RIN", "DegFact")], B=100,
                    bootmethod="boot",
                    cbi="kmeans",
                    krange=2, seed=100, gold_standard=NULL)
-stab = stability(data=x, k=2, bs=100, seed=100)
-stab_mean_RIN <- as.numeric(as.data.frame(assay(stab$stability_mean))[1, "Mean_stability_k_2"])
+stab = stability(data=x, k=2, bs=100, seed=100, all_metrics=TRUE)
+stab_mean_all <- as.numeric(as.data.frame(assay(stab$stability_mean))[1, "Mean_stability_k_2"])
 
-# clusterbootWrapper and stability() must agree on the same input/seed —
-# that is what the original comment documented (both should be 0.8534346 on
-# the R version where it was recorded). Pin the semantic property instead
-# of a version-specific constant.
-stopifnot(stab_mean_RIN >= 0.75 && stab_mean_RIN <= 1.0)
-stopifnot(isTRUE(all.equal(mean(a$bootmean), stab_mean_RIN, tolerance=1e-8)))
+# clusterbootWrapper and stability() must agree on the same merged input/seed.
+stopifnot(stab_mean_all >= 0.75 && stab_mean_all <= 1.0)
+stopifnot(isTRUE(all.equal(mean(a$bootmean), stab_mean_all, tolerance=1e-8)))
