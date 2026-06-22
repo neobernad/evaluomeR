@@ -1,40 +1,68 @@
 import { useMemo } from 'react'
 import ReactECharts from 'echarts-for-react'
 import type { KSummaryEntry } from '@/types/demo'
+import { buildOptimalAnimatedLine, buildGraphicOptimalLabel } from '@/lib/kChartMarks'
 
 interface KScoreChartProps {
   kSummary: Record<string, KSummaryEntry>
   optimalK: number
+  currentK: number
   dataset?: string
 }
 
-export function KScoreChart({ kSummary, optimalK, dataset }: KScoreChartProps) {
+export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreChartProps) {
   const kValues = Object.keys(kSummary).sort((a, b) => Number(a) - Number(b))
   const optLabel = `k = ${optimalK}`
-  const optComposite = kSummary[String(optimalK)]?.composite ?? 0
+  const currentLabel = `k = ${currentK}`
+  const isAtOptimal = currentK === optimalK
 
   const option = useMemo(() => {
+    const categories = kValues.map((kv) => `k = ${kv}`)
     const stabilityData = kValues.map((k) => ({
       value: kSummary[k].avgStability,
       itemStyle: {
-        color: Number(k) === optimalK ? '#3b82f6' : 'rgba(59,130,246,0.35)',
+        color:
+          Number(k) === optimalK
+            ? '#3b82f6'
+            : Number(k) === currentK
+              ? '#60a5fa'
+              : 'rgba(59,130,246,0.35)',
       },
     }))
     const silhouetteData = kValues.map((k) => ({
       value: kSummary[k].avgSilhouette,
       itemStyle: {
-        color: Number(k) === optimalK ? '#22c55e' : 'rgba(34,197,94,0.35)',
+        color:
+          Number(k) === optimalK
+            ? '#22c55e'
+            : Number(k) === currentK
+              ? '#4ade80'
+              : 'rgba(34,197,94,0.35)',
       },
     }))
     const compositeData = kValues.map((k) => ({
       value: kSummary[k].composite,
-      symbolSize: Number(k) === optimalK ? 14 : 8,
-      itemStyle: {
-        color: Number(k) === optimalK ? '#f59e0b' : '#f59e0b',
-        borderColor: Number(k) === optimalK ? '#22c55e' : undefined,
-        borderWidth: Number(k) === optimalK ? 2 : 0,
-      },
+      symbolSize: Number(k) === currentK ? 14 : 8,
+      itemStyle: { color: '#f59e0b' },
     }))
+
+    const markAreaData = (isAtOptimal
+      ? [
+          [
+            { xAxis: optLabel, itemStyle: { color: 'rgba(34,197,94,0.15)' } },
+            { xAxis: optLabel },
+          ],
+        ]
+      : [
+          [
+            { xAxis: currentLabel, itemStyle: { color: 'rgba(59,130,246,0.15)' } },
+            { xAxis: currentLabel },
+          ],
+          [
+            { xAxis: optLabel, itemStyle: { color: 'rgba(34,197,94,0.08)' } },
+            { xAxis: optLabel },
+          ],
+        ]) as Array<[{ xAxis: string; itemStyle?: { color: string } }, { xAxis: string }]>
 
     return {
       backgroundColor: 'transparent',
@@ -57,7 +85,7 @@ export function KScoreChart({ kSummary, optimalK, dataset }: KScoreChartProps) {
       grid: { left: '8%', right: '6%', bottom: '14%', top: '18%' },
       xAxis: {
         type: 'category',
-        data: kValues.map((k) => `k = ${k}`),
+        data: categories,
         axisLabel: { color: '#94a3b8', fontWeight: 'bold' },
         axisLine: { lineStyle: { color: '#334155' } },
       },
@@ -80,12 +108,7 @@ export function KScoreChart({ kSummary, optimalK, dataset }: KScoreChartProps) {
           data: stabilityData,
           markArea: {
             silent: true,
-            data: [
-              [
-                { xAxis: optLabel, itemStyle: { color: 'rgba(34,197,94,0.10)' } },
-                { xAxis: optLabel },
-              ],
-            ],
+            data: markAreaData,
           },
         },
         {
@@ -102,28 +125,21 @@ export function KScoreChart({ kSummary, optimalK, dataset }: KScoreChartProps) {
           lineStyle: { color: '#f59e0b', width: 3 },
           itemStyle: { color: '#f59e0b' },
           data: compositeData,
-          markPoint: {
-            silent: true,
-            symbol: 'pin',
-            symbolSize: 42,
-            itemStyle: { color: '#f59e0b' },
-            label: {
-              show: true,
-              formatter: `★ ${optLabel}`,
-              color: '#fef3c7',
-              fontSize: 11,
-              fontWeight: 'bold',
-            },
-            data: [{ coord: [optLabel, optComposite] }],
-          },
+          ...buildOptimalAnimatedLine(optLabel, 0, 1),
         },
       ],
+      ...buildGraphicOptimalLabel(
+        optLabel,
+        categories,
+        { left: 8, right: 6, top: 18 },
+        `✦ best  k = ${optimalK}`,
+      ),
     }
-  }, [kSummary, kValues, optimalK, optLabel, optComposite])
+  }, [kSummary, kValues, optimalK, currentK, optLabel, currentLabel, isAtOptimal])
 
   return (
     <div>
-      <ReactECharts option={option} style={{ height: 320 }} opts={{ renderer: 'canvas' }} />
+      <ReactECharts option={option} style={{ height: 320 }} opts={{ renderer: 'canvas' }} notMerge />
       {dataset === 'nci60_k8' && (
         <p className="mt-1 text-center text-xs text-slate-500">
           k = 2 is excluded — too few groups for {'>'}9 cancer tissue types

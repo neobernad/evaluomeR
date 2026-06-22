@@ -3,6 +3,7 @@ import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
 import type { DemoData } from '@/types/demo'
 import { formatMetricLabel } from '@/lib/metricLabels'
+import { buildAnimatedLines, buildGraphicKLabels } from '@/lib/kChartMarks'
 
 const ZONES = [
   { name: 'Unstable',      min: 0,    max: 0.6,  color: 'rgba(239,68,68,0.10)' },
@@ -66,43 +67,26 @@ export function StabilityChart({ stability, k, optimalK, chartMetrics }: Stabili
         markArea: idx === 0
           ? {
               silent: true,
-              data: [
-                ...ZONES.map((z) => [
-                  { yAxis: z.min, itemStyle: { color: z.color } },
-                  { yAxis: z.max },
-                ]),
-                [
-                  {
-                    xAxis: String(optimalK),
-                    itemStyle: { color: 'rgba(34,197,94,0.12)' },
-                    label: {
-                      show: true,
-                      formatter: `Optimal k = ${optimalK}`,
-                      color: '#22c55e',
-                      fontSize: 10,
-                      position: 'insideTop',
-                    },
+              data: ZONES.map((z) => [
+                {
+                  yAxis: z.min,
+                  itemStyle: { color: z.color },
+                  label: {
+                    show: true,
+                    formatter: z.name,
+                    position: 'insideTopLeft',
+                    color: '#94a3b8',
+                    fontSize: 9,
+                    opacity: 0.8,
                   },
-                  { xAxis: String(optimalK) },
-                ],
-              ],
+                },
+                { yAxis: z.max },
+              ]),
             }
           : undefined,
-        markLine:
-          idx === 0 && k !== optimalK
-            ? {
-                silent: true,
-                symbol: 'none',
-                lineStyle: { color: '#cbd5e1', type: 'dashed', width: 1.5 },
-                data: [{ xAxis: String(k) }],
-                label: {
-                  formatter: `k = ${k}`,
-                  color: '#cbd5e1',
-                  fontSize: 10,
-                },
-              }
-            : undefined,
+        ...(idx === 0 ? buildAnimatedLines(k, optimalK, 0, 1) : {}),
       })),
+      ...buildGraphicKLabels(k, optimalK, kValues, { left: 8, right: 4, top: 16 }),
     }),
     [stability, chartMetrics, kValues, k, optimalK],
   )
@@ -120,7 +104,7 @@ export function StabilityChart({ stability, k, optimalK, chartMetrics }: Stabili
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35 }}
       >
-        <ReactECharts option={option} style={{ height: 380 }} opts={{ renderer: 'canvas' }} />
+        <ReactECharts option={option} style={{ height: 380 }} opts={{ renderer: 'canvas' }} notMerge />
       </motion.div>
     </div>
   )

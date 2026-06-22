@@ -68,11 +68,11 @@ export function ClusterCompare({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          <ReactECharts option={userOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} />
+          <ReactECharts option={userOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
         </motion.div>
 
         <div className="rounded-xl border border-emerald-500/30 bg-emerald-950/10 p-1">
-          <ReactECharts option={optOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} />
+          <ReactECharts option={optOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
         </div>
       </div>
       {!isOptimal && (

@@ -36,7 +36,7 @@ export function ClusterScatter({ samples, clusters, k, pca, optimalK }: ClusterS
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35 }}
       >
-        <ReactECharts option={option} style={{ height: 420 }} opts={{ renderer: 'canvas' }} />
+        <ReactECharts option={option} style={{ height: 420 }} opts={{ renderer: 'canvas' }} notMerge />
       </motion.div>
     </div>
   )
