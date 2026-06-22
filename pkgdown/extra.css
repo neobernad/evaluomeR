@@ -1,34 +1,275 @@
-.navbar {
-  backdrop-filter: blur(12px);
-  background-color: rgba(15, 23, 42, 0.85) !important;
+/* ── Layout: clear fixed navbar ─────────────────────────────────────────── */
+
+body {
+  padding-top: 70px !important;
+  scroll-padding-top: 70px;
+  background-color: #020617;
+  color: #e2e8f0;
 }
 
+.template-home main > .row > .col-md-9 > p:first-child {
+  margin-top: 1.5rem;
+}
+
+/* ── Navbar ───────────────────────────────────────────────────────────── */
+
+.navbar {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background-color: rgba(15, 23, 42, 0.9) !important;
+  border-bottom: 1px solid #1e293b;
+}
+
+.navbar-brand,
+.navbar-nav .nav-link {
+  font-weight: 500;
+}
+
+.navbar-nav .nav-link.active,
+.navbar-nav .nav-link:hover {
+  color: #60a5fa !important;
+}
+
+/* ── Page header / hero ───────────────────────────────────────────────── */
+
 .page-header {
-  background: linear-gradient(135deg, #0F172A 0%, #1E3A5F 60%, #0F172A 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #0f172a 100%);
   padding: 4rem 0;
   color: #fff;
+  border-bottom: 1px solid #1e293b;
 }
 
 .page-header h1,
 .page-header .lead {
-  color: #fff;
+  color: #f8fafc;
 }
 
-pre code {
-  font-size: 0.82rem;
-  border-radius: 8px;
+/* ── Main content area ────────────────────────────────────────────────── */
+
+main,
+.contents,
+.template-article .row,
+.template-reference .row {
+  color: #e2e8f0;
 }
 
-.sourceCode {
-  border-left: 3px solid #3B82F6;
+.card,
+.bg-light {
+  background-color: #0f172a !important;
+  border-color: #1e293b !important;
+  color: #e2e8f0;
 }
 
-.ref-index .ref-index-item {
-  border-bottom: 1px solid #e2e8f0;
-  padding: 0.5rem 0;
+/* Sidebar (reference / articles TOC) */
+#sidebar,
+.bslib-sidebar-layout,
+.sidebar,
+nav#toc {
+  background-color: #020617;
+  border-color: #1e293b;
 }
+
+#sidebar a,
+nav#toc a,
+.sidebar a {
+  color: #94a3b8;
+}
+
+#sidebar a:hover,
+nav#toc a:hover,
+.sidebar a:hover,
+#sidebar .active a,
+nav#toc .active a {
+  color: #60a5fa;
+}
+
+/* ── Home page badges ───────────────────────────────────────────────────── */
+
+.template-home main > .row > .col-md-9 > p:first-child img {
+  display: inline-block;
+  margin: 0.25rem 0.35rem 0.25rem 0;
+  vertical-align: middle;
+}
+
+/* ── Home links ─────────────────────────────────────────────────────────── */
 
 .home-links a {
   border-radius: 6px;
   font-weight: 500;
+  border: 1px solid #334155;
+  background-color: #0f172a;
+  color: #e2e8f0 !important;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.home-links a:hover {
+  border-color: #3b82f6;
+  background-color: #1e293b;
+  color: #f8fafc !important;
+}
+
+/* ── Code blocks ───────────────────────────────────────────────────────── */
+
+pre,
+pre code {
+  background-color: #0f172a !important;
+  color: #e2e8f0;
+  border-radius: 8px;
+  font-size: 0.82rem;
+}
+
+.sourceCode {
+  border-left: 3px solid #3b82f6;
+  background-color: #0f172a;
+}
+
+code {
+  color: #7dd3fc;
+  background-color: #1e293b;
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+pre code {
+  padding: 0;
+  background-color: transparent !important;
+  color: inherit;
+}
+
+/* ── Reference index ───────────────────────────────────────────────────── */
+
+.ref-index .ref-index-item {
+  border-bottom: 1px solid #1e293b;
+  padding: 0.5rem 0;
+  transition: background-color 0.15s;
+}
+
+.ref-index .ref-index-item:hover {
+  background-color: rgba(30, 41, 59, 0.5);
+}
+
+.ref-index .ref-index-item a {
+  color: #60a5fa;
+}
+
+.ref-index .ref-index-heading {
+  color: #94a3b8;
+  border-bottom-color: #334155;
+}
+
+/* ── Tables ────────────────────────────────────────────────────────────── */
+
+table {
+  color: #e2e8f0;
+}
+
+.table,
+table.table {
+  --bs-table-bg: #0f172a;
+  --bs-table-color: #e2e8f0;
+  --bs-table-border-color: #1e293b;
+  --bs-table-striped-bg: #1e293b;
+  --bs-table-hover-bg: #1e293b;
+}
+
+thead th {
+  border-bottom-color: #334155 !important;
+  color: #cbd5e1;
+}
+
+/* ── Definition lists (reference pages) ───────────────────────────────── */
+
+dl dt {
+  color: #f1f5f9;
+}
+
+dl dd {
+  color: #94a3b8;
+}
+
+/* ── Tabs (Bootstrap nav-tabs on reference pages) ──────────────────────── */
+
+.nav-tabs {
+  border-bottom-color: #1e293b;
+}
+
+.nav-tabs .nav-link {
+  color: #94a3b8;
+  border-color: transparent;
+}
+
+.nav-tabs .nav-link:hover {
+  color: #e2e8f0;
+  border-color: #334155 #334155 transparent;
+}
+
+.nav-tabs .nav-link.active {
+  color: #60a5fa;
+  background-color: #0f172a;
+  border-color: #334155 #334155 #0f172a;
+}
+
+/* ── Alerts / callouts ─────────────────────────────────────────────────── */
+
+.alert {
+  border-color: #334155;
+}
+
+/* ── Footer ────────────────────────────────────────────────────────────── */
+
+footer,
+.pkgdown-footer {
+  background-color: #020617;
+  border-top: 1px solid #1e293b;
+  color: #64748b;
+  padding: 2rem 0;
+}
+
+footer a,
+.pkgdown-footer a {
+  color: #94a3b8;
+}
+
+footer a:hover,
+.pkgdown-footer a:hover {
+  color: #60a5fa;
+}
+
+/* ── Links & headings ─────────────────────────────────────────────────── */
+
+a {
+  color: #60a5fa;
+}
+
+a:hover {
+  color: #93c5fd;
+}
+
+h1, h2, h3, h4, h5, h6,
+.h1, .h2, .h3, .h4, .h5, .h6 {
+  color: #f8fafc;
+}
+
+.text-muted {
+  color: #64748b !important;
+}
+
+/* ── Pagination ────────────────────────────────────────────────────────── */
+
+.pagination .page-link {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #94a3b8;
+}
+
+.pagination .page-link:hover {
+  background-color: #1e293b;
+  border-color: #475569;
+  color: #e2e8f0;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+  color: #fff;
 }
