@@ -1,0 +1,35 @@
+{
+  "name": "evaluomer-demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@radix-ui/react-slider": "^1.2.0",
+    "@radix-ui/react-tabs": "^1.1.0",
+    "@radix-ui/react-tooltip": "^1.1.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "echarts": "^5.5.0",
+    "echarts-for-react": "^3.0.2",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.441.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "tailwind-merge": "^2.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.0",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.5.0",
+    "vite": "^5.4.0"
+  }
+}

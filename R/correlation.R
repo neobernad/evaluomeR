@@ -20,7 +20,7 @@
 #'
 metricsCorrelations <- function(data, margins=c(0,10,9,11), getImages=TRUE) {
 
-  data <- as.data.frame(assay(data))
+  data <- assayAsDF(data)
   data <- removeNAValues(data)
   dfStats(data)
 

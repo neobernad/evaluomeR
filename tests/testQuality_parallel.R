@@ -8,6 +8,20 @@ data("nci60_k8")
 
 seed=100
 
+# --- Correctness check: serial and parallel must produce identical assay output ---
+.qual_correct_sec <- qualityRange(ontMetrics, k.range=c(3,5), quality_index="silhouette", numCores=1, seed=100)
+.qual_correct_par <- qualityRange(ontMetrics, k.range=c(3,5), quality_index="silhouette", numCores=2, seed=100)
+stopifnot(identical(
+  as.data.frame(assay(.qual_correct_sec$k_3)),
+  as.data.frame(assay(.qual_correct_par$k_3))
+))
+stopifnot(identical(
+  as.data.frame(assay(.qual_correct_sec$k_5)),
+  as.data.frame(assay(.qual_correct_par$k_5))
+))
+rm(.qual_correct_sec, .qual_correct_par)
+# ---------------------------------------------------------------------------------
+
 #Función auxiliar para series de ejecuciones
 ejecutar_experimento_Q <- function(dataset, k.range, quality_index, numCores, seed, nEjec, all_metrics=FALSE){
   tiempos <- numeric(nEjec)
