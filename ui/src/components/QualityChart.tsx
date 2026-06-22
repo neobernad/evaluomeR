@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
+import { BarChart2, Layers } from 'lucide-react'
+import { ChartCaption } from '@/components/ChartCaption'
 import { OptimalKBadge } from '@/components/OptimalKBadge'
 import type { DemoData } from '@/types/demo'
 import { formatMetricLabel } from '@/lib/metricLabels'
@@ -195,8 +197,29 @@ export function QualityChart({ quality, k, optimalK, chartMetrics }: QualityChar
     >
       <OptimalKBadge optimalK={optimalK} currentK={k} />
       <div className="grid gap-6 lg:grid-cols-2">
-        <ReactECharts option={silOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
-        <ReactECharts option={chOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
+        <div>
+          <ReactECharts option={silOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
+          <ChartCaption
+            icon={Layers}
+            text="Silhouette width measures how much closer a sample is to its own cluster than to the nearest neighbour cluster. Values near +1 indicate well-separated clusters."
+            highlights={[
+              { label: '> 0.70 Strong', color: 'emerald' },
+              { label: '0.50 – 0.70 Reasonable', color: 'cyan' },
+              { label: '< 0.25 Weak', color: 'amber' },
+            ]}
+          />
+        </div>
+        <div>
+          <ReactECharts option={chOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
+          <ChartCaption
+            icon={BarChart2}
+            text="Calinski–Harabasz is the ratio of between-cluster to within-cluster dispersion — higher means tighter, better-separated groups. No fixed scale; compare across k values."
+            highlights={[
+              { label: 'Higher = better', color: 'blue' },
+              { label: 'No upper bound', color: 'slate' },
+            ]}
+          />
+        </div>
       </div>
     </motion.div>
   )
