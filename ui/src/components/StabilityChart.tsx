@@ -1,6 +1,8 @@
 import { useMemo } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
+import { Shuffle } from 'lucide-react'
+import { ChartCaption } from '@/components/ChartCaption'
 import type { DemoData } from '@/types/demo'
 import { formatMetricLabel } from '@/lib/metricLabels'
 import { buildAnimatedLines, buildGraphicKLabels } from '@/lib/kChartMarks'
@@ -105,6 +107,16 @@ export function StabilityChart({ stability, k, optimalK, chartMetrics }: Stabili
         transition={{ duration: 0.35 }}
       >
         <ReactECharts option={option} style={{ height: 380 }} opts={{ renderer: 'canvas' }} notMerge />
+        <ChartCaption
+          icon={Shuffle}
+          text="Each line is the mean Jaccard similarity of cluster assignments across 100 bootstrap resamples — how consistently a metric groups samples under k."
+          highlights={[
+            { label: '≥ 0.85 Highly stable', color: 'blue' },
+            { label: '0.75 – 0.85 Stable', color: 'emerald' },
+            { label: '0.60 – 0.75 Doubtful', color: 'amber' },
+            { label: '< 0.60 Unstable', color: 'red' },
+          ]}
+        />
       </motion.div>
     </div>
   )
