@@ -1,0 +1,9 @@
+services:
+  evaluomeR:
+    build: .
+    image: evaluomer:local
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./work:/work
+    working_dir: /work

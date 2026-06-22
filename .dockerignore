@@ -1,0 +1,17 @@
+.git
+.github
+.cursor
+usecases
+notebooks
+tests
+check
+*.tar.gz
+*.Rproj
+.Rproj.user
+_pkgdown.yml
+AGENTS.md
+README.md
+docs/DOCKER.md
+docker-compose.yml
+Dockerfile
+.dockerignore
