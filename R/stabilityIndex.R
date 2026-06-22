@@ -1,3 +1,87 @@
+# Internal: NA-fill km5 result structure used when clustering cannot proceed.
+.makeNAKm5 <- function(n_rows, k) {
+  bspart <- rep(NA_real_, n_rows)
+  jac    <- rep(NA_real_, k)
+  centr  <- rep(NA_real_, k)
+  list(
+    bspart    = bspart, jac  = jac, centr = centr,
+    means     = bspart, bspart.or = bspart, bspart.inv = bspart,
+    jac.or    = jac,    jac.inv   = jac,
+    partition = bspart, jac.stab  = jac,
+    csv = list(
+      cluster_partition = NULL, cluster_mean         = NULL,
+      cluster_centers   = NULL, cluster_size         = NULL,
+      cluster_betweenss = NULL, cluster_totss        = NULL,
+      cluster_tot.withinss = NULL, cluster_anova     = NULL
+    )
+  )
+}
+
+# Internal: process one metric across all k values for stability analysis.
+# Called by both the serial (lapply) and parallel (parLapply) dispatchers.
+# Returns list(stab_valores, csv_data).
+.runStabilityForOneMetric <- function(i.metr, datos.bruto, names.metr, cbi, seed,
+                                      k.range, bs, all_metrics, gold_standard,
+                                      num.metrics, ...) {
+  stab_valores <- rep(NA_real_, max(k.range))
+  csv_data     <- vector("list", max(k.range))
+  i            <- i.metr + 1L
+
+  if (all_metrics) {
+    message("Processing all metrics, 'merge', in dataframe (", length(names.metr), ")")
+    data_to_cluster <- datos.bruto[, -1]
+  } else {
+    message("Processing metric: ", names.metr[i.metr], " (", i.metr, ")")
+    data_to_cluster <- datos.bruto[, i]
+  }
+
+  for (j.k in k.range) {
+    message("\tCalculation of k = ", j.k)
+    v.size <- if (!all_metrics) length(levels(as.factor(data_to_cluster))) else j.k
+
+    if (v.size >= j.k) {
+      raw <- tryCatch(
+        clusterbootWrapper(data = data_to_cluster, B = bs, bootmethod = "boot",
+                           cbi = cbi, gold_standard = gold_standard,
+                           krange = j.k, seed = seed, ...),
+        error = function(e) e
+      )
+      if (inherits(raw, "error")) {
+        message(paste0("\t", raw))
+        message("\tWarning: Could not process data for k = ", j.k)
+        km5 <- .makeNAKm5(length(datos.bruto[, i]), j.k)
+      } else {
+        km5         <- list()
+        km5$cluster <- raw
+        km5$jac     <- raw$bootmean
+        km5$bspart  <- raw$partition
+        km5$csv     <- list(
+          cluster_partition    = raw$partition,
+          cluster_mean         = raw$bootmean,
+          cluster_centers      = raw$result$result$centers,
+          cluster_size         = raw$result$result$size,
+          cluster_betweenss    = raw$result$result$betweenss,
+          cluster_totss        = raw$result$result$totss,
+          cluster_tot.withinss = raw$result$result$tot.withinss,
+          cluster_anova        = fAnova(raw$result$result, j.k, num.metrics)
+        )
+        km5$centr <- raw$result$result$centers
+        for (km5.i in seq_along(km5$centr)) {
+          km5$means[which(km5$bspart == km5.i)] <- km5$centr[km5.i]
+        }
+      }
+    } else {
+      message("\tWarning: Could not process data for k = ", j.k)
+      km5 <- .makeNAKm5(length(datos.bruto[, i]), j.k)
+    }
+
+    stab_valores[j.k] <- mean(km5$jac)
+    csv_data[[j.k]]   <- km5
+  }
+
+  list(stab_valores = stab_valores, csv_data = csv_data)
+}
+
 #' @title Stability index.
 #' @name stability
 #' @aliases stability
@@ -248,207 +332,39 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
   data <- removeNAValues(data)
   dfStats(data)
 
-  inversa=NULL
-  m.stab.global = NULL
-  m.stab.global.csv = NULL # To store new CSV output measures without altering legacy code
-  todo.estable = NULL
-  datos.bruto=data
-  names.metr=names(datos.bruto)[-c(1)]
+  datos.bruto  <- data
+  names.metr   <- names(datos.bruto)[-1]
+  pkg.env$names.metr <- names.metr
 
-  pkg.env$names.metr = names.metr
-
-  bs.values=c(bs)
-  contador=0
-  i.min=k.min
-  i.max=k.max
-
-  k.range = NULL
-  k.range.length = NULL
+  i.min <- k.min; i.max <- k.max
   if (!is.null(k.set)) {
-    k.range = k.set
-    k.range.length = length(k.set)
+    k.range <- k.set; k.range.length <- length(k.set)
   } else {
-    k.range = i.min:i.max
-    k.range.length = length(i.min:i.max)+1
+    k.range <- i.min:i.max; k.range.length <- length(i.min:i.max) + 1
   }
 
-  if (all_metrics == TRUE) { # Processing all metrics as one
-    num.metrics = 1
-  } else {
-    num.metrics = length(names.metr)
-  }
+  num.metrics <- if (all_metrics) 1L else length(names.metr)
+  if (all_metrics) pkg.env$names.metr <- "all_metrics"
 
-  for (i.metr in 1:num.metrics) {
+  # --- serial dispatch via lapply, same body as parallel ---
+  resultados <- lapply(seq_len(num.metrics), function(i.metr)
+    .runStabilityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
+                              k.range, bs, all_metrics, gold_standard, num.metrics, ...))
 
-    if (all_metrics == TRUE) {
-      message("Processing all metrics, 'merge', in dataframe (", length(names.metr),")")
-      pkg.env$names.metr = c("all_metrics")
-    } else {
-      message("Processing metric: ", names.metr[i.metr],"(", i.metr,")")
-    }
+  m.stab.global     <- lapply(resultados, `[[`, "stab_valores")
+  m.stab.global.csv <- lapply(resultados, `[[`, "csv_data")
 
-    m.stab.global[[i.metr]]=matrix(data=NA, nrow=1,
-                                   ncol=k.range.length)
-    m.stab.global.csv[[i.metr]]=matrix(data=NA, nrow=1,
-                                       ncol=k.range.length)
-
-    for (j.k in k.range) {
-      message("\tCalculation of k = ", j.k,"")
-      estable=NULL
-      contador=contador+1
-      i=i.metr+1
-      estable$n.metric=i.metr
-      estable$name.metric=names.metr[i.metr]
-      estable$n.k=j.k
-      estable$name.ontology=names(datos.bruto[1])
-
-      if (all_metrics == TRUE) { # Processing all metrics as one
-        data_to_cluster = datos.bruto[,-1] # Removing first column
-      } else {
-        data_to_cluster = datos.bruto[,i]
-      }
-
-      km5=NULL
-      v.size = 0
-      if (!all_metrics) {
-        v.size = length(levels(as.factor(data_to_cluster)))
-      } else {
-        v.size = j.k
-      }
-      if (v.size>=j.k) {
-        #km5$cluster=boot.cluster(data=datos.bruto[,i],
-        #                         nk=j.k, B=bs, seed=seed)
-        #km5$jac=km5$cluster$means
-
-
-
-        clusterbootData = tryCatch({
-          clusterbootWrapper(data=data_to_cluster, B=bs,
-                             bootmethod="boot",
-                             cbi=cbi,
-                             gold_standard=gold_standard,
-                             krange=j.k, seed=seed, ...)
-        }, error = function(error_condition) {
-          error_condition
-        })
-
-        if(inherits(clusterbootData, "error")) {
-          message(paste0("\t", clusterbootData))
-          message("\tWarning: Could not process data for k = ", j.k)
-          km5$bspart=rep(NA,length(datos.bruto[,i]))
-          km5$jac=rep(NA,j.k)
-          km5$centr=rep(NA,j.k)
-          km5$means=km5$bspart
-          km5$bspart.or=km5$bspart
-          km5$bspart.inv=km5$means
-          km5$jac.or=km5$jac
-          km5$jac.inv=km5$jac
-          km5$partition=km5$bspart.inv
-          km5$jac.stab=km5$jac.inv
-
-          km5$csv = NULL
-          km5$csv$cluster_partition = NULL
-          km5$csv$cluster_mean = NULL
-          km5$csv$cluster_centers = NULL
-          km5$csv$cluster_size = NULL
-          km5$csv$cluster_betweenss = NULL
-          km5$csv$cluster_totss = NULL
-          km5$csv$cluster_tot.withinss = NULL
-          km5$csv$cluster_anova = NULL
-
-          m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
-          m.stab.global.csv[[i.metr]][j.k] = list(km5)
-          estable[[which(bs.values==bs)]] = km5
-          next
-        }
-
-        km5$cluster = clusterbootData
-
-        km5$jac=km5$cluster$bootmean
-        km5$bspart=km5$cluster$partition
-
-        km5$csv = NULL
-        km5$csv$cluster_partition = km5$cluster$partition
-        km5$csv$cluster_mean = km5$cluster$bootmean
-        km5$csv$cluster_centers = km5$cluster$result$result$centers
-        km5$csv$cluster_size = km5$cluster$result$result$size
-        km5$csv$cluster_betweenss = km5$cluster$result$result$betweenss
-        km5$csv$cluster_totss = km5$cluster$result$result$totss
-        km5$csv$cluster_tot.withinss = km5$cluster$result$result$tot.withinss
-        km5$csv$cluster_anova = fAnova(km5$cluster$result$result, j.k, num.metrics)
-
-        km5$centr=km5$cluster$result$result$centers
-        for (km5.i in 1:length(km5$centr)) {
-          km5$means[which(km5$bspart==km5.i)]=km5$centr[km5.i]
-        }
-
-        #km5$bspart.or=ordered(km5$means,labels=seq(1,length(km5$centr)))
-
-        #km5$bspart.inv=ordered(km5$means,labels=seq(length(km5$centr),1))
-
-        #km5$jac.or=km5$jac[order(km5$centr)]
-        #km5$jac.inv=km5$jac[order(km5$centr,decreasing=TRUE)]
-
-        #if (any(inversa==names.metr[i.metr])) {
-        #  km5$partition=km5$bspart.inv
-        #  km5$jac.stab=km5$jac.inv
-        #} else {
-        #  km5$partition=km5$bspart.or
-        #  km5$jac.stab=km5$jac.or
-        #}
-        #m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
-        m.stab.global[[i.metr]][j.k] = mean(km5$jac)
-        m.stab.global.csv[[i.metr]][j.k] = list(km5)
-        estable[[which(bs.values==bs)]] = km5
-      } else {
-        message("\tWarning: Could not process data for k = ", j.k)
-        km5$bspart=rep(NA,length(datos.bruto[,i]))
-        km5$jac=rep(NA,j.k)
-        km5$centr=rep(NA,j.k)
-        km5$means=km5$bspart
-        km5$bspart.or=km5$bspart
-        km5$bspart.inv=km5$means
-        km5$jac.or=km5$jac
-        km5$jac.inv=km5$jac
-        km5$partition=km5$bspart.inv
-        km5$jac.stab=km5$jac.inv
-
-        km5$csv = NULL
-        km5$csv$cluster_partition = NULL
-        km5$csv$cluster_mean = NULL
-        km5$csv$cluster_centers = NULL
-        km5$csv$cluster_size = NULL
-        km5$csv$cluster_betweenss = NULL
-        km5$csv$cluster_totss = NULL
-        km5$csv$cluster_tot.withinss = NULL
-        km5$csv$cluster_anova = NULL
-
-        # m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
-        m.stab.global[[i.metr]][j.k] = mean(km5$jac)
-        m.stab.global.csv[[i.metr]][j.k] = list(km5)
-        estable[[which(bs.values==bs)]] = km5
-      }
-      estable$km5.dynamic = km5$partition
-      todo.estable[[contador]]=estable
-    }
-  }
-
-  e.stab.global=NULL
+  e.stab.global <- NULL
   for (j.k in k.range) {
-    #e.stab.global[[j.k]]=matrix(data=NA, nrow=length(names.metr), ncol=length(i.min:i.max))
-    e.stab.global[[j.k]]=matrix(data=NA, nrow=k.range.length, ncol=1)
-    for (i.metr in 1:length(pkg.env$names.metr)) {
-      e.stab.global[[j.k]][i.metr]=m.stab.global[[i.metr]][j.k]
+    e.stab.global[[j.k]] <- matrix(data=NA, nrow=k.range.length, ncol=1)
+    for (i.metr in seq_len(length(pkg.env$names.metr))) {
+      e.stab.global[[j.k]][i.metr] <- m.stab.global[[i.metr]][j.k]
     }
   }
 
-
-  pkg.env$m.stab.global.csv = m.stab.global.csv
-  pkg.env$m.stab.global = m.stab.global
-  pkg.env$e.stab.global = e.stab.global
-  #pkg.env$names.metr = names.metr
-  #return(stabilityDataFrame)
-  #return(NULL)
+  pkg.env$m.stab.global.csv <- m.stab.global.csv
+  pkg.env$m.stab.global     <- m.stab.global
+  pkg.env$e.stab.global     <- e.stab.global
 }
 
 # Parallel version of runStabilityIndex
@@ -456,7 +372,7 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
                                        cbi, all_metrics, seed, k.set=NULL,
                                        gold_standard=NULL, numCores=NULL,...) {
-  
+
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -471,238 +387,48 @@ runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
       message("Warning: 'gold_standard' parameter is set, argument 'bs' will be ignored.")
     }
   }
-  
+
   data <- removeNAValues(data)
   dfStats(data)
-  
-  inversa=NULL
-  m.stab.global = NULL
-  m.stab.global.csv = NULL # To store new CSV output measures without altering legacy code
-  todo.estable = NULL
-  datos.bruto=data
-  names.metr=names(datos.bruto)[-c(1)]
-  
-  pkg.env$names.metr = names.metr
-  
-  bs.values=c(bs)
-  contador=0
-  i.min=k.min
-  i.max=k.max
-  
-  k.range = NULL
-  k.range.length = NULL
+
+  datos.bruto  <- data
+  names.metr   <- names(datos.bruto)[-1]
+  pkg.env$names.metr <- names.metr
+
+  i.min <- k.min; i.max <- k.max
   if (!is.null(k.set)) {
-    k.range = k.set
-    k.range.length = length(k.set)
+    k.range <- k.set; k.range.length <- length(k.set)
   } else {
-    k.range = i.min:i.max
-    k.range.length = length(i.min:i.max)+1
+    k.range <- i.min:i.max; k.range.length <- length(i.min:i.max) + 1
   }
-  
-  if (all_metrics == TRUE) { # Processing all metrics as one
-    num.metrics = 1
-    pkg.env$names.metr = c("all_metrics")
-  } else {
-    num.metrics = length(names.metr)
-    pkg.env$names.metr = names.metr
-  }
-  
-  # Optionally detect number of cores automatically or assign manually
-  # numCores <- detectCores() 
+
+  num.metrics <- if (all_metrics) 1L else length(names.metr)
+  if (all_metrics) pkg.env$names.metr <- "all_metrics"
+
   message("Number of cores in parallelization: ", numCores)
   cl <- makeCluster(numCores)
   on.exit(stopCluster(cl), add = TRUE)
-  
-  # Export variables from the current environment to the cluster
-  clusterExport(cl, c("datos.bruto", "names.metr", "cbi", "seed", "k.range", "k.range.length", "bs.values", "gold_standard", "all_metrics"), envir=environment())
-  
-  # Cargamos el paquete de evaluomeR
-  clusterEvalQ(cl, {library(evaluomeR)})
-  
-  # Parallel loop over metrics
-  resultados <- parLapply(cl, 1:num.metrics, function(i.metr){
-    
-    # Store results for each metric
-    stab_valores <- rep(NA, max(k.range))
-    
-    csv_data <- vector("list", max(k.range))
-    
-    
-    if (all_metrics == TRUE) {
-      message("Processing all metrics, 'merge', in dataframe (", length(names.metr),")")
-    } else {
-      message("Processing metric: ", names.metr[i.metr],"(", i.metr,")")
-    }
-    
-    for (j.k in k.range) {
-      message("\tCalculation of k = ", j.k,"")
-      estable=NULL
-      contador=contador+1
-      i=i.metr+1
-      estable$n.metric=i.metr
-      estable$name.metric=names.metr[i.metr]
-      estable$n.k=j.k
-      estable$name.ontology=names(datos.bruto[1])
-      
-      if (all_metrics == TRUE) { # Processing all metrics as one
-        data_to_cluster = datos.bruto[,-1] # Removing first column
-      } else {
-        data_to_cluster = datos.bruto[,i]
-      }
-      
-      km5=NULL
-      v.size = 0
-      if (!all_metrics) {
-        v.size = length(levels(as.factor(data_to_cluster)))
-      } else {
-        v.size = j.k
-      }
-      if (v.size>=j.k) {
-        #km5$cluster=boot.cluster(data=datos.bruto[,i],
-        #                         nk=j.k, B=bs, seed=seed)
-        #km5$jac=km5$cluster$means
-        
-        
-        
-        clusterbootData = tryCatch({
-          clusterbootWrapper(data=data_to_cluster, B=bs,
-                             bootmethod="boot",
-                             cbi=cbi,
-                             gold_standard=gold_standard,
-                             krange=j.k, seed=seed, ...)
-        }, error = function(error_condition) {
-          error_condition
-        })
-        
-        if(inherits(clusterbootData, "error")) {
-          message(paste0("\t", clusterbootData))
-          message("\tWarning: Could not process data for k = ", j.k)
-          km5$bspart=rep(NA,length(datos.bruto[,i]))
-          km5$jac=rep(NA,j.k)
-          km5$centr=rep(NA,j.k)
-          km5$means=km5$bspart
-          km5$bspart.or=km5$bspart
-          km5$bspart.inv=km5$means
-          km5$jac.or=km5$jac
-          km5$jac.inv=km5$jac
-          km5$partition=km5$bspart.inv
-          km5$jac.stab=km5$jac.inv
-          
-          km5$csv = NULL
-          km5$csv$cluster_partition = NULL
-          km5$csv$cluster_mean = NULL
-          km5$csv$cluster_centers = NULL
-          km5$csv$cluster_size = NULL
-          km5$csv$cluster_betweenss = NULL
-          km5$csv$cluster_totss = NULL
-          km5$csv$cluster_tot.withinss = NULL
-          km5$csv$cluster_anova = NULL
-          
-          # CAMBIAMOS A NUESTRAS ESTRUCTURAS LOCALES, NO A LA GLOBAL
-          
-          stab_valores[j.k] = mean(km5$jac)
-          csv_data[[j.k]] = km5
-          next
-        }
-        
-        km5$cluster = clusterbootData
-        
-        km5$jac=km5$cluster$bootmean
-        km5$bspart=km5$cluster$partition
-        
-        km5$csv = NULL
-        km5$csv$cluster_partition = km5$cluster$partition
-        km5$csv$cluster_mean = km5$cluster$bootmean
-        km5$csv$cluster_centers = km5$cluster$result$result$centers
-        km5$csv$cluster_size = km5$cluster$result$result$size
-        km5$csv$cluster_betweenss = km5$cluster$result$result$betweenss
-        km5$csv$cluster_totss = km5$cluster$result$result$totss
-        km5$csv$cluster_tot.withinss = km5$cluster$result$result$tot.withinss
-        km5$csv$cluster_anova = fAnova(km5$cluster$result$result, j.k, num.metrics)
-        
-        km5$centr=km5$cluster$result$result$centers
-        for (km5.i in 1:length(km5$centr)) {
-          km5$means[which(km5$bspart==km5.i)]=km5$centr[km5.i]
-        }
-        
-        #km5$bspart.or=ordered(km5$means,labels=seq(1,length(km5$centr)))
-        
-        #km5$bspart.inv=ordered(km5$means,labels=seq(length(km5$centr),1))
-        
-        #km5$jac.or=km5$jac[order(km5$centr)]
-        #km5$jac.inv=km5$jac[order(km5$centr,decreasing=TRUE)]
-        
-        #if (any(inversa==names.metr[i.metr])) {
-        #  km5$partition=km5$bspart.inv
-        #  km5$jac.stab=km5$jac.inv
-        #} else {
-        #  km5$partition=km5$bspart.or
-        #  km5$jac.stab=km5$jac.or
-        #}
-        #m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
-        
-        # CAMBIAMOS A NUESTRAS ESTRUCTURAS LOCALES, NO A LA GLOBAL
-        stab_valores[j.k] = mean(km5$jac)
-        csv_data[[j.k]] = km5
-      } else {
-        message("\tWarning: Could not process data for k = ", j.k)
-        km5$bspart=rep(NA,length(datos.bruto[,i]))
-        km5$jac=rep(NA,j.k)
-        km5$centr=rep(NA,j.k)
-        km5$means=km5$bspart
-        km5$bspart.or=km5$bspart
-        km5$bspart.inv=km5$means
-        km5$jac.or=km5$jac
-        km5$jac.inv=km5$jac
-        km5$partition=km5$bspart.inv
-        km5$jac.stab=km5$jac.inv
-        
-        km5$csv = NULL
-        km5$csv$cluster_partition = NULL
-        km5$csv$cluster_mean = NULL
-        km5$csv$cluster_centers = NULL
-        km5$csv$cluster_size = NULL
-        km5$csv$cluster_betweenss = NULL
-        km5$csv$cluster_totss = NULL
-        km5$csv$cluster_tot.withinss = NULL
-        km5$csv$cluster_anova = NULL
-        
-        # m.stab.global[[i.metr]][j.k] = mean(km5$jac.stab)
-        
-        # CAMBIAMOS A NUESTRAS ESTRUCTURAS LOCALES, NO A LA GLOBAL
-        stab_valores[j.k] = mean(km5$jac)
-        csv_data[[j.k]] = km5
-      }
-    }
-    return(list(stab_valores = stab_valores, csv_data = csv_data))
-  })
-  
-  
-  # COMBINAMOS
-  m.stab.global <- list()
-  m.stab.global.csv <- list()
-  
-  for (i.metr in 1:num.metrics) {
-    m.stab.global[[i.metr]] <- resultados[[i.metr]]$stab_valores
-    m.stab.global.csv[[i.metr]] <- resultados[[i.metr]]$csv_data
-  }
-  
-  e.stab.global=NULL
+  clusterEvalQ(cl, library(evaluomeR))
+
+  # --- parallel dispatch: same helper as serial, different dispatcher ---
+  resultados <- parLapply(cl, seq_len(num.metrics), function(i.metr)
+    .runStabilityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
+                              k.range, bs, all_metrics, gold_standard, num.metrics, ...))
+
+  m.stab.global     <- lapply(resultados, `[[`, "stab_valores")
+  m.stab.global.csv <- lapply(resultados, `[[`, "csv_data")
+
+  e.stab.global <- NULL
   for (j.k in k.range) {
-    #e.stab.global[[j.k]]=matrix(data=NA, nrow=length(names.metr), ncol=length(i.min:i.max))
-    e.stab.global[[j.k]]=matrix(data=NA, nrow=k.range.length, ncol=1)
-    for (i.metr in 1:num.metrics) {
-      e.stab.global[[j.k]][i.metr]=m.stab.global[[i.metr]][j.k]
+    e.stab.global[[j.k]] <- matrix(data=NA, nrow=k.range.length, ncol=1)
+    for (i.metr in seq_len(num.metrics)) {
+      e.stab.global[[j.k]][i.metr] <- m.stab.global[[i.metr]][j.k]
     }
   }
-  
-  
-  pkg.env$m.stab.global.csv = m.stab.global.csv
-  pkg.env$m.stab.global = m.stab.global
-  pkg.env$e.stab.global = e.stab.global
-  #pkg.env$names.metr = names.metr
-  #return(stabilityDataFrame)
-  #return(NULL)
+
+  pkg.env$m.stab.global.csv <- m.stab.global.csv
+  pkg.env$m.stab.global     <- m.stab.global
+  pkg.env$e.stab.global     <- e.stab.global
 }
 
 runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
