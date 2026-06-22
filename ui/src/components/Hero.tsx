@@ -63,7 +63,7 @@ export function Hero() {
       </motion.div>
 
       <motion.p
-        className="absolute bottom-8 text-xs text-slate-500"
+        className="absolute bottom-8 w-full px-4 text-center text-xs text-slate-500"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
