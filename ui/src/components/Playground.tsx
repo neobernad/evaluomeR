@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
@@ -26,6 +26,27 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
   const data: DemoData = active.data
   const [k, setK] = useState<number>(data.optimalK)
   const [showData, setShowData] = useState(false)
+  const [compact, setCompact] = useState(false)
+  const sentinelRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    setCompact(false)
+  }, [datasetKey])
+
+  useEffect(() => {
+    const sentinel = sentinelRef.current
+    if (!sentinel) return
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setCompact(!entry.isIntersecting)
+      },
+      { threshold: 0, rootMargin: '0px' },
+    )
+
+    observer.observe(sentinel)
+    return () => observer.disconnect()
+  }, [datasetKey])
 
   const handleDatasetChange = (key: DatasetKey) => {
     const next = datasets.find((d) => d.key === key)
@@ -48,7 +69,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
         <p className="mt-2 text-slate-400">{subtitle}</p>
       </div>
 
-      <div className="mb-6">
+      <div ref={sentinelRef} className="mb-6">
         <DatasetSelector
           datasets={datasets}
           selected={datasetKey}
@@ -87,7 +108,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
         </AnimatePresence>
       </div>
 
-      <div className="mb-8">
+      <div className="sticky top-0 z-20 mb-8">
         <KSlider
           k={k}
           kMin={data.meta.kRange[0]}
@@ -95,6 +116,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
           onChange={setK}
           optimalK={data.optimalK}
           kSummary={data.kSummary}
+          compact={compact}
         />
       </div>
 
