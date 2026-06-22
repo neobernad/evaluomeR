@@ -12,7 +12,7 @@ export function OptimalKBadge({ optimalK, currentK }: OptimalKBadgeProps) {
   return (
     <motion.div
       className={[
-        'flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors duration-300',
+        'flex flex-wrap items-start gap-2 gap-x-3 rounded-lg border px-4 py-3 transition-colors duration-300',
         isOptimal
           ? 'border-emerald-500/40 bg-emerald-500/10'
           : 'border-amber-500/20 bg-amber-500/5',

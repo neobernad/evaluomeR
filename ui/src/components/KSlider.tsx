@@ -21,6 +21,12 @@ function scoreBarColor(ratio: number, isOptimal: boolean): string {
 export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary }: KSliderProps) {
   const kRange = Array.from({ length: kMax - kMin + 1 }, (_, i) => kMin + i)
   const maxComposite = Math.max(...Object.values(kSummary).map((e) => e.composite))
+  const smGridCols: Record<number, string> = {
+    3: 'sm:grid-cols-3',
+    4: 'sm:grid-cols-4',
+    5: 'sm:grid-cols-5',
+    6: 'sm:grid-cols-6',
+  }
 
   return (
     <div className="rounded-xl border border-slate-800 bg-slate-900/50 p-6">
@@ -32,8 +38,10 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary }: KSlider
       </div>
 
       <div
-        className="grid gap-3"
-        style={{ gridTemplateColumns: `repeat(${kRange.length}, minmax(0, 1fr))` }}
+        className={[
+          'mt-4 grid grid-cols-3 gap-3 pt-4',
+          smGridCols[kRange.length] ?? 'sm:grid-cols-6',
+        ].join(' ')}
       >
         {kRange.map((kv) => {
           const entry = kSummary[String(kv)]
@@ -74,7 +82,7 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary }: KSlider
               )}
               <span
                 className={[
-                  'font-mono text-3xl font-bold leading-none',
+                  'font-mono text-xl font-bold leading-none sm:text-3xl',
                   isSelected
                     ? isOptimal
                       ? 'text-emerald-300'

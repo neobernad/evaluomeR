@@ -1,7 +1,10 @@
 import { useState } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
+import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatasetSelector, type DatasetKey, type DatasetOption } from '@/components/DatasetSelector'
+import { DatasetCard } from '@/components/DatasetCard'
 import { KSlider } from '@/components/KSlider'
 import { OptimalKPanel } from '@/components/OptimalKPanel'
 import { KScoreChart } from '@/components/KScoreChart'
@@ -22,12 +25,14 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
   const active = datasets.find((d) => d.key === datasetKey) ?? datasets[0]
   const data: DemoData = active.data
   const [k, setK] = useState<number>(data.optimalK)
+  const [showData, setShowData] = useState(false)
 
   const handleDatasetChange = (key: DatasetKey) => {
     const next = datasets.find((d) => d.key === key)
     if (!next) return
     setDatasetKey(key)
     setK(next.data.optimalK)
+    setShowData(false)
   }
 
   const typeLabel = datasetKey === 'golub' ? 'leukemia classes' : 'cancer tissues'
@@ -49,6 +54,37 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
           selected={datasetKey}
           onSelect={handleDatasetChange}
         />
+      </div>
+
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={() => setShowData((v) => !v)}
+          className="flex w-full items-center justify-between rounded-lg border border-slate-800 px-4 py-3 text-sm font-medium text-slate-300 transition-colors hover:bg-slate-900/40"
+        >
+          <span>Explore the data</span>
+          {showData ? (
+            <ChevronDown className="h-4 w-4 text-slate-500" />
+          ) : (
+            <ChevronRight className="h-4 w-4 text-slate-500" />
+          )}
+        </button>
+        <AnimatePresence>
+          {showData && (
+            <motion.div
+              key={datasetKey}
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+              className="overflow-hidden"
+            >
+              <div className="pt-4">
+                <DatasetCard data={data} />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       <div className="mb-8">
@@ -139,4 +175,4 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
     </section>
   )
 }
-
+
