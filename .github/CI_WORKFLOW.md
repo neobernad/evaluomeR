@@ -29,12 +29,12 @@ metadata. A failing check blocks merge.
 
 ### pkgdown — `.github/workflows/pkgdown.yaml`
 
-**Triggers:** push to `main` or `master` only; manual dispatch.
+**Triggers:** push to `main`, `master`, or `develop`; manual dispatch.
 
-Builds the documentation site and deploys to GitHub Pages at
-https://neobernad.github.io/evaluomeR/
-
-`develop` does **not** trigger pkgdown deploy.
+Builds the documentation site (and demo SPA) on every trigger. **Deploy** to
+GitHub Pages at https://neobernad.github.io/evaluomeR/ runs only on push to
+`main` or `master` — `develop` validates the build but does not publish
+(must match the `github-pages` environment branch protection).
 
 ## Local testing
 

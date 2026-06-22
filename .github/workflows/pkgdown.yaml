@@ -80,6 +80,7 @@ jobs:
 
   deploy:
     needs: pkgdown
+    if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write

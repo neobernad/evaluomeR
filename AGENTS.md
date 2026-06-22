@@ -262,6 +262,9 @@ A PR must pass this job before merging.
 
 ### pkgdown docs — `.github/workflows/pkgdown.yaml`
 
+Triggered on push to `main`, `master`, or `develop` (build validation on all;
+**deploy to GitHub Pages only on `main`/`master`**).
+
 Builds the documentation site with `pkgdown::build_site_github_pages()` and
 deploys to GitHub Pages at `https://neobernad.github.io/evaluomeR/`.
 
