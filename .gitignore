@@ -43,3 +43,6 @@ notebooks/local/.ipynb_checkpoints/
 *.tiff
 usecases/usecase1/plots-rm/
 usecases/usecase1/results-csv-rm/
+ui/node_modules/
+ui/tsconfig.tsbuildinfo
+docs/

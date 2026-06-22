@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.4.2
+FROM bioconductor/bioconductor_docker:RELEASE_3_19
 
 LABEL org.opencontainers.image.source="https://github.com/neobernad/evaluomeR"
 LABEL org.opencontainers.image.description="evaluomeR — evaluation of bioinformatics metrics (built from source)"
@@ -6,30 +6,18 @@ LABEL org.opencontainers.image.description="evaluomeR — evaluation of bioinfor
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    cmake \
+    gfortran \
+    liblapack-dev \
+    libblas-dev \
+    libnlopt-dev \
     libcurl4-openssl-dev \
     libssl-dev \
     libxml2-dev \
-    libfontconfig1-dev \
-    libfreetype6-dev \
-    libpng-dev \
-    libtiff5-dev \
-    libjpeg-dev \
-    libharfbuzz-dev \
-    libfribidi-dev \
+    pandoc \
   && rm -rf /var/lib/apt/lists/*
 
-RUN R -e 'install.packages(c("remotes", "BiocManager"), repos = "https://packagemanager.posit.co/cran/__linux__/jammy/latest")'
+WORKDIR /work
 
-WORKDIR /evaluomeR
-
-COPY DESCRIPTION NAMESPACE LICENSE ./
-COPY R/ R/
-COPY data/ data/
-COPY man/ man/
-COPY inst/ inst/
-COPY vignettes/ vignettes/
-
-RUN R -e 'BiocManager::install(c("SummarizedExperiment", "MultiAssayExperiment"), ask = FALSE, update = FALSE)' \
- && R -e 'remotes::install_local(".", dependencies = TRUE, upgrade = FALSE)'
-
+# Default: interactive R shell with repo mounted at /work via docker-compose
 CMD ["R"]

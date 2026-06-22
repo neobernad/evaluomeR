@@ -2,15 +2,41 @@ url: https://neobernad.github.io/evaluomeR/
 
 template:
   bootstrap: 5
+  bootswatch: flatly
+  bslib:
+    primary: "#0F172A"
+    link-color: "#3B82F6"
+    base_font: {google: "Inter"}
+    heading_font: {google: "Inter"}
+    code_font: {google: "JetBrains Mono"}
+
+home:
+  title: "evaluomeR — Evaluate Bioinformatics Metrics"
+  description: >
+    Bootstrap Jaccard stability, silhouette quality, and optimal-k selection
+    for bioinformatics metric datasets. Includes an interactive NCI-60 cancer
+    cell-line demo. Bioconductor R package.
+  links:
+  - text: "Try the interactive demo"
+    href: app/index.html
+  - text: "Bioconductor page"
+    href: https://bioconductor.org/packages/evaluomeR
+
+navbar:
+  structure:
+    left:  [intro, reference, articles]
+    right: [demo, github]
+  components:
+    demo:
+      text: "Try Demo"
+      href: app/index.html
+      icon: fa-play-circle
 
 articles:
   - title: "Get started"
-    contents:
-      - manual
-
+    contents: [manual]
   - title: "Publications"
-    contents:
-      - publications
+    contents: [publications]
 
 development:
   mode: auto

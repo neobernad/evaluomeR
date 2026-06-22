@@ -5,3 +5,8 @@
 ^tests/testATSC_parallel\.R$
 ^tests/testAlpha_parallel\.R$
 ^tests/testK_optimo_parallel\.R$
+^ui/
+^tools/
+^pkgdown/extra\.css$
+^Dockerfile$
+^docker-compose\.yml$
