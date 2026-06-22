@@ -2,13 +2,25 @@ url: https://neobernad.github.io/evaluomeR/
 
 template:
   bootstrap: 5
-  bootswatch: flatly
+  bootswatch: darkly
   bslib:
-    primary: "#0F172A"
-    link-color: "#3B82F6"
+    primary: "#3B82F6"
+    secondary: "#64748B"
+    success: "#22C55E"
+    info: "#38BDF8"
+    bg: "#020617"
+    fg: "#E2E8F0"
+    link-color: "#60A5FA"
     base_font: {google: "Inter"}
     heading_font: {google: "Inter"}
     code_font: {google: "JetBrains Mono"}
+    navbar-bg: "#0F172A"
+    navbar-light-brand-color: "#F8FAFC"
+    navbar-light-color: "#CBD5E1"
+    navbar-light-active-color: "#FFFFFF"
+    navbar-dark-brand-color: "#F8FAFC"
+    navbar-dark-color: "#CBD5E1"
+    navbar-dark-active-color: "#FFFFFF"
 
 home:
   title: "evaluomeR — Evaluate Bioinformatics Metrics"

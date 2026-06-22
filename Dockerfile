@@ -19,5 +19,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /work
 
+# Update xfun, knitr, rmarkdown, and pkgdown from CRAN so they are
+# consistent regardless of what was shipped with the Bioconductor base image.
+RUN R -e 'install.packages(c("xfun", "knitr", "rmarkdown", "pkgdown"), \
+  repos = "https://cloud.r-project.org", Ncpus = 2L)'
+
 # Default: interactive R shell with repo mounted at /work via docker-compose
 CMD ["R"]
