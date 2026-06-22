@@ -27,7 +27,7 @@ devtools::install_github("neobernad/evaluomeR@v1.7.9") # Latest release
 
 ## Docker
 
-See [docs/DOCKER.md](docs/DOCKER.md) for build instructions and example commands.
+See [tools/DOCKER.md](tools/DOCKER.md) for build instructions and example commands.
 
 
 # Anaconda

@@ -11,7 +11,7 @@ check
 _pkgdown.yml
 AGENTS.md
 README.md
-docs/DOCKER.md
+tools/DOCKER.md
 docker-compose.yml
 Dockerfile
 .dockerignore
