@@ -28,9 +28,6 @@ BiocManager::install("evaluomeR")
 
 # GitHub (development)
 devtools::install_github("neobernad/evaluomeR")
-
-# Conda
-# conda install -c bioconda bioconductor-evaluomer
 ```
 
 - Requires R >= 3.6
