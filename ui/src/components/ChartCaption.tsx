@@ -25,13 +25,13 @@ const HIGHLIGHT_STYLES: Record<Exclude<Highlight['color'], 'slate'>, string> = {
 export function ChartCaption({ icon: Icon, text, highlights }: ChartCaptionProps) {
   return (
     <div className="mt-3 border-t border-slate-800 pt-3">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-2">
         <div className="flex gap-2.5">
           <Icon className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden />
           <p className="text-xs leading-relaxed text-slate-400">{text}</p>
         </div>
         {highlights && highlights.length > 0 && (
-          <div className="flex shrink-0 flex-wrap gap-1.5 sm:justify-end">
+          <div className="flex flex-wrap gap-1.5 pl-6.5">
             {highlights.map((h) => (
               <Badge
                 key={h.label}
