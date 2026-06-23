@@ -28,8 +28,12 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
   const [showData, setShowData] = useState(false)
   const [compact, setCompact] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
+  const compactRef = useRef(false)
+  const lockRef = useRef(false)
 
   useLayoutEffect(() => {
+    compactRef.current = false
+    lockRef.current = false
     setCompact(false)
   }, [datasetKey])
 
@@ -39,7 +43,14 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setCompact(!entry.isIntersecting)
+        const next = !entry.isIntersecting
+        if (next === compactRef.current || lockRef.current) return
+        compactRef.current = next
+        lockRef.current = true
+        setCompact(next)
+        setTimeout(() => {
+          lockRef.current = false
+        }, 450)
       },
       { threshold: 0, rootMargin: '0px' },
     )
