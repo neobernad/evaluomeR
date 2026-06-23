@@ -161,19 +161,29 @@ run_export <- function(dataset_name,
   })
   names(clusters_list) <- as.character(k_min:k_max)
 
-  message("PCA (2 components) ...")
+  message("PCA (3 components) ...")
   pca_result    <- prcomp(metric_df, center = TRUE, scale. = TRUE)
-  pc_coords     <- as.data.frame(pca_result$x[, 1:2, drop = FALSE])
-  var_explained <- summary(pca_result)$importance[2, 1:2]
-  message("PCA variance: PC1=", round(var_explained[1] * 100, 1),
-          "%, PC2=", round(var_explained[2] * 100, 1), "%")
+  n_pcs         <- min(3L, ncol(pca_result$x))
+  pc_coords     <- as.data.frame(pca_result$x[, seq_len(n_pcs), drop = FALSE])
+  var_explained <- summary(pca_result)$importance[2, seq_len(n_pcs)]
+  var_msg <- paste(
+    vapply(seq_len(n_pcs), function(i) {
+      paste0("PC", i, "=", round(var_explained[i] * 100, 1), "%")
+    }, character(1)),
+    collapse = ", "
+  )
+  message("PCA variance: ", var_msg)
 
   pca_export <- list(
     coords = lapply(seq_len(nrow(pc_coords)), function(i) {
-      list(
+      coord <- list(
         pc1 = round(pc_coords$PC1[i], 6),
         pc2 = round(pc_coords$PC2[i], 6)
       )
+      if (n_pcs >= 3L) {
+        coord$pc3 <- round(pc_coords$PC3[i], 6)
+      }
+      coord
     }),
     varExplained = as.numeric(var_explained)
   )
