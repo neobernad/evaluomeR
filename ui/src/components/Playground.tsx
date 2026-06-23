@@ -74,7 +74,17 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
       : `Explore precomputed evaluomeR analyses on ${data.meta.nSamples} NCI-60 cancer cell lines.`
 
   return (
-    <section id="playground" className="mx-auto max-w-5xl px-6 py-20">
+    <section id="playground" className="relative">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-dot-grid [mask-image:linear-gradient(to_bottom,transparent,black_8%,black_92%,transparent)]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,rgba(59,130,246,0.04),transparent_60%)]"
+      />
+
+      <div className="relative mx-auto max-w-5xl px-6 py-20">
       <div className="mb-8 text-center">
         <h2 className="text-3xl font-bold text-white">Interactive Playground</h2>
         <p className="mt-2 text-slate-400">{subtitle}</p>
@@ -205,6 +215,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
           </Tabs>
         </CardContent>
       </Card>
+      </div>
     </section>
   )
 }
