@@ -6,21 +6,21 @@ the stability and goodness of the classifications of such metrics. The method ta
 the metrics for the dataset and evaluates the reliability of the metrics according to the 
 following analyses: Correlations, Stability and Goodness of classifications.
 
-Preferably, install **evaluomeR** from the latest stable version at the [release bioconductor repository](https://www.bioconductor.org/packages/release/bioc/html/evaluomeR.html) or [development bioconductor repository](https://www.bioconductor.org/packages/devel/bioc/html/evaluomeR.html).
+- **Documentation:** [neobernad.github.io/evaluomeR](https://neobernad.github.io/evaluomeR/)
+- **Interactive demo:** [neobernad.github.io/evaluomeR/app](https://neobernad.github.io/evaluomeR/app/)
 
 # Installation
 
-You can install latest version or any release version with:
+The recommended way to use **evaluomeR** is via Docker — see [tools/DOCKER.md](tools/DOCKER.md) for build instructions and example commands.
+
+**evaluomeR** is also available on [Bioconductor (release)](https://www.bioconductor.org/packages/release/bioc/html/evaluomeR.html) and [Bioconductor (devel)](https://www.bioconductor.org/packages/devel/bioc/html/evaluomeR.html).
+
+To install the latest development version from GitHub:
 
 ```bash
 devtools::install_github("neobernad/evaluomeR") # Latest commit
 devtools::install_github("neobernad/evaluomeR@v1.7.9") # Latest release
 ```
-
-
-## Docker
-
-See [tools/DOCKER.md](tools/DOCKER.md) for build instructions and example commands.
 
 # Documentation
 
