@@ -1,10 +1,3 @@
-![Version](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/version.svg)
-![Release](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/latest_release_date.svg)
-![Platforms](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/platforms.svg)
-![License](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/license.svg)
-![Downloads](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/downloads.svg)
-![Conda](https://anaconda.org/bioconda/bioconductor-evaluomer/badges/installer/conda.svg)
-
 
 # evaluomeR
 
@@ -13,27 +6,20 @@ the stability and goodness of the classifications of such metrics. The method ta
 the metrics for the dataset and evaluates the reliability of the metrics according to the 
 following analyses: Correlations, Stability and Goodness of classifications.
 
-Preferably, install **evaluomeR** from the latest stable version at the [release bioconductor repository](https://www.bioconductor.org/packages/release/bioc/html/evaluomeR.html) or [development bioconductor repository](https://www.bioconductor.org/packages/devel/bioc/html/evaluomeR.html).
+- **Documentation:** [neobernad.github.io/evaluomeR](https://neobernad.github.io/evaluomeR/)
+- **Interactive demo:** [neobernad.github.io/evaluomeR/app](https://neobernad.github.io/evaluomeR/app/)
 
 # Installation
 
-You can install latest version or any release version with:
+The recommended way to use **evaluomeR** is via Docker — see [tools/DOCKER.md](tools/DOCKER.md) for build instructions and example commands.
+
+**evaluomeR** is also available on [Bioconductor (release)](https://www.bioconductor.org/packages/release/bioc/html/evaluomeR.html) and [Bioconductor (devel)](https://www.bioconductor.org/packages/devel/bioc/html/evaluomeR.html).
+
+To install the latest development version from GitHub:
 
 ```bash
 devtools::install_github("neobernad/evaluomeR") # Latest commit
 devtools::install_github("neobernad/evaluomeR@v1.7.9") # Latest release
-```
-
-
-## Docker
-
-See [tools/DOCKER.md](tools/DOCKER.md) for build instructions and example commands.
-
-
-# Anaconda
-**evaluomeR** is also available in the Anaconda Cloud ([link](https://anaconda.org/bioconda/bioconductor-evaluomer)). You can install the package executing the following command:
-```bash
-conda install -c bioconda bioconductor-evaluomer
 ```
 
 # Documentation

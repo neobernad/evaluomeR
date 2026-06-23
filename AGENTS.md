@@ -28,9 +28,6 @@ BiocManager::install("evaluomeR")
 
 # GitHub (development)
 devtools::install_github("neobernad/evaluomeR")
-
-# Conda
-# conda install -c bioconda bioconductor-evaluomer
 ```
 
 - Requires R >= 3.6
@@ -367,6 +364,7 @@ Parameters match the use-case notebooks: **seed = 13606**, **bs = 100**,
 | `Dockerfile` | Bioconductor base image + system deps |
 | `docker-compose.yml` | Mounts repo at `/work`, service name `evaluomeR` |
 | `tools/docker-export.sh` | Installs package + deps, runs `export-demo-data.R` |
+| `tools/build-docs.sh` | Builds pkgdown site then React demo app end-to-end |
 
 ### Manual R export (if R is already installed)
 
@@ -509,7 +507,7 @@ source("tests/<script>.R")
 | Preprocessing / PCA | `R/dataPreprocessing.R`, `R/predictions.R` | `tests/testDataPreprocessing.R`, `tests/testPCA.R` |
 | Clustering backends (CBI) | `R/internalClusterboot.R`, `R/helpers.R` (`pkg.env$cbi`), `R/internalFunctions.R` (clusterboot dispatch) | `tests/testCBI.R`, `tests/testARI.R` |
 | Helpers / package-wide | `R/helpers.R`, `R/data.R`, `DESCRIPTION`, `NAMESPACE` | `tests/testAll.R` |
-| CI / docs only | `.github/`, `man/`, `vignettes/`, `ui/`, `tools/`, `_pkgdown.yml` | `R CMD check` + `docker-compose run --rm evaluomeR bash tools/docker-export.sh` + `cd ui && npm run build` |
+| CI / docs only | `.github/`, `man/`, `vignettes/`, `ui/`, `tools/`, `_pkgdown.yml` | `R CMD check` + `bash tools/build-docs.sh` |
 
 `R/metricsAnalysis.R` spans two rows — run scripts from **both** rows when the
 change is not clearly plot-only or ATSC-only.

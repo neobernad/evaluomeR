@@ -167,6 +167,5 @@ CMD ["R"]
 
 ## See also
 
-- [README](../README.md) — Bioconductor and Conda install options
+- [README](../README.md) — Bioconductor install options
 - [Bioconductor evaluomeR](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
-- Conda: `conda install -c bioconda bioconductor-evaluomer`
