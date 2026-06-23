@@ -154,8 +154,8 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                     ].join(' ')}
                   >
                     {isOptimal && (
-                      <span className="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-400 text-[9px] font-semibold text-white shadow-[0_0_8px_rgba(16,185,129,0.45)]">
-                        ✦
+                      <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-2 py-0.5 text-[9px] font-semibold tracking-wide text-white shadow-[0_0_8px_rgba(16,185,129,0.45)]">
+                        ✦ optimal k
                       </span>
                     )}
                     <span

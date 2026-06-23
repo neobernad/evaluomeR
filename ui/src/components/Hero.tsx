@@ -19,7 +19,7 @@ export function Hero() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          Bioconductor R package
+          R package
         </motion.p>
         <motion.h1
           className="mb-6 text-5xl font-bold tracking-tight text-white md:text-6xl"
@@ -36,7 +36,7 @@ export function Hero() {
           transition={{ delay: 0.45 }}
         >
           Discover the optimal number of clusters for your bioinformatics metrics
-          — using bootstrap stability and silhouette quality on real cancer cell-line data.
+          — using bootstrap stability and silhouette quality on precomputed datasets.
         </motion.p>
 
         <motion.div
@@ -68,7 +68,7 @@ export function Hero() {
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        Precomputed demo · NCI-60 cancer cell lines · k = 3–8 · bootstrap = 100
+        Precomputed demo
       </motion.p>
     </section>
   )
