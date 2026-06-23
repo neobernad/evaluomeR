@@ -1,6 +1,7 @@
 export interface PCACoord {
   pc1: number
   pc2: number
+  pc3?: number
 }
 
 export interface Sample {
@@ -51,6 +52,6 @@ export interface DemoData {
   clusters: ByK<number[]>
   pca: {
     coords: PCACoord[]
-    varExplained: [number, number]
+    varExplained: [number, number] | [number, number, number]
   }
 }
