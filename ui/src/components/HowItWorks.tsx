@@ -2,10 +2,11 @@ import { useState } from 'react'
 import { ChevronDown, ChevronRight, Layers, Shuffle, Zap } from 'lucide-react'
 
 interface HowItWorksProps {
+  activeTab?: string
   onNavigateTab?: (tab: string) => void
 }
 
-export function HowItWorks({ onNavigateTab }: HowItWorksProps) {
+export function HowItWorks({ activeTab, onNavigateTab }: HowItWorksProps) {
   const [open, setOpen] = useState(false)
 
   const steps = [
@@ -77,14 +78,18 @@ export function HowItWorks({ onNavigateTab }: HowItWorksProps) {
                   <span className="text-sm font-medium text-slate-200">{step.title}</span>
                 </div>
                 <p className="text-xs leading-relaxed text-slate-400">{step.body}</p>
-                {onNavigateTab && (
-                  <button
-                    type="button"
-                    onClick={() => onNavigateTab(step.tab)}
-                    className="mt-2 text-xs text-blue-400 hover:underline"
-                  >
-                    View {step.tab === 'optimal-k' ? 'optimal k' : step.tab} tab →
-                  </button>
+                {step.tab === activeTab ? (
+                  <span className="mt-2 inline-block text-xs text-slate-500">Current tab</span>
+                ) : (
+                  onNavigateTab && (
+                    <button
+                      type="button"
+                      onClick={() => onNavigateTab(step.tab)}
+                      className="mt-2 text-xs text-blue-400 hover:underline"
+                    >
+                      View {step.tab === 'optimal-k' ? 'optimal k' : step.tab} tab →
+                    </button>
+                  )
                 )}
               </div>
             )

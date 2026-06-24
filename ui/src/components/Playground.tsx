@@ -217,7 +217,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
             </TabsList>
 
             <TabsContent value="optimal-k" className="space-y-6 pt-4">
-              <HowItWorks onNavigateTab={handleTabChange} />
+              <HowItWorks activeTab={activeTab} onNavigateTab={handleTabChange} />
               <OptimalKPanel
                 optimalK={data.optimalK}
                 nCancerTypes={data.meta.nCancerTypes}
