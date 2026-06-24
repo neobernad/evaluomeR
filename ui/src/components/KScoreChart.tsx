@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import ReactECharts from 'echarts-for-react'
+import { Target } from 'lucide-react'
+import { ChartCaption } from '@/components/ChartCaption'
 import type { KSummaryEntry } from '@/types/demo'
 import { buildOptimalAnimatedLine, buildGraphicOptimalLabel } from '@/lib/kChartMarks'
 
@@ -15,6 +17,7 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
   const optLabel = `k = ${optimalK}`
   const currentLabel = `k = ${currentK}`
   const isAtOptimal = currentK === optimalK
+  const hasAri = kValues.some((k) => kSummary[k].ari !== undefined)
 
   const option = useMemo(() => {
     const categories = kValues.map((kv) => `k = ${kv}`)
@@ -45,6 +48,13 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
       symbolSize: Number(k) === currentK ? 14 : 8,
       itemStyle: { color: '#f59e0b' },
     }))
+    const ariData = hasAri
+      ? kValues.map((k) => ({
+          value: kSummary[k].ari ?? null,
+          symbolSize: Number(k) === optimalK ? 12 : 8,
+          itemStyle: { color: '#14b8a6' },
+        }))
+      : []
 
     const markAreaData = (isAtOptimal
       ? [
@@ -64,21 +74,24 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
           ],
         ]) as Array<[{ xAxis: string; itemStyle?: { color: string } }, { xAxis: string }]>
 
+    const legendData = ['Avg stability', 'Avg silhouette', 'Composite score']
+    if (hasAri) legendData.push('ARI vs labels')
+
     return {
       backgroundColor: 'transparent',
       tooltip: {
         trigger: 'axis',
         axisPointer: { type: 'shadow' },
-        formatter: (params: { name: string; seriesName: string; value: number }[]) => {
+        formatter: (params: { name: string; seriesName: string; value: number | null }[]) => {
           const k = params[0]?.name
-          const lines = params.map(
-            (p) => `${p.seriesName}: <b>${p.value.toFixed(3)}</b>`,
-          )
+          const lines = params
+            .filter((p) => p.value !== null && p.value !== undefined)
+            .map((p) => `${p.seriesName}: <b>${Number(p.value).toFixed(3)}</b>`)
           return [`<b>${k}</b>`, ...lines].join('<br/>')
         },
       },
       legend: {
-        data: ['Avg stability', 'Avg silhouette', 'Composite score'],
+        data: legendData,
         textStyle: { color: '#94a3b8' },
         top: 4,
       },
@@ -127,6 +140,19 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
           data: compositeData,
           ...buildOptimalAnimatedLine(optLabel, 0, 1),
         },
+        ...(hasAri
+          ? [
+              {
+                name: 'ARI vs labels',
+                type: 'line' as const,
+                smooth: true,
+                symbol: 'diamond',
+                lineStyle: { color: '#14b8a6', width: 2.5 },
+                itemStyle: { color: '#14b8a6' },
+                data: ariData,
+              },
+            ]
+          : []),
       ],
       ...buildGraphicOptimalLabel(
         optLabel,
@@ -135,7 +161,7 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
         `✦ best  k = ${optimalK}`,
       ),
     }
-  }, [kSummary, kValues, optimalK, currentK, optLabel, currentLabel, isAtOptimal])
+  }, [kSummary, kValues, optimalK, currentK, optLabel, currentLabel, isAtOptimal, hasAri])
 
   return (
     <div>
@@ -144,6 +170,16 @@ export function KScoreChart({ kSummary, optimalK, currentK, dataset }: KScoreCha
         <p className="mt-1 text-center text-xs text-slate-500">
           k = 2 is excluded — too few groups for {'>'}9 cancer tissue types
         </p>
+      )}
+      {hasAri && (
+        <ChartCaption
+          icon={Target}
+          text="Adjusted Rand Index (ARI) compares k-means cluster assignments to known tissue/class labels. ARI = 1 means perfect recovery of the ground truth."
+          highlights={[
+            { label: '1.0 Perfect match', color: 'emerald' },
+            { label: '0 Random', color: 'slate' },
+          ]}
+        />
       )}
     </div>
   )
