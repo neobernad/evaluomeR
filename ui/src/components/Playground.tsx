@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatasetSelector, type DatasetKey, type DatasetOption } from '@/components/DatasetSelector'
 import { DatasetCard } from '@/components/DatasetCard'
+import { HowItWorks } from '@/components/HowItWorks'
 import { KSlider } from '@/components/KSlider'
 import { OptimalKPanel } from '@/components/OptimalKPanel'
 import { KScoreChart } from '@/components/KScoreChart'
@@ -216,6 +217,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
             </TabsList>
 
             <TabsContent value="optimal-k" className="space-y-6 pt-4">
+              <HowItWorks onNavigateTab={handleTabChange} />
               <OptimalKPanel
                 optimalK={data.optimalK}
                 nCancerTypes={data.meta.nCancerTypes}
