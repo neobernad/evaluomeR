@@ -260,6 +260,9 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 k={k}
                 optimalK={data.optimalK}
                 chartMetrics={data.meta.chartMetrics}
+                samples={data.samples}
+                clusters={data.clusters}
+                sampleSilhouette={data.sampleSilhouette}
               />
             </TabsContent>
 
