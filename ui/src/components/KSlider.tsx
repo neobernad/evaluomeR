@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import type { KeyboardEvent } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import type { KSummaryEntry } from '@/types/demo'
 
@@ -18,6 +19,22 @@ function scoreBarColor(ratio: number, isOptimal: boolean): string {
   if (ratio >= 0.75) return '#60a5fa'
   if (ratio >= 0.6) return '#f59e0b'
   return '#ef4444'
+}
+
+function handleKKeyDown(
+  e: KeyboardEvent<HTMLButtonElement>,
+  kv: number,
+  kMin: number,
+  kMax: number,
+  onChange: (k: number) => void,
+) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    if (kv < kMax) onChange(kv + 1)
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+    e.preventDefault()
+    if (kv > kMin) onChange(kv - 1)
+  }
 }
 
 export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact = false }: KSliderProps) {
@@ -58,7 +75,11 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
               <span className="text-sm font-medium text-slate-300">Clusters (k)</span>
             </div>
             <div className="mx-1 h-5 w-px shrink-0 bg-slate-700" aria-hidden />
-            <div className="flex flex-1 flex-wrap items-center justify-center gap-2.5">
+            <div
+              className="flex flex-1 flex-wrap items-center justify-center gap-2.5"
+              role="radiogroup"
+              aria-label="Number of clusters"
+            >
               {kRange.map((kv) => {
                 const isSelected = kv === k
                 const isOptimal = kv === optimalK
@@ -66,7 +87,11 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                   <motion.button
                     key={kv}
                     type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={`k = ${kv}${isOptimal ? ', optimal' : ''}`}
                     onClick={() => onChange(kv)}
+                    onKeyDown={(e) => handleKKeyDown(e, kv, kMin, kMax, onChange)}
                     whileHover={!isSelected ? { scale: 1.08 } : undefined}
                     whileTap={{ scale: 0.95 }}
                     className={[
@@ -120,6 +145,8 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                 'mt-4 grid grid-cols-3 gap-3 pt-4',
                 smGridCols[kRange.length] ?? 'sm:grid-cols-6',
               ].join(' ')}
+              role="radiogroup"
+              aria-label="Number of clusters"
             >
               {kRange.map((kv) => {
                 const entry = kSummary[String(kv)]
@@ -132,7 +159,11 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                   <motion.button
                     key={kv}
                     type="button"
+                    role="radio"
+                    aria-checked={isSelected}
+                    aria-label={`k = ${kv}${isOptimal ? ', optimal' : ''}`}
                     onClick={() => onChange(kv)}
+                    onKeyDown={(e) => handleKKeyDown(e, kv, kMin, kMax, onChange)}
                     whileHover={!isSelected ? { scale: 1.04, y: -2 } : undefined}
                     whileTap={{ scale: 0.97 }}
                     animate={{
