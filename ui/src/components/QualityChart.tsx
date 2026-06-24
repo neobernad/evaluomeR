@@ -1,10 +1,11 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
 import { BarChart2, Layers } from 'lucide-react'
 import { ChartCaption } from '@/components/ChartCaption'
 import { OptimalKBadge } from '@/components/OptimalKBadge'
-import type { DemoData } from '@/types/demo'
+import { SilhouetteBar } from '@/components/SilhouetteBar'
+import type { ByK, DemoData, Sample } from '@/types/demo'
 import { formatMetricLabel } from '@/lib/metricLabels'
 import { buildAnimatedLines, buildGraphicKLabels } from '@/lib/kChartMarks'
 
@@ -86,7 +87,12 @@ interface QualityChartProps {
   k: number
   optimalK: number
   chartMetrics: string[]
+  samples: Sample[]
+  clusters: DemoData['clusters']
+  sampleSilhouette?: ByK<number[]>
 }
+
+type SilhouetteView = 'average' | 'per-sample'
 
 function buildLineOption(
   title: string,
@@ -145,8 +151,19 @@ function buildLineOption(
   }
 }
 
-export function QualityChart({ quality, k, optimalK, chartMetrics }: QualityChartProps) {
+export function QualityChart({
+  quality,
+  k,
+  optimalK,
+  chartMetrics,
+  samples,
+  clusters,
+  sampleSilhouette,
+}: QualityChartProps) {
   const kValues = Object.keys(quality.silhouette).sort((a, b) => Number(a) - Number(b))
+  const [silView, setSilView] = useState<SilhouetteView>('average')
+  const hasPerSample = sampleSilhouette?.[String(k)] !== undefined
+  const clusterAssignments = clusters[String(k)] ?? []
 
   const chMax = useMemo(() => {
     const vals = kValues.flatMap((kv) =>
@@ -198,7 +215,34 @@ export function QualityChart({ quality, k, optimalK, chartMetrics }: QualityChar
       <OptimalKBadge optimalK={optimalK} currentK={k} />
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
-          <ReactECharts option={silOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
+          {hasPerSample && (
+            <div className="mb-2 inline-flex rounded-lg border border-slate-800 bg-slate-900/60 p-1">
+              {(['average', 'per-sample'] as const).map((mode) => (
+                <button
+                  key={mode}
+                  type="button"
+                  onClick={() => setSilView(mode === 'average' ? 'average' : 'per-sample')}
+                  className={[
+                    'rounded-md px-3 py-1 text-xs font-semibold capitalize transition-all',
+                    silView === mode
+                      ? 'bg-slate-800 text-white'
+                      : 'text-slate-500 hover:text-slate-300',
+                  ].join(' ')}
+                >
+                  {mode === 'average' ? 'Average' : 'Per sample'}
+                </button>
+              ))}
+            </div>
+          )}
+          {silView === 'per-sample' && hasPerSample ? (
+            <SilhouetteBar
+              samples={samples}
+              clusters={clusterAssignments}
+              silhouetteWidths={sampleSilhouette![String(k)]}
+            />
+          ) : (
+            <ReactECharts option={silOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
+          )}
           <ChartCaption
             icon={Layers}
             text="Silhouette width measures how much closer a sample is to its own cluster than to the nearest neighbour cluster. Values near +1 indicate well-separated clusters."
