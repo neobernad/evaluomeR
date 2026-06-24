@@ -1,13 +1,15 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronDown, ChevronRight } from 'lucide-react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { DatasetSelector, type DatasetKey, type DatasetOption } from '@/components/DatasetSelector'
 import { DatasetCard } from '@/components/DatasetCard'
+import { HowItWorks } from '@/components/HowItWorks'
 import { KSlider } from '@/components/KSlider'
 import { OptimalKPanel } from '@/components/OptimalKPanel'
 import { KScoreChart } from '@/components/KScoreChart'
+import { SectionDivider } from '@/components/SectionDivider'
 import { ClusterCompare } from '@/components/ClusterCompare'
 import { OptimalKTable } from '@/components/OptimalKTable'
 import { StabilityChart } from '@/components/StabilityChart'
@@ -15,21 +17,61 @@ import { QualityChart } from '@/components/QualityChart'
 import { ClusterScatter } from '@/components/ClusterScatter'
 import type { DemoData } from '@/types/demo'
 
+const VALID_TABS = ['optimal-k', 'stability', 'quality', 'clusters'] as const
+type AnalysisTab = (typeof VALID_TABS)[number]
+
 interface PlaygroundProps {
   datasets: DatasetOption[]
   defaultDataset?: DatasetKey
 }
 
+function parseHash(
+  datasets: DatasetOption[],
+  defaultDataset: DatasetKey,
+): { dataset: DatasetKey; k?: number; tab: AnalysisTab } {
+  const raw = window.location.hash.replace(/^#/, '')
+  const params = new URLSearchParams(raw)
+  const datasetParam = params.get('dataset') as DatasetKey | null
+  const dataset =
+    datasetParam && datasets.some((d) => d.key === datasetParam) ? datasetParam : defaultDataset
+  const active = datasets.find((d) => d.key === dataset) ?? datasets[0]
+  const kParam = params.get('k')
+  const kParsed = kParam !== null ? Number(kParam) : undefined
+  const k =
+    kParsed !== undefined &&
+    !Number.isNaN(kParsed) &&
+    kParsed >= active.data.meta.kRange[0] &&
+    kParsed <= active.data.meta.kRange[1]
+      ? kParsed
+      : undefined
+  const tabParam = params.get('tab')
+  const tab = VALID_TABS.includes(tabParam as AnalysisTab)
+    ? (tabParam as AnalysisTab)
+    : 'optimal-k'
+  return { dataset, k, tab }
+}
+
+function writeHash(dataset: DatasetKey, k: number, tab: AnalysisTab) {
+  const params = new URLSearchParams({ dataset, k: String(k), tab })
+  const next = `#${params.toString()}`
+  if (window.location.hash !== next) {
+    window.history.replaceState(null, '', next)
+  }
+}
+
 export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundProps) {
-  const [datasetKey, setDatasetKey] = useState<DatasetKey>(defaultDataset)
+  const initial = parseHash(datasets, defaultDataset)
+  const [datasetKey, setDatasetKey] = useState<DatasetKey>(initial.dataset)
   const active = datasets.find((d) => d.key === datasetKey) ?? datasets[0]
   const data: DemoData = active.data
-  const [k, setK] = useState<number>(data.optimalK)
+  const [k, setK] = useState<number>(initial.k ?? data.optimalK)
+  const [activeTab, setActiveTab] = useState<AnalysisTab>(initial.tab)
   const [showData, setShowData] = useState(false)
   const [compact, setCompact] = useState(false)
   const sentinelRef = useRef<HTMLDivElement>(null)
   const compactRef = useRef(false)
   const lockRef = useRef(false)
+  const skipHashSync = useRef(true)
 
   useLayoutEffect(() => {
     compactRef.current = false
@@ -59,13 +101,30 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
     return () => observer.disconnect()
   }, [datasetKey])
 
-  const handleDatasetChange = (key: DatasetKey) => {
-    const next = datasets.find((d) => d.key === key)
-    if (!next) return
-    setDatasetKey(key)
-    setK(next.data.optimalK)
-    setShowData(false)
-  }
+  useEffect(() => {
+    if (skipHashSync.current) {
+      skipHashSync.current = false
+      return
+    }
+    writeHash(datasetKey, k, activeTab)
+  }, [datasetKey, k, activeTab])
+
+  const handleDatasetChange = useCallback(
+    (key: DatasetKey) => {
+      const next = datasets.find((d) => d.key === key)
+      if (!next) return
+      setDatasetKey(key)
+      setK(next.data.optimalK)
+      setShowData(false)
+    },
+    [datasets],
+  )
+
+  const handleTabChange = useCallback((tab: string) => {
+    if (VALID_TABS.includes(tab as AnalysisTab)) {
+      setActiveTab(tab as AnalysisTab)
+    }
+  }, [])
 
   const typeLabel = datasetKey === 'golub' ? 'leukemia classes' : 'cancer tissues'
   const subtitle =
@@ -149,7 +208,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="optimal-k">
+          <Tabs value={activeTab} onValueChange={handleTabChange}>
             <TabsList className="w-full flex-wrap">
               <TabsTrigger value="optimal-k">Optimal k</TabsTrigger>
               <TabsTrigger value="stability">Stability</TabsTrigger>
@@ -158,6 +217,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
             </TabsList>
 
             <TabsContent value="optimal-k" className="space-y-6 pt-4">
+              <HowItWorks activeTab={activeTab} onNavigateTab={handleTabChange} />
               <OptimalKPanel
                 optimalK={data.optimalK}
                 nCancerTypes={data.meta.nCancerTypes}
@@ -172,6 +232,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 currentK={k}
                 dataset={data.meta.dataset}
               />
+              <SectionDivider label="PCA cluster comparison" />
               <ClusterCompare
                 samples={data.samples}
                 clusters={data.clusters}
@@ -188,6 +249,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
             <TabsContent value="stability">
               <StabilityChart
                 stability={data.stability}
+                stabilitySD={data.stabilitySD}
                 k={k}
                 optimalK={data.optimalK}
                 chartMetrics={data.meta.chartMetrics}
@@ -200,6 +262,9 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 k={k}
                 optimalK={data.optimalK}
                 chartMetrics={data.meta.chartMetrics}
+                samples={data.samples}
+                clusters={data.clusters}
+                sampleSilhouette={data.sampleSilhouette}
               />
             </TabsContent>
 
@@ -219,4 +284,3 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
     </section>
   )
 }
-
