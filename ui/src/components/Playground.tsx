@@ -8,6 +8,7 @@ import { DatasetCard } from '@/components/DatasetCard'
 import { KSlider } from '@/components/KSlider'
 import { OptimalKPanel } from '@/components/OptimalKPanel'
 import { KScoreChart } from '@/components/KScoreChart'
+import { SectionDivider } from '@/components/SectionDivider'
 import { ClusterCompare } from '@/components/ClusterCompare'
 import { OptimalKTable } from '@/components/OptimalKTable'
 import { StabilityChart } from '@/components/StabilityChart'
@@ -172,6 +173,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 currentK={k}
                 dataset={data.meta.dataset}
               />
+              <SectionDivider label="PCA cluster comparison" />
               <ClusterCompare
                 samples={data.samples}
                 clusters={data.clusters}
