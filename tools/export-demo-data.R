@@ -7,6 +7,8 @@ suppressPackageStartupMessages({
   library(evaluomeR)
   library(SummarizedExperiment)
   library(jsonlite)
+  library(mclust)
+  library(cluster)
 })
 
 BS    <- 100L
@@ -141,6 +143,50 @@ run_export <- function(dataset_name,
   index_metrics <- intersect("all_metrics", rownames(stab_std))
   if (length(index_metrics) == 0) index_metrics <- rownames(stab_std)
 
+  clusters_list <- lapply(k_min:k_max, function(k) {
+    set.seed(seed)
+    km <- kmeans(metric_df, centers = k, nstart = 25)
+    as.integer(km$cluster)
+  })
+  names(clusters_list) <- as.character(k_min:k_max)
+
+  message("ARI vs ground truth per k ...")
+  true_int <- as.integer(as.factor(cancer_types))
+  ari_by_k <- setNames(
+    lapply(k_min:k_max, function(k) {
+      round(mclust::adjustedRandIndex(true_int, clusters_list[[as.character(k)]]), 6)
+    }),
+    as.character(k_min:k_max)
+  )
+
+  message("Stability SD per k (inter-cluster Jaccard SD) ...")
+  stab_sd_by_k <- setNames(
+    lapply(k_min:k_max, function(k) {
+      raw <- clusterbootWrapper(
+        data = metric_df,
+        B = bs,
+        bootmethod = "boot",
+        cbi = "kmeans",
+        krange = k,
+        gold_standard = NULL,
+        seed = seed
+      )
+      round(sd(raw$bootmean, na.rm = TRUE), 6)
+    }),
+    as.character(k_min:k_max)
+  )
+
+  message("Per-sample silhouette per k ...")
+  scaled_df <- scale(metric_df)
+  dist_mat <- dist(scaled_df)
+  sil_samples_by_k <- setNames(
+    lapply(k_min:k_max, function(k) {
+      sil <- silhouette(clusters_list[[as.character(k)]], dist_mat)
+      round(as.numeric(sil[, "sil_width"]), 6)
+    }),
+    as.character(k_min:k_max)
+  )
+
   k_summary <- lapply(k_min:k_max, function(k) {
     k_col <- paste0("k_", k)
     avg_stab <- as.numeric(unlist(stab_std[index_metrics, k_col]))
@@ -149,17 +195,11 @@ run_export <- function(dataset_name,
     list(
       avgStability  = round(avg_stab, 6),
       avgSilhouette = round(avg_sil, 6),
-      composite     = round(composite, 6)
+      composite     = round(composite, 6),
+      ari           = ari_by_k[[as.character(k)]]
     )
   })
   names(k_summary) <- as.character(k_min:k_max)
-
-  clusters_list <- lapply(k_min:k_max, function(k) {
-    set.seed(seed)
-    km <- kmeans(metric_df, centers = k, nstart = 25)
-    as.integer(km$cluster)
-  })
-  names(clusters_list) <- as.character(k_min:k_max)
 
   message("PCA (3 components) ...")
   pca_result    <- prcomp(metric_df, center = TRUE, scale. = TRUE)
@@ -211,6 +251,8 @@ run_export <- function(dataset_name,
     optimalKPerMetric = opt_per_metric,
     optimalKDetail    = opt_detail,
     kSummary          = k_summary,
+    stabilitySD       = stab_sd_by_k,
+    sampleSilhouette  = sil_samples_by_k,
     clusters          = clusters_list,
     pca               = pca_export
   )
