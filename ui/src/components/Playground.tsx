@@ -273,6 +273,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 k={k}
                 pca={data.pca}
                 optimalK={data.optimalK}
+                chartMetrics={data.meta.chartMetrics}
               />
             </TabsContent>
           </Tabs>
