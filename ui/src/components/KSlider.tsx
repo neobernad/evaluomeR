@@ -1,4 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion'
+import { useEffect, useRef } from 'react'
+import type { KeyboardEvent } from 'react'
 import { SlidersHorizontal } from 'lucide-react'
 import type { KSummaryEntry } from '@/types/demo'
 
@@ -20,6 +22,22 @@ function scoreBarColor(ratio: number, isOptimal: boolean): string {
   return '#ef4444'
 }
 
+function handleKKeyDown(
+  e: KeyboardEvent<HTMLDivElement>,
+  k: number,
+  kMin: number,
+  kMax: number,
+  onChange: (k: number) => void,
+) {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowUp') {
+    e.preventDefault()
+    if (k < kMax) onChange(k + 1)
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') {
+    e.preventDefault()
+    if (k > kMin) onChange(k - 1)
+  }
+}
+
 export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact = false }: KSliderProps) {
   const kRange = Array.from({ length: kMax - kMin + 1 }, (_, i) => kMin + i)
   const maxComposite = Math.max(...Object.values(kSummary).map((e) => e.composite))
@@ -32,6 +50,11 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
   const selectedEntry = kSummary[String(k)]
   const selectedRatio = selectedEntry ? selectedEntry.composite / maxComposite : 0
   const isSelectedOptimal = k === optimalK
+  const btnRefs = useRef<Map<number, HTMLButtonElement>>(new Map())
+
+  useEffect(() => {
+    btnRefs.current.get(k)?.focus()
+  }, [k])
 
   return (
     <motion.div
@@ -58,14 +81,27 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
               <span className="text-sm font-medium text-slate-300">Clusters (k)</span>
             </div>
             <div className="mx-1 h-5 w-px shrink-0 bg-slate-700" aria-hidden />
-            <div className="flex flex-1 flex-wrap items-center justify-center gap-2.5">
+            <div
+              className="flex flex-1 flex-wrap items-center justify-center gap-2.5"
+              role="radiogroup"
+              aria-label="Number of clusters"
+              onKeyDown={(e) => handleKKeyDown(e, k, kMin, kMax, onChange)}
+            >
               {kRange.map((kv) => {
                 const isSelected = kv === k
                 const isOptimal = kv === optimalK
                 return (
                   <motion.button
                     key={kv}
+                    ref={(el) => {
+                      if (el) btnRefs.current.set(kv, el)
+                      else btnRefs.current.delete(kv)
+                    }}
                     type="button"
+                    role="radio"
+                    tabIndex={isSelected ? 0 : -1}
+                    aria-checked={isSelected}
+                    aria-label={`k = ${kv}${isOptimal ? ', optimal' : ''}`}
                     onClick={() => onChange(kv)}
                     whileHover={!isSelected ? { scale: 1.08 } : undefined}
                     whileTap={{ scale: 0.95 }}
@@ -120,6 +156,9 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                 'mt-4 grid grid-cols-3 gap-3 pt-4',
                 smGridCols[kRange.length] ?? 'sm:grid-cols-6',
               ].join(' ')}
+              role="radiogroup"
+              aria-label="Number of clusters"
+              onKeyDown={(e) => handleKKeyDown(e, k, kMin, kMax, onChange)}
             >
               {kRange.map((kv) => {
                 const entry = kSummary[String(kv)]
@@ -131,7 +170,15 @@ export function KSlider({ k, kMin, kMax, onChange, optimalK, kSummary, compact =
                 return (
                   <motion.button
                     key={kv}
+                    ref={(el) => {
+                      if (el) btnRefs.current.set(kv, el)
+                      else btnRefs.current.delete(kv)
+                    }}
                     type="button"
+                    role="radio"
+                    tabIndex={isSelected ? 0 : -1}
+                    aria-checked={isSelected}
+                    aria-label={`k = ${kv}${isOptimal ? ', optimal' : ''}`}
                     onClick={() => onChange(kv)}
                     whileHover={!isSelected ? { scale: 1.04, y: -2 } : undefined}
                     whileTap={{ scale: 0.97 }}
