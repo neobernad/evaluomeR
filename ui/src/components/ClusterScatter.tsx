@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
 import type { DemoData, Sample } from '@/types/demo'
@@ -18,15 +18,28 @@ export function ClusterScatter({ samples, clusters, k, pca, optimalK }: ClusterS
   const isOptimal = k === optimalK
   const has3D = pca.coords.length > 0 && pca.coords[0].pc3 !== undefined
   const [view, setView] = useState<ClusterView>('2d')
+  const [glReady, setGlReady] = useState(false)
 
   const activeView: ClusterView = has3D ? view : '2d'
 
+  useEffect(() => {
+    if (activeView === '3d') {
+      import('echarts-gl').then(() => setGlReady(true))
+    }
+  }, [activeView])
+
   const option = useMemo(() => {
     if (activeView === '3d') {
+      if (!glReady) return null
       return buildPCACluster3DOption({ samples, clusters, k, pca })
     }
     return buildPCAClusterOption({ samples, clusters, k, pca })
-  }, [activeView, samples, clusters, k, pca])
+  }, [activeView, samples, clusters, k, pca, glReady])
+
+  const pcCount = activeView === '3d' ? 3 : 2
+  const totalVar = pca.varExplained
+    .slice(0, pcCount)
+    .reduce((a, b) => a + b, 0)
 
   const caption =
     activeView === '3d'
@@ -36,7 +49,12 @@ export function ClusterScatter({ samples, clusters, k, pca, optimalK }: ClusterS
   return (
     <div>
       <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-slate-500">{caption}</p>
+        <div className="space-y-1">
+          <p className="text-xs text-slate-500">{caption}</p>
+          <span className="inline-flex rounded-full border border-slate-800 bg-slate-900/60 px-2 py-0.5 text-[10px] text-slate-400">
+            PC1{pcCount > 2 ? '+PC2+PC3' : '+PC2'} explain {(totalVar * 100).toFixed(1)}% of variance
+          </span>
+        </div>
         {has3D && (
           <div className="inline-flex rounded-lg border border-slate-800 bg-slate-900/60 p-1">
             {(['2d', '3d'] as const).map((mode) => {
@@ -71,7 +89,13 @@ export function ClusterScatter({ samples, clusters, k, pca, optimalK }: ClusterS
         animate={{ opacity: 1 }}
         transition={{ duration: 0.35 }}
       >
-        <ReactECharts option={option} style={{ height: 420 }} opts={{ renderer: 'canvas' }} notMerge />
+        {activeView === '3d' && !glReady ? (
+          <div className="flex h-[420px] items-center justify-center text-sm text-slate-500">
+            Loading 3D view…
+          </div>
+        ) : option ? (
+          <ReactECharts option={option} style={{ height: 420 }} opts={{ renderer: 'canvas' }} notMerge />
+        ) : null}
       </motion.div>
     </div>
   )
