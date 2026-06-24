@@ -190,6 +190,7 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
             <TabsContent value="stability">
               <StabilityChart
                 stability={data.stability}
+                stabilitySD={data.stabilitySD}
                 k={k}
                 optimalK={data.optimalK}
                 chartMetrics={data.meta.chartMetrics}
