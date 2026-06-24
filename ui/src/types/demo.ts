@@ -21,6 +21,7 @@ export interface KSummaryEntry {
   avgStability: number
   avgSilhouette: number
   composite: number
+  ari?: number
 }
 
 export type MetricMap = Record<string, number>
@@ -49,6 +50,8 @@ export interface DemoData {
   optimalKPerMetric: Record<string, number>
   optimalKDetail: OptimalKRow[]
   kSummary: Record<string, KSummaryEntry>
+  stabilitySD?: ByK<number>
+  sampleSilhouette?: ByK<number[]>
   clusters: ByK<number[]>
   pca: {
     coords: PCACoord[]
