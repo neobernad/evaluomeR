@@ -1,4 +1,3 @@
-import 'echarts-gl'
 import type { DemoData, Sample } from '@/types/demo'
 import { getCancerColor } from '@/lib/cancerColors'
 import { computeEllipsePoints } from '@/lib/ellipse'
@@ -187,6 +186,7 @@ export function buildPCACluster3DOption(params: {
 
   const clusterAssignments = clusters[String(k)] ?? []
   const clusterIds = [...new Set(clusterAssignments)].sort((a, b) => a - b)
+  const cancerTypes = [...new Set(samples.map((s) => s.cancerType))].sort()
 
   const axisStyle = {
     nameTextStyle: { color: '#94a3b8', fontSize: 11 },
@@ -195,7 +195,7 @@ export function buildPCACluster3DOption(params: {
     splitLine: { lineStyle: { color: '#1e293b' } },
   }
 
-  const scatterSeries = clusterIds.map((cid, idx) => {
+  const sphereSeries = clusterIds.flatMap((cid, idx) => {
     const color = CLUSTER_COLORS[idx % CLUSTER_COLORS.length]
     const points: [number, number, number][] = samples
       .map((_, i) => {
@@ -207,31 +207,29 @@ export function buildPCACluster3DOption(params: {
       .filter((point): point is [number, number, number] => point !== null)
 
     const sphere = computeClusterSphere(points)
-    const ringSeries = sphere ? buildFibonacciSphere(sphere, color) : []
-
-    const clusterSeries = {
-      name: `Cluster ${cid}`,
-      type: 'scatter3D',
-      data: samples
-        .map((sample, i) => {
-          if (clusterAssignments[i] !== cid) return null
-          const coord = pca.coords[i]
-          if (coord.pc3 === undefined) return null
-          return {
-            name: sample.id,
-            value: [coord.pc1, coord.pc2, coord.pc3] as [number, number, number],
-            tissue: sample.cancerType,
-            cluster: cid,
-          }
-        })
-        .filter((point): point is NonNullable<typeof point> => point !== null),
-      symbolSize: 9,
-      itemStyle: { color, opacity: 0.95 },
-      z: 3,
-    }
-
-    return [...ringSeries, clusterSeries]
+    return sphere ? buildFibonacciSphere(sphere, color) : []
   })
+
+  const tissueScatterSeries = cancerTypes.map((ct) => ({
+    name: ct,
+    type: 'scatter3D',
+    data: samples
+      .map((sample, i) => {
+        if (sample.cancerType !== ct) return null
+        const coord = pca.coords[i]
+        if (coord.pc3 === undefined) return null
+        return {
+          name: sample.id,
+          value: [coord.pc1, coord.pc2, coord.pc3] as [number, number, number],
+          tissue: sample.cancerType,
+          cluster: clusterAssignments[i],
+        }
+      })
+      .filter((point): point is NonNullable<typeof point> => point !== null),
+    symbolSize: 9,
+    itemStyle: { color: getCancerColor(ct), opacity: 0.95 },
+    z: 3,
+  }))
 
   return {
     backgroundColor: 'transparent',
@@ -247,7 +245,7 @@ export function buildPCACluster3DOption(params: {
       },
     },
     legend: {
-      data: clusterIds.map((cid) => `Cluster ${cid}`),
+      data: cancerTypes,
       textStyle: { color: '#94a3b8', fontSize: 11 },
       top: 0,
       type: 'scroll',
@@ -270,6 +268,6 @@ export function buildPCACluster3DOption(params: {
         ambient: { intensity: 0.45 },
       },
     },
-    series: scatterSeries.flat(),
+    series: [...sphereSeries, ...tissueScatterSeries],
   }
 }
