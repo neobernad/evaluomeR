@@ -8,6 +8,7 @@ import { DatasetCard } from '@/components/DatasetCard'
 import { KSlider } from '@/components/KSlider'
 import { OptimalKPanel } from '@/components/OptimalKPanel'
 import { KScoreChart } from '@/components/KScoreChart'
+import { KParetoChart } from '@/components/KParetoChart'
 import { SectionDivider } from '@/components/SectionDivider'
 import { ClusterCompare } from '@/components/ClusterCompare'
 import { OptimalKTable } from '@/components/OptimalKTable'
@@ -229,6 +230,11 @@ export function Playground({ datasets, defaultDataset = 'nci60' }: PlaygroundPro
                 optimalK={data.optimalK}
                 currentK={k}
                 dataset={data.meta.dataset}
+              />
+              <KParetoChart
+                kSummary={data.kSummary}
+                optimalK={data.optimalK}
+                currentK={k}
               />
               <SectionDivider label="PCA cluster comparison" />
               <ClusterCompare
