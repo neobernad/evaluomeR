@@ -3,7 +3,7 @@ import ReactECharts from 'echarts-for-react'
 import { motion } from 'framer-motion'
 import { Shuffle } from 'lucide-react'
 import { ChartCaption } from '@/components/ChartCaption'
-import type { DemoData } from '@/types/demo'
+import type { ByK, DemoData } from '@/types/demo'
 import { formatMetricLabel } from '@/lib/metricLabels'
 import { buildAnimatedLines, buildGraphicKLabels } from '@/lib/kChartMarks'
 
@@ -19,19 +19,102 @@ const LINE_COLORS = [
   '#f43f5e', '#06b6d4', '#fb923c', '#84cc16',
 ]
 
+function clamp01(v: number) {
+  return Math.max(0, Math.min(1, v))
+}
+
 interface StabilityChartProps {
   stability: DemoData['stability']
+  stabilitySD?: ByK<number>
   k: number
   optimalK: number
   chartMetrics: string[]
 }
 
-export function StabilityChart({ stability, k, optimalK, chartMetrics }: StabilityChartProps) {
+export function StabilityChart({
+  stability,
+  stabilitySD,
+  k,
+  optimalK,
+  chartMetrics,
+}: StabilityChartProps) {
   const kValues = Object.keys(stability).sort((a, b) => Number(a) - Number(b))
   const isOptimal = k === optimalK
+  const hasBands = stabilitySD !== undefined
 
-  const option = useMemo(
-    () => ({
+  const option = useMemo(() => {
+    const bandBase = hasBands
+      ? {
+          name: '_bandBase',
+          type: 'line' as const,
+          data: kValues.map((kv) => {
+            const mean = stability[kv]?.[chartMetrics[0]] ?? 0
+            const sd = stabilitySD?.[kv] ?? 0
+            return clamp01(mean - sd)
+          }),
+          lineStyle: { opacity: 0 },
+          symbol: 'none',
+          silent: true,
+          z: 1,
+          stack: 'confidence',
+          areaStyle: { opacity: 0 },
+        }
+      : null
+
+    const bandFill = hasBands
+      ? {
+          name: '_bandFill',
+          type: 'line' as const,
+          data: kValues.map((kv) => {
+            const mean = stability[kv]?.[chartMetrics[0]] ?? 0
+            const sd = stabilitySD?.[kv] ?? 0
+            const lo = clamp01(mean - sd)
+            const hi = clamp01(mean + sd)
+            return hi - lo
+          }),
+          lineStyle: { opacity: 0 },
+          symbol: 'none',
+          silent: true,
+          z: 1,
+          stack: 'confidence',
+          areaStyle: { color: 'rgba(59,130,246,0.15)' },
+        }
+      : null
+
+    const lineSeries = chartMetrics.map((metric, idx) => ({
+      name: formatMetricLabel(metric),
+      type: 'line' as const,
+      smooth: true,
+      symbol: 'circle',
+      symbolSize: 8,
+      data: kValues.map((kv) => stability[kv]?.[metric] ?? null),
+      lineStyle: { width: 2.5 },
+      itemStyle: { color: LINE_COLORS[idx % LINE_COLORS.length] },
+      z: 2,
+      markArea: idx === 0
+        ? {
+            silent: true,
+            data: ZONES.map((z) => [
+              {
+                yAxis: z.min,
+                itemStyle: { color: z.color },
+                label: {
+                  show: true,
+                  formatter: z.name,
+                  position: 'insideTopLeft',
+                  color: '#94a3b8',
+                  fontSize: 9,
+                  opacity: 0.8,
+                },
+              },
+              { yAxis: z.max },
+            ]),
+          }
+        : undefined,
+      ...(idx === 0 ? buildAnimatedLines(k, optimalK, 0, 1) : {}),
+    }))
+
+    return {
       backgroundColor: 'transparent',
       tooltip: { trigger: 'axis' },
       legend: {
@@ -57,41 +140,13 @@ export function StabilityChart({ stability, k, optimalK, chartMetrics }: Stabili
         axisLabel: { color: '#94a3b8' },
         splitLine: { lineStyle: { color: '#1e293b' } },
       },
-      series: chartMetrics.map((metric, idx) => ({
-        name: formatMetricLabel(metric),
-        type: 'line',
-        smooth: true,
-        symbol: 'circle',
-        symbolSize: 8,
-        data: kValues.map((kv) => stability[kv]?.[metric] ?? null),
-        lineStyle: { width: 2.5 },
-        itemStyle: { color: LINE_COLORS[idx % LINE_COLORS.length] },
-        markArea: idx === 0
-          ? {
-              silent: true,
-              data: ZONES.map((z) => [
-                {
-                  yAxis: z.min,
-                  itemStyle: { color: z.color },
-                  label: {
-                    show: true,
-                    formatter: z.name,
-                    position: 'insideTopLeft',
-                    color: '#94a3b8',
-                    fontSize: 9,
-                    opacity: 0.8,
-                  },
-                },
-                { yAxis: z.max },
-              ]),
-            }
-          : undefined,
-        ...(idx === 0 ? buildAnimatedLines(k, optimalK, 0, 1) : {}),
-      })),
+      series: [
+        ...(bandBase && bandFill ? [bandBase, bandFill] : []),
+        ...lineSeries,
+      ],
       ...buildGraphicKLabels(k, optimalK, kValues, { left: 8, right: 4, top: 16 }),
-    }),
-    [stability, chartMetrics, kValues, k, optimalK],
-  )
+    }
+  }, [stability, stabilitySD, chartMetrics, kValues, k, optimalK, hasBands])
 
   return (
     <div>
@@ -109,7 +164,11 @@ export function StabilityChart({ stability, k, optimalK, chartMetrics }: Stabili
         <ReactECharts option={option} style={{ height: 380 }} opts={{ renderer: 'canvas' }} notMerge />
         <ChartCaption
           icon={Shuffle}
-          text="Each line is the mean Jaccard similarity of cluster assignments across 100 bootstrap resamples — how consistently a metric groups samples under k."
+          text={
+            hasBands
+              ? 'Each line is the mean Jaccard similarity across 100 bootstrap resamples. Shaded bands show ±1 SD of inter-cluster Jaccard at each k.'
+              : 'Each line is the mean Jaccard similarity of cluster assignments across 100 bootstrap resamples — how consistently a metric groups samples under k.'
+          }
           highlights={[
             { label: '≥ 0.85 Highly stable', color: 'blue' },
             { label: '0.75 – 0.85 Stable', color: 'emerald' },
