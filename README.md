@@ -1,6 +1,17 @@
 
 # evaluomeR
 
+[![Bioconductor release](https://bioconductor.org/shields/build/release/bioc/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
+[![Bioconductor devel](https://bioconductor.org/shields/build/devel/bioc/evaluomeR.svg)](https://bioconductor.org/packages/devel/bioc/html/evaluomeR.html)
+[![Downloads](https://bioconductor.org/shields/downloads/release/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
+[![Years in Bioconductor](https://bioconductor.org/shields/years-in-bioc/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
+[![R-CMD-check](https://github.com/neobernad/evaluomeR/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/neobernad/evaluomeR/actions/workflows/test.yaml)
+[![pkgdown](https://github.com/neobernad/evaluomeR/actions/workflows/pkgdown.yaml/badge.svg?branch=master)](https://github.com/neobernad/evaluomeR/actions/workflows/pkgdown.yaml)
+[![License: GPL-3](https://img.shields.io/badge/license-GPL--3-blue)](LICENSE)
+[![R >= 3.6](https://img.shields.io/badge/R-%3E%3D3.6-276DC2?logo=r&logoColor=white)](https://cran.r-project.org/)
+[![GitHub release](https://img.shields.io/github/v/release/neobernad/evaluomeR?sort=semver)](https://github.com/neobernad/evaluomeR/releases)
+[![Live demo](https://img.shields.io/badge/demo-live-4ade80?logo=react&logoColor=white)](https://neobernad.github.io/evaluomeR/app/)
+
 The **evaluomeR** package permits to evaluate the reliability of bioinformatic metrics by analysing
 the stability and goodness of the classifications of such metrics. The method takes the measurements of 
 the metrics for the dataset and evaluates the reliability of the metrics according to the 
