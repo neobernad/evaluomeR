@@ -2,7 +2,6 @@
 # evaluomeR
 
 [![Bioconductor release](https://bioconductor.org/shields/build/release/bioc/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
-[![Bioconductor devel](https://bioconductor.org/shields/build/devel/bioc/evaluomeR.svg)](https://bioconductor.org/packages/devel/bioc/html/evaluomeR.html)
 [![Downloads](https://bioconductor.org/shields/downloads/release/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
 [![Years in Bioconductor](https://bioconductor.org/shields/years-in-bioc/evaluomeR.svg)](https://bioconductor.org/packages/release/bioc/html/evaluomeR.html)
 [![R-CMD-check](https://github.com/neobernad/evaluomeR/actions/workflows/test.yaml/badge.svg?branch=master)](https://github.com/neobernad/evaluomeR/actions/workflows/test.yaml)
