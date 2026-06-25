@@ -215,25 +215,25 @@ export function QualityChart({
       <OptimalKBadge optimalK={optimalK} currentK={k} />
       <div className="grid gap-6 lg:grid-cols-2">
         <div>
-          {hasPerSample && (
-            <div className="mb-2 inline-flex rounded-lg border border-slate-800 bg-slate-900/60 p-1">
-              {(['average', 'per-sample'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  type="button"
-                  onClick={() => setSilView(mode === 'average' ? 'average' : 'per-sample')}
-                  className={[
-                    'rounded-md px-3 py-1 text-xs font-semibold capitalize transition-all',
-                    silView === mode
-                      ? 'bg-slate-800 text-white'
-                      : 'text-slate-500 hover:text-slate-300',
-                  ].join(' ')}
-                >
-                  {mode === 'average' ? 'Average' : 'Per sample'}
-                </button>
-              ))}
-            </div>
-          )}
+          <div
+            className={`mb-2 inline-flex rounded-lg border border-slate-800 bg-slate-900/60 p-1 ${!hasPerSample ? 'invisible' : ''}`}
+          >
+            {(['average', 'per-sample'] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => setSilView(mode === 'average' ? 'average' : 'per-sample')}
+                className={[
+                  'rounded-md px-3 py-1 text-xs font-semibold capitalize transition-all',
+                  silView === mode
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-500 hover:text-slate-300',
+                ].join(' ')}
+              >
+                {mode === 'average' ? 'Average' : 'Per sample'}
+              </button>
+            ))}
+          </div>
           {silView === 'per-sample' && hasPerSample ? (
             <SilhouetteBar
               samples={samples}
@@ -254,6 +254,13 @@ export function QualityChart({
           />
         </div>
         <div>
+          <div
+            className="mb-2 inline-flex rounded-lg border border-slate-800 bg-slate-900/60 p-1 invisible pointer-events-none"
+            aria-hidden="true"
+          >
+            <span className="rounded-md px-3 py-1 text-xs font-semibold">Average</span>
+            <span className="rounded-md px-3 py-1 text-xs font-semibold">Per sample</span>
+          </div>
           <ReactECharts option={chOption} style={{ height: 340 }} opts={{ renderer: 'canvas' }} notMerge />
           <ChartCaption
             icon={BarChart2}
