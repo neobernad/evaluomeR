@@ -1,6 +1,6 @@
 name: Benchmarks
 
-# Slow timing scripts kept out of R CMD check (see .Rbuildignore).
+# Slow timing scripts kept out of R CMD check (tests/benchmarks is in .Rbuildignore).
 # They only fail if the code crashes.
 on:
   schedule:
@@ -31,6 +31,6 @@ jobs:
         run: |
           for f in testCH_index testL1_clustering testPCA; do
             echo "::group::$f"
-            Rscript "tests/$f.R"
+            Rscript "tests/benchmarks/$f.R"
             echo "::endgroup::"
           done

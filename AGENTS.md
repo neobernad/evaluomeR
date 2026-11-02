@@ -49,7 +49,7 @@ devtools::install_github("neobernad/evaluomeR")
 ├── vignettes/
 │   ├── manual.Rmd        # Main how-to vignette (BiocStyle HTML)
 │   └── publications.Rmd  # Bibliography of related papers
-├── tests/                # 18 standalone integration/benchmark R scripts (no testthat)
+├── tests/                # testthat suite (tests/testthat/) + benchmarks/ (not run by R CMD check)
 ├── usecases/             # Research replication scripts, datasets, and CSV results
 ├── notebooks/            # Jupyter notebooks with R kernels for case studies
 │   └── atsc/wrsk-master/ # Vendored wrsk R sub-package
@@ -234,23 +234,24 @@ Default is `"kmeans"` for most functions and `"clara"` for ATSC.
 
 ## Running Tests
 
-There is **no testthat / RUnit harness**. Tests are standalone R scripts in
-`tests/`. Run them by sourcing from an R session with the package installed:
+Tests use **testthat** (edition 3) and live in `tests/testthat/`, one file per
+area. `R CMD check` runs them through `tests/testthat.R`; the suite takes about
+10 s. From the repo root with the package installed:
 
 ```r
-library(evaluomeR)
-source("tests/testAll.R")          # end-to-end smoke test
-source("tests/testStability.R")    # stability index tests
-source("tests/testQuality.R")      # quality index tests
-source("tests/testATSC.R")         # ATSC pipeline tests
-# ... etc. — see tests/ for the full list of 18 scripts
+devtools::test()                                         # whole suite
+testthat::test_file("tests/testthat/test-stability.R")   # one area
 ```
 
-`golub` and `nci60_k8` are now bundled in `data/`; a few scripts may still
-reference other local files — check paths before running.
+Tests use small bundled data (`rnaMetrics`, `ontMetrics`, `golub`), low `bs`
+and fixed seeds, and compare against reference values from the current code.
+If a reference value changes, the clustering or bootstrap output changed: only
+update it when that change is intended. Prefer real data over mocks; mock
+(`local_mocked_bindings()`) only for machinery such as the parallel cluster.
 
-The canonical test run used by CI is `R CMD check`, which exercises the
-package examples and vignette code (not the `tests/` scripts directly).
+`tests/benchmarks/` holds timing scripts (`*_parallel.R`, `testL1_clustering.R`,
+`testPCA.R`, `testCH_index.R`). They have no assertions, take ~20 min, and are
+excluded from the package build. Run them with `Rscript tests/benchmarks/<f>.R`.
 
 ---
 
@@ -271,8 +272,8 @@ A new push to the same branch cancels the run it supersedes.
 
 ### Benchmarks — `.github/workflows/benchmarks.yaml`
 
-Weekly (Mondays) and manual. Runs the slow timing scripts kept out of
-`R CMD check`; fails only if they crash.
+Weekly (Mondays) and manual. Runs `testL1_clustering.R`, `testPCA.R` and
+`testCH_index.R` from `tests/benchmarks/`; fails only if they crash.
 
 ### pkgdown docs — `.github/workflows/pkgdown.yaml`
 
@@ -541,39 +542,36 @@ for a session. `.cursor/` is gitignored.
 
 ### Area-specific tests (required after code changes)
 
-See [Running Tests](#running-tests) for how to invoke scripts. After editing
-package code, run every matching script for the area you changed:
+See [Running Tests](#running-tests). After editing package code, run the
+test files for the area you changed (or the whole suite, ~10 s):
 
 ```r
-library(evaluomeR)
-source("tests/<script>.R")
+testthat::test_file("tests/testthat/<file>.R")
 ```
 
-| Area changed | R source | Test script(s) |
+| Area changed | R source | Test file(s) in `tests/testthat/` |
 |--------------|----------|----------------|
-| Stability | `R/stabilityIndex.R`, `R/internalFunctions.R` (bootstrap/Jaccard) | `tests/testStability.R` |
-| Quality | `R/qualityIndices.R` | `tests/testQuality.R`, `tests/testCH_index.R` |
-| Correlation | `R/correlation.R` | `tests/testAll.R` |
-| Metrics plots / optimal k | `R/plotMetrics.R`, `R/optimalK.R` | `tests/testAnalysis.R` |
-| ATSC / RSKC | `R/atsc.R`, `R/rskcAnalysis.R` | `tests/testATSC.R`, `tests/testATSC_GoldStandard.R`, `tests/testL1_clustering.R`, `tests/testMetricsRelevancy.R` |
-| Preprocessing / PCA | `R/dataPreprocessing.R`, `R/predictions.R` | `tests/testDataPreprocessing.R`, `tests/testPCA.R` |
-| Clustering backends (CBI) | `R/internalClusterboot.R`, `R/helpers.R` (`pkg.env$cbi`), `R/internalFunctions.R` (clusterboot dispatch) | `tests/testCBI.R`, `tests/testARI.R` |
-| Helpers / package-wide | `R/helpers.R`, `R/data.R`, `DESCRIPTION`, `NAMESPACE` | `tests/testAll.R` |
+| Stability | `R/stabilityIndex.R`, `R/internalFunctions.R` (bootstrap/Jaccard) | `test-stability.R` |
+| Quality | `R/qualityIndices.R` | `test-quality.R` |
+| Correlation, metrics plots, optimal k | `R/correlation.R`, `R/plotMetrics.R`, `R/optimalK.R` | `test-optimal-k.R` |
+| ATSC / RSKC | `R/atsc.R`, `R/rskcAnalysis.R` | `test-atsc.R` |
+| Preprocessing / PCA | `R/dataPreprocessing.R`, `R/predictions.R` | `test-preprocessing.R` |
+| Clustering backends (CBI) | `R/internalClusterboot.R`, `R/helpers.R` (`pkg.env$cbi`), `R/internalFunctions.R` (clusterboot dispatch) | `test-stability.R` |
+| Helpers / package-wide | `R/helpers.R`, `R/data.R`, `DESCRIPTION`, `NAMESPACE` | whole suite |
 | CI / docs only | `.github/`, `man/`, `vignettes/`, `ui/`, `tools/`, `_pkgdown.yml` | `R CMD check` + `bash tools/build-docs.sh` |
 
-**Coverage gap:** no script in `tests/` calls `globalMetric`,
+**Coverage gap:** no test calls `globalMetric`,
 `annotateClustersByMetric` or `getMetricRangeByCluster`. When touching them,
 verify manually against a bundled dataset (e.g. `rnaMetrics`).
 
 **Known drift:** `man/*.Rd` headers still say "Please edit documentation in
 R/metricsAnalysis.R" (file was split). Run `devtools::document()` to regenerate.
 
-Benchmark scripts are excluded from the package build (`.Rbuildignore`), so
-`R CMD check` skips them: the parallel ones (`tests/*_parallel.R`) and the slow
-timing ones (`testL1_clustering.R`, `testPCA.R`, `testCH_index.R`, ~20 min
-together). The timing ones run weekly and on demand in
-`.github/workflows/benchmarks.yaml`. Run them by hand when changing ATSC,
-RSKC, PCA or quality-index paths, or parallel execution.
+For ATSC, RSKC, PCA, quality-index or parallel changes, also run the matching
+script in `tests/benchmarks/` by hand.
 
-When a change spans multiple areas, run every matching script before claiming
+**Known issue:** `getMetricsRelevancy` passes the `Description` column to RSKC
+(unlike `getRSKCL1Boundry`, which drops it), so it gets a relevancy weight.
+
+When a change spans multiple areas, run every matching test file before claiming
 the work is done.

@@ -1,15 +1,8 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-^tests/testStability_parallel\.R$
-^tests/testQuality_parallel\.R$
-^tests/testATSC_parallel\.R$
-^tests/testAlpha_parallel\.R$
-^tests/testK_optimo_parallel\.R$
 ^ui/
 ^tools/
 ^pkgdown$
 ^Dockerfile$
 ^docker-compose\.yml$
-^tests/testL1_clustering\.R$
-^tests/testPCA\.R$
-^tests/testCH_index\.R$
+^tests/benchmarks$
