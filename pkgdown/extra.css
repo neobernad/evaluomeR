@@ -116,7 +116,8 @@ table, table.table { color: var(--ev-ink) !important; --bs-table-bg: transparent
 thead th { color: var(--ev-muted) !important; font-weight: 600; border-bottom: 2px solid var(--ev-line) !important; background: transparent !important; }
 td, th { border-color: var(--ev-line) !important; }
 .table-striped > tbody > tr:nth-of-type(odd) > * { --bs-table-accent-bg: rgba(29,63,191,.035); }
-.card, .bg-light { background: #fff !important; border-color: var(--ev-line) !important; color: var(--ev-ink) !important; }
+/* pkgdown puts .bg-light on the navbar too; keep it cobalt. */
+.card, .bg-light:not(.navbar) { background: #fff !important; border-color: var(--ev-line) !important; color: var(--ev-ink) !important; }
 .ref-index .ref-index-item, .ref-index .ref-index-heading { border-color: var(--ev-line) !important; }
 dl dt { color: var(--ev-ink) !important; }
 dl dd { color: var(--ev-ink) !important; }

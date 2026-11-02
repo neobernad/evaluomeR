@@ -53,7 +53,9 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const S = D.kSummary, s = S[k]
   const best = Math.max(...ks.map((v) => S[v].composite))
   const ari = (v: number) => (S[v].ari ?? NaN).toFixed(2)
-  const verdict = k === o ? `${k} groups. This is the answer evaluomeR gives.` : `${k} groups works, but less well than ${o}.`
+  const verdict = k === o
+    ? <>{k} groups. This is the answer <span className="pkg">evaluomeR</span> gives.</>
+    : `${k} groups works, but less well than ${o}.`
   const why = k === o
     ? `Most stable under resampling and best separated of k ${ks[0]}–${ks[ks.length - 1]}${s.ari != null ? `, and it matches the known labels with an adjusted Rand index of ${ari(k)}` : ''}.`
     : `Its combined score is ${((s.composite / S[o].composite) * 100).toFixed(0)}% of k = ${o}. Switch to known labels to see which groups get split or merged.`
@@ -87,7 +89,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
         <section className="head">
           <div>
             <h2 className="ask">How many groups are in these {D.meta.nSamples} {ds.noun}?</h2>
-            <p className="sub">Pick a k. Each was scored on {D.meta.metrics.length} metrics with {D.meta.bs} bootstraps.</p>
+            <p className="sub">Pick a k. Each was scored on {D.meta.nMetrics} metrics with {D.meta.bs} bootstraps.</p>
           </div>
           <div className="stripbar" ref={barRef}>
             <div className="strip" ref={stripRef} role="radiogroup" aria-label="Number of clusters k" onKeyDown={onKey}>
