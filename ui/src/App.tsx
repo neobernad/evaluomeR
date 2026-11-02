@@ -1,45 +1,25 @@
 import nci60Data from '@/data/nci60.json'
 import golubData from '@/data/golub.json'
-import { Hero } from '@/components/Hero'
-import { Playground } from '@/components/Playground'
-import { InstallCTA } from '@/components/InstallCTA'
-import type { DatasetOption } from '@/components/DatasetSelector'
 import type { DemoData } from '@/types/demo'
+import type { Dataset } from '@/lib/demo'
+import { Intro } from '@/components/Intro'
+import { Explorer } from '@/components/Explorer'
+import { Install } from '@/components/Install'
 
-const nci60 = nci60Data as unknown as DemoData
 const golub = golubData as unknown as DemoData
+const nci60 = nci60Data as unknown as DemoData
 
-const datasets: DatasetOption[] = [
-  {
-    key: 'nci60',
-    label: 'NCI-60',
-    description: 'Cancer cell lines across multiple tissue types',
-    data: nci60,
-  },
-  {
-    key: 'golub',
-    label: 'Golub',
-    description: 'Leukemia gene expression — AML vs B-ALL vs T-ALL',
-    data: golub,
-  },
+const datasets: Dataset[] = [
+  { key: 'golub', label: 'Golub leukemia', short: 'Golub', noun: 'leukemia samples', data: golub },
+  { key: 'nci60', label: 'NCI-60 cell lines', short: 'NCI-60', noun: 'cancer cell lines', data: nci60 },
 ]
 
 export default function App() {
   return (
-    <div className="min-h-screen">
-      <Hero />
-      <Playground datasets={datasets} defaultDataset="nci60" />
-      <InstallCTA />
-      <footer className="border-t border-slate-800 py-8 text-center text-xs text-slate-500">
-        evaluomeR · GPL-3 ·{' '}
-        <a
-          href="https://github.com/neobernad/evaluomeR"
-          className="text-slate-400 hover:text-white"
-        >
-          GitHub
-        </a>
-      </footer>
-    </div>
+    <>
+      <Intro data={golub} />
+      <Explorer datasets={datasets} />
+      <Install />
+    </>
   )
 }
-

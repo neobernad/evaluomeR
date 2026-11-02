@@ -288,11 +288,11 @@ A static React playground hosted alongside pkgdown on GitHub Pages.
 | Item | Detail |
 |------|--------|
 | **Live URL** | https://neobernad.github.io/evaluomeR/app/ |
-| **Stack** | Vite, React, TypeScript, Tailwind, ECharts, Framer Motion |
+| **Stack** | Vite, React, TypeScript, GSAP (intro animation), plain CSS (`ui/src/index.css`) |
 | **Source** | `ui/src/` |
 | **Precomputed data** | `ui/src/data/nci60.json`, `ui/src/data/golub.json` |
-| **Components** | `ui/src/components/` (charts, Playground, HowItWorks, OptimalK*, SilhouetteBar …); shadcn-style primitives in `components/ui/` |
-| **Helpers** | `ui/src/lib/` (cluster chart, ellipses, colors, metric labels) |
+| **Components** | `ui/src/components/`: `Intro` (full-screen hero + GSAP "Settle" animation), `Explorer` (dataset pills, k strip, verdict, PCA scatter, score table), `Install`, `Logo` |
+| **Helpers** | `ui/src/lib/demo.ts` (cluster colours + shapes, PCA projection, k list) |
 | **Build output** | `docs/app/` (via `ui/vite.config.ts` `outDir`) |
 
 ### Datasets in the demo
@@ -302,10 +302,14 @@ A static React playground hosted alongside pkgdown on GitHub Pages.
 | NCI-60 (`nci60_k8`) | 3–8 | `all_metrics=TRUE`, bs=100 | 12 cancer tissue types |
 | Golub (`golub`) | 2–6 | `all_metrics=TRUE`, bs=100 | AML, B-ALL, T-ALL |
 
-The UI shows stability (with inter-cluster SD bands), quality, per-sample
-silhouette, ARI vs. ground truth, optimal-k selection with a "how it works"
-explainer, and PCA cluster plots with ellipses (3D via lazy-loaded
-`echarts-gl`). Playground state (dataset, k) is synced to the URL hash.
+The UI opens with a full-screen intro whose background replays the Golub
+clustering (samples settle into the k=3 clusters, then an oval fades in around
+each). The explorer asks "how many groups?": pick k on a strip (bar = combined
+score, gold dot = recommended), read the verdict, see clusters or known labels
+on PC1/PC2, and compare stability, silhouette and ARI for every k in a table.
+Clusters are coded by shape as well as colour. State (dataset, k) is synced to
+the URL hash. Docs (`_pkgdown.yml`, `pkgdown/extra.css`) share the same
+cobalt/gold style and the logo in `pkgdown/assets/logo.svg` (= `ui/public/favicon.svg`).
 
 ### Local UI development
 

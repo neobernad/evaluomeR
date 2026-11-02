@@ -7,6 +7,6 @@
 ^tests/testK_optimo_parallel\.R$
 ^ui/
 ^tools/
-^pkgdown/extra\.css$
+^pkgdown$
 ^Dockerfile$
 ^docker-compose\.yml$
