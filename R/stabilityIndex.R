@@ -18,7 +18,7 @@
 }
 
 # Internal: process one metric across all k values for stability analysis.
-# Called by both the serial (lapply) and parallel (parLapply) dispatchers.
+# Run for each metric by mapMetrics (serially or on parallel workers).
 # Returns list(stab_valores, csv_data).
 .runStabilityForOneMetric <- function(i.metr, datos.bruto, names.metr, cbi, seed,
                                       k.range, bs, all_metrics, gold_standard,
@@ -325,9 +325,9 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 
   num.metrics <- if (all_metrics) 1L else length(names.metr)
 
-  resultados <- mapMetrics(num.metrics, function(i.metr)
-    .runStabilityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
-                              k.range, bs, all_metrics, gold_standard, num.metrics, ...),
+  resultados <- mapMetrics(num.metrics, .runStabilityForOneMetric,
+    list(datos.bruto, names.metr, cbi, seed, k.range, bs, all_metrics,
+         gold_standard, num.metrics, ...),
     numCores)
 
   m.stab.global     <- lapply(resultados, `[[`, "stab_valores")

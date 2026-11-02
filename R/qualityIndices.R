@@ -13,7 +13,7 @@
 }
 
 # Internal: process one metric across all k values for quality analysis.
-# Called by both the serial (lapply) and parallel (parLapply) dispatchers.
+# Run for each metric by mapMetrics (serially or on parallel workers).
 # Returns list(quality_valores, estable_entries).
 # - quality_valores: nrow x k.range.length matrix of quality measurements.
 # - estable_entries[[j.k]]: the e.res object for k=j.k, flattened into the run
@@ -343,9 +343,9 @@ runQualityIndicesSilhouette <- function(data, k.min=NULL, k.max=NULL, bs,
 
   num.metrics <- if (all_metrics) 1L else length(names.metr)
 
-  resultados <- mapMetrics(num.metrics, function(i.metr)
-    .runQualityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
-                            k.range, nrow, k.range.length, all_metrics, quality_index, ...),
+  resultados <- mapMetrics(num.metrics, .runQualityForOneMetric,
+    list(datos.bruto, names.metr, cbi, seed, k.range, nrow, k.range.length,
+         all_metrics, quality_index, ...),
     numCores)
 
   m.global <- lapply(resultados, `[[`, "quality_valores")
