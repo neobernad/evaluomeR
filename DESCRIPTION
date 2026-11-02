@@ -32,6 +32,7 @@ Imports:
     ggdendro,
     plotrix,
     stats,
+    parallel,
     matrixStats,
     Rdpack,
     MASS,

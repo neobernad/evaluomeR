@@ -39,13 +39,6 @@ getDataQualityRange <- function(data, k) {
 ###############################
 
 pkg.env <- new.env()
-pkg.env$m.stab.global = NULL
-pkg.env$m.stab.global.csv = NULL
-pkg.env$m.global = NULL
-pkg.env$e.global = NULL
-pkg.env$estable = NULL
-pkg.env$names.index = NULL
-pkg.env$names.metr = NULL
 pkg.env$seed = 13606
 pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "rskc") # Supported CBIs
 
@@ -53,6 +46,19 @@ pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "r
 #####################
 ## Private methods ##
 #####################
+
+# Runs f(i) for i in 1..n: lapply when numCores <= 1, otherwise parLapply on numCores workers.
+mapMetrics <- function(n, f, numCores = 1) {
+  if (is.null(numCores) || numCores <= 1) return(lapply(seq_len(n), f))
+  message("Number of cores in parallelization: ", numCores)
+  cl <- makeCluster(numCores)
+  on.exit(stopCluster(cl), add = TRUE)
+  clusterEvalQ(cl, {
+    library(evaluomeR)
+    library(cluster)
+  })
+  parLapply(cl, seq_len(n), f)
+}
 
 # Source: http://r.789695.n4.nabble.com/Suppressing-output-e-g-from-cat-td859876.html
 # Supresses the output messages of a function 'x'

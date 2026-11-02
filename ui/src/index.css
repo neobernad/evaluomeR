@@ -56,6 +56,7 @@ button{font:inherit;color:inherit}
 /* ---------- result ---------- */
 .body{display:grid;gap:20px;padding:20px 0 8px}
 .verdict{font:700 clamp(21px,4.6vw,28px)/1.2 var(--disp);margin:0 0 6px;text-wrap:balance}
+.verdict .pkg{color:var(--gold)}
 .why{color:var(--muted);margin:0;max-width:48ch}
 .plotbox{background:var(--deep);border-radius:16px;padding:12px}
 .plothead{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}
