@@ -1,4 +1,4 @@
-Changes in the development version (unreleased)
+Changes in version 1.8.2 (2026-11-02)
   + Bug fix: with numCores > 1, arguments passed through '...' (e.g. 'L1',
     'alpha' for cbi = "rskc") that are variables in the user's session no longer
     give NA stability or 'object not found' errors on the workers.
@@ -13,6 +13,9 @@ Changes in the development version (unreleased)
     'Description' column by name instead of always dropping the first column.
   + Tests moved to testthat (tests/testthat); timing benchmarks moved to
     tests/benchmarks and are no longer run by R CMD check.
+  + The online demo (https://neobernad.github.io/evaluomeR/app/) matches cluster
+    colours to the known labels, draws cluster ovals and animates changes of
+    dataset, view and k.
 
 Changes in version 1.7.8 (2022-10-12)
   + All metrics within dataframe can be clustered altogether in evaluomeR,
