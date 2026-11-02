@@ -500,6 +500,20 @@ Each use case under `usecases/` follows the pattern:
 
 ## Agent Workflow
 
+### Branching (required)
+
+Unless told otherwise, start every new piece of work on a fresh branch cut
+from an up-to-date `develop`:
+
+```bash
+git checkout develop
+git pull origin develop
+git checkout -b feature/<short-description>   # or fix/<...>
+```
+
+Never commit new work directly to `develop` or `master`. Open PRs back into
+`develop`; `master` receives releases only.
+
 ### Ponytail (optional, local install)
 
 [Ponytail](https://github.com/DietrichGebert/ponytail) lazy-senior-dev mode is
