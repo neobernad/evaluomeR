@@ -4,9 +4,9 @@ This document describes the continuous integration (CI) workflows for evaluomeR.
 
 ## Overview
 
-CI validates the installable R package. The standalone scripts in `tests/` are
-**not** run by GitHub Actions; run those locally after code changes (see
-`AGENTS.md` → Agent Workflow).
+CI validates the installable R package. `R CMD check` runs the testthat suite
+in `tests/testthat/` (under 10 s). The slow timing scripts in `tests/benchmarks/` are
+left out of the check and run weekly in the Benchmarks workflow.
 
 ## Workflows
 
@@ -24,8 +24,16 @@ CI validates the installable R package. The standalone scripts in `tests/` are
 **Steps:** checkout → setup-r (RSPM binaries) → setup-r-dependencies →
 `r-lib/actions/check-r-package`.
 
-This runs `R CMD check`, which exercises examples, vignette code, and package
-metadata. A failing check blocks merge.
+This runs `R CMD check`, which exercises examples, vignette code, the testthat
+suite and package metadata. A failing check blocks merge. A new push to a PR
+cancels the run it supersedes; runs on `develop`/`master` are never cancelled.
+
+### Benchmarks — `.github/workflows/benchmarks.yaml`
+
+**Triggers:** weekly (Mondays 03:00 UTC); manual dispatch.
+
+Runs `testL1_clustering.R`, `testPCA.R` and `testCH_index.R` from
+`tests/benchmarks/`. They have no assertions, so this fails only on a crash.
 
 ### pkgdown — `.github/workflows/pkgdown.yaml`
 
@@ -39,9 +47,8 @@ GitHub Pages at https://neobernad.github.io/evaluomeR/ runs only on push to
 ## Local testing
 
 ```r
-library(evaluomeR)
-source("tests/testAll.R")       # smoke test
-source("tests/testStability.R") # area-specific — see AGENTS.md
+devtools::test()                                        # whole suite
+testthat::test_file("tests/testthat/test-stability.R")  # one area, see AGENTS.md
 ```
 
 Full package check locally:
@@ -61,4 +68,6 @@ R CMD build . && R CMD check evaluomeR_*.tar.gz
 - `.github/workflows/test.yaml` — R CMD check workflow
 - `.github/workflows/pkgdown.yaml` — documentation deploy
 - `AGENTS.md` — area-specific test mapping for agents
-- `tests/` — standalone integration scripts (local only)
+- `.github/workflows/benchmarks.yaml` — weekly benchmark run
+- `tests/testthat/` — test suite run by R CMD check
+- `tests/benchmarks/` — timing scripts (not run by R CMD check)

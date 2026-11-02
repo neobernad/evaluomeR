@@ -47,9 +47,10 @@ Imports:
     FactoMineR (>= 2.11), 
     factoextra (>= 1.0.7),
     nFactors (>= 2.4.1.1)
-Suggests: BiocStyle, knitr, rmarkdown, magrittr, pkgdown
+Suggests: BiocStyle, knitr, rmarkdown, magrittr, pkgdown, testthat (>= 3.1.10)
 VignetteBuilder: knitr
 RdMacros: Rdpack
+Config/testthat/edition: 3
 RoxygenNote: 7.3.2
 biocViews: Clustering, Classification, FeatureExtraction
 Collate:
