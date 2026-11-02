@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import type { DemoData } from '@/types/demo'
-import { HAZE, color, project, shape } from '@/lib/demo'
+import { HAZE, clusterGroups, color, oval, project, shape } from '@/lib/demo'
 
 const NS = 'http://www.w3.org/2000/svg'
 
@@ -16,7 +16,7 @@ export function Intro({ data }: { data: DemoData }) {
     const svg = svgRef.current!
     const still = matchMedia('(prefers-reduced-motion: reduce)').matches
     const k = data.optimalK
-    const groups = data.clusters[k].map((c) => c - 1)
+    const cmap = clusterGroups(data, k), groups = data.clusters[k].map((c) => cmap[c - 1])
     let ctx: gsap.Context | undefined
 
     const run = () => {
@@ -29,20 +29,10 @@ export function Intro({ data }: { data: DemoData }) {
       const R = wide ? Math.max(7, W / 170) : Math.max(6, W / 70)
       const at = project(data, wide ? [W * 0.56, W * 0.93, H * 0.2, H * 0.84] : [W * 0.06, W * 0.94, H * 0.1, H * 0.9])
 
-      const ovals = Array.from({ length: k }, (_, g) => {
-        const m = at.filter((_, i) => groups[i] === g)
-        const n = m.length
-        const cx = m.reduce((s, p) => s + p.x, 0) / n, cy = m.reduce((s, p) => s + p.y, 0) / n
-        const a = m.reduce((s, p) => s + (p.x - cx) ** 2, 0) / n
-        const b = m.reduce((s, p) => s + (p.x - cx) * (p.y - cy), 0) / n
-        const c = m.reduce((s, p) => s + (p.y - cy) ** 2, 0) / n
-        // Tilt and proportions from the cluster covariance, scaled so every sample sits inside.
-        const t = (a + c) / 2, d = Math.sqrt(((a - c) / 2) ** 2 + b * b)
-        const th = Math.atan2(t + d - a, b || 1e-9), cs = Math.cos(th), sn = Math.sin(th)
-        const s1 = Math.sqrt(t + d) || 1, s2 = Math.sqrt(Math.max(t - d, 1e-6))
-        const sc = Math.max(...m.map((p) => Math.hypot(((p.x - cx) * cs + (p.y - cy) * sn) / s1, (-(p.x - cx) * sn + (p.y - cy) * cs) / s2)))
+      const ovals = [...new Set(groups)].map((g) => {
+        const { cx, cy, rx, ry, deg } = oval(at.filter((_, i) => groups[i] === g), R * 1.8)
         const e = document.createElementNS(NS, 'ellipse')
-        Object.entries({ class: 'oval', cx, cy, rx: s1 * sc + R * 1.8, ry: s2 * sc + R * 1.8, transform: `rotate(${(th * 180) / Math.PI} ${cx} ${cy})`, stroke: color(g), fill: color(g) })
+        Object.entries({ class: 'oval', cx, cy, rx, ry, transform: `rotate(${deg} ${cx} ${cy})`, stroke: color(g), fill: color(g) })
           .forEach(([k2, v]) => e.setAttribute(k2, String(v)))
         const w = document.createElementNS(NS, 'g')
         w.appendChild(e)

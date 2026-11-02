@@ -47,9 +47,15 @@ pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "r
 ## Private methods ##
 #####################
 
-# Runs f(i) for i in 1..n: lapply when numCores <= 1, otherwise parLapply on numCores workers.
-mapMetrics <- function(n, f, numCores = 1) {
-  if (is.null(numCores) || numCores <= 1) return(lapply(seq_len(n), f))
+# Runs f(i, <args>) for i in 1..n: lapply when one core (or one task) is enough,
+# otherwise parLapply on at most n workers. `args` is a list built by the caller,
+# so arguments (including ...) are evaluated here, not on the workers, where the
+# caller's variables do not exist.
+mapMetrics <- function(n, f, args, numCores = 1) {
+  force(args) # evaluate now: a lazy promise would be evaluated on the worker
+  g <- function(i) do.call(f, c(list(i), args))
+  numCores <- min(if (is.null(numCores)) 1 else numCores, n)
+  if (numCores <= 1) return(lapply(seq_len(n), g))
   message("Number of cores in parallelization: ", numCores)
   cl <- makeCluster(numCores)
   on.exit(stopCluster(cl), add = TRUE)
@@ -57,7 +63,7 @@ mapMetrics <- function(n, f, numCores = 1) {
     library(evaluomeR)
     library(cluster)
   })
-  parLapply(cl, seq_len(n), f)
+  parLapply(cl, seq_len(n), g)
 }
 
 # Source: http://r.789695.n4.nabble.com/Suppressing-output-e-g-from-cat-td859876.html

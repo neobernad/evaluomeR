@@ -24,11 +24,19 @@ button{font:inherit;color:inherit}
 .top nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;text-decoration:none;color:var(--muted);border-radius:8px}
 .top nav a:hover{color:var(--paper);background:rgba(255,255,255,.06)}
 .top nav .hide-sm{display:none}
-.pills{grid-column:1/-1;display:flex;gap:8px}
-.pills button{flex:1;min-height:44px;font-size:15px;background:transparent;color:var(--muted);
-  border:1px solid rgba(195,206,248,.45);border-radius:999px;padding:0 14px;cursor:pointer}
-.pills button[aria-pressed=true]{background:var(--paper);color:var(--cobalt);border-color:var(--paper);font-weight:600}
-.pills .long{display:none}
+/* Dataset picker: labelled toggle; a paper "thumb" slides under the selected option. */
+.pick{grid-column:1/-1;display:flex;align-items:center;gap:10px}
+.pick .lbl{font-size:14px;color:var(--muted);white-space:nowrap}
+.pills{position:relative;flex:1;display:flex;gap:2px;padding:4px;border-radius:16px;background:rgba(255,255,255,.08)}
+.pills .thumb{position:absolute;top:4px;bottom:4px;left:0;width:var(--w,0);transform:translateX(var(--x,0));border-radius:12px;background:var(--paper);box-shadow:0 2px 8px rgba(11,22,64,.25)}
+.pills.ready .thumb{transition:transform .38s cubic-bezier(.3,.8,.2,1),width .38s cubic-bezier(.3,.8,.2,1)}
+.pills button{position:relative;flex:1;min-height:44px;padding:4px 14px;border:0;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer;line-height:1.25;white-space:nowrap;transition:color .25s}
+.pills button b{display:block;font-size:15px;font-weight:600;color:var(--paper);transition:color .25s}
+.pills button small{display:none;font-size:12px}
+.pills button[aria-pressed=true]{color:#4A5580}
+.pills button[aria-pressed=true] b{color:var(--cobalt)}
+.pills button:not([aria-pressed=true]):hover b{color:#fff}
+.pick .long{display:none}
 
 /* ---------- question ---------- */
 .ask{font:700 clamp(24px,6vw,36px)/1.15 var(--disp);letter-spacing:-.015em;margin:14px 0 6px;max-width:24ch;text-wrap:balance}
@@ -68,12 +76,24 @@ svg.sc{display:block;width:100%;height:auto;aspect-ratio:1/1}
 .legend svg{width:12px;height:12px;vertical-align:-1px;margin-right:5px}
 .axes{font-size:12px;color:var(--muted);margin-top:4px}
 
-table{width:100%;border-collapse:collapse;font-size:15px}
-caption{text-align:left;color:var(--muted);font-size:13px;padding-bottom:6px}
-th{font-weight:400;color:var(--muted);text-align:right;padding:8px 6px;border-bottom:1px solid var(--rule);font-size:13px}
+svg.sc .oval{stroke-width:1.5;vector-effect:non-scaling-stroke;fill-opacity:.07;stroke-opacity:.7}
+
+/* Scores table: a card like the plot, one row per k, each score with a 0–1 meter under it. */
+.t{align-self:start;background:var(--deep);border-radius:16px;padding:6px 12px 10px}
+table{width:100%;border-collapse:separate;border-spacing:0;font-size:15px;font-variant-numeric:tabular-nums}
+caption{text-align:left;color:var(--muted);font-size:14px;padding:8px 6px 4px}
+th{font-weight:400;color:var(--muted);text-align:right;padding:8px 8px;border-bottom:1px solid var(--rule);font-size:13px}
 th:first-child,td:first-child{text-align:left}
-td{text-align:right;padding:9px 6px;border-bottom:1px solid rgba(195,206,248,.12)}
-tr.sel td{color:var(--gold);font-weight:600}
+td{text-align:right;padding:8px 8px}
+tbody tr:not(:last-child)>*{border-bottom:1px solid rgba(195,206,248,.1)}
+tr.sel>*{background:rgba(255,216,77,.1)}
+tr.sel>:first-child{border-radius:10px 0 0 10px}
+tr.sel>:last-child{border-radius:0 10px 10px 0}
+tr.sel td .num{color:var(--gold);font-weight:600}
+.meter{display:block;height:3px;margin:5px 0 0 auto;max-width:72px;border-radius:2px;background:rgba(195,206,248,.16)}
+.meter i{display:block;height:100%;border-radius:2px;background:var(--stroke)}
+tr.sel .meter i{background:var(--gold)}
+tbody th .best{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin-left:7px;vertical-align:2px}
 .lbl-long{display:none}
 
 /* ---------- install ---------- */
@@ -117,10 +137,13 @@ footer{background:var(--paper);color:#4A5580;font-size:14px;padding:0 0 calc(24p
   :root{--gutter:28px}
   .top{grid-template-columns:auto 1fr auto}
   .top .brand{grid-row:1;grid-column:1}
-  .pills{grid-column:2;grid-row:1;justify-self:start}
+  .pick{grid-column:2;grid-row:1;justify-self:start}
+  .pills{flex:none}
+  .pills button{text-align:left}
+  .pills button small{display:block}
   .top nav{grid-column:3}
   .pills button{flex:none}
-  .pills .long{display:inline}.pills .short{display:none}
+  .pick .long{display:inline}.pick .short{display:none}
   .top nav .hide-sm{display:inline-flex}
   .strip .n{font-size:52px}
   .strip [role=radio]{min-height:84px}
@@ -151,5 +174,5 @@ footer{background:var(--paper);color:#4A5580;font-size:14px;padding:0 0 calc(24p
 .top .brand{display:inline-flex;align-items:center;gap:10px}
 .logo{flex:none;border-radius:8px}
 .plothead h3{font-size:14px;font-weight:400;color:var(--muted);margin:0}
-tbody th{text-align:left;color:inherit;font-size:15px;font-weight:400;border-bottom-color:rgba(195,206,248,.12)}
+tbody th{text-align:left;color:inherit;font:700 18px var(--disp);border-bottom:0}
 tr.sel th{color:var(--gold);font-weight:600}

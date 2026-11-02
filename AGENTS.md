@@ -298,7 +298,7 @@ A static React playground hosted alongside pkgdown on GitHub Pages.
 | **Stack** | Vite, React, TypeScript, GSAP (intro animation), plain CSS (`ui/src/index.css`) |
 | **Source** | `ui/src/` |
 | **Precomputed data** | `ui/src/data/nci60.json`, `ui/src/data/golub.json` |
-| **Components** | `ui/src/components/`: `Intro` (full-screen hero + GSAP "Settle" animation), `Explorer` (dataset pills, k strip, verdict, PCA scatter, score table), `Install`, `Logo` |
+| **Components** | `ui/src/components/`: `Intro` (full-screen hero + GSAP "Settle" animation), `Explorer` (labelled "Example data" toggle with a sliding highlight, k strip, verdict, PCA scatter, score table), `Install`, `Logo` |
 | **Helpers** | `ui/src/lib/demo.ts` (cluster colours + shapes, PCA projection, k list) |
 | **Build output** | `docs/app/` (via `ui/vite.config.ts` `outDir`) |
 

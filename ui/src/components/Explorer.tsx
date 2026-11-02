@@ -1,6 +1,11 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { color, kValues, project, shape, type Dataset } from '@/lib/demo'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { clusterGroups, color, kValues, oval, project, shape, type Dataset } from '@/lib/demo'
 import { Logo } from '@/components/Logo'
+import gsap from 'gsap'
+
+const still = () => matchMedia('(prefers-reduced-motion: reduce)').matches
+// What fades out and back in when the dataset changes.
+const SWAP = '.head .ask, .head .sub, .strip, .stripcap, .body > *'
 
 const readHash = () => new URLSearchParams(location.hash.slice(1))
 const useMedia = (q: string) => {
@@ -16,6 +21,7 @@ const useMedia = (q: string) => {
 /** Pick a k, see the verdict, the clusters on PC1/PC2, and the scores for every k. */
 export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const [key, setKey] = useState(() => (datasets.some((d) => d.key === readHash().get('dataset')) ? readHash().get('dataset')! : datasets[0].key))
+  const [sel, setSel] = useState(key) // picker selection; moves at once, while `key` changes after the fade-out
   const ds = datasets.find((d) => d.key === key)!
   const D = ds.data
   const ks = kValues(D)
@@ -25,6 +31,24 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const stripRef = useRef<HTMLDivElement>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const small = useMedia('(max-width: 639px)')
+  const pillsRef = useRef<HTMLDivElement>(null)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const svgRef = useRef<SVGSVGElement>(null)
+
+  // Slide the highlight under the selected dataset; re-measure when the buttons resize (fonts, breakpoints).
+  useLayoutEffect(() => {
+    const el = pillsRef.current!
+    const place = () => {
+      const b = el.querySelector<HTMLElement>('[aria-pressed=true]')!
+      el.style.setProperty('--x', `${b.offsetLeft}px`)
+      el.style.setProperty('--w', `${b.offsetWidth}px`)
+    }
+    place()
+    requestAnimationFrame(() => el.classList.add('ready')) // no slide on first paint
+    const ro = new ResizeObserver(place)
+    el.querySelectorAll('button').forEach((b) => ro.observe(b))
+    return () => ro.disconnect()
+  }, [sel])
 
   useEffect(() => { history.replaceState(null, '', `#dataset=${key}&k=${k}`) }, [key, k])
 
@@ -35,7 +59,22 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
     return () => io.disconnect()
   }, [])
 
-  const pickDataset = (d: Dataset) => { setKey(d.key); setK(d.data.optimalK) }
+  // Dataset switch: fade the old results out, swap, fade the new ones in (layout effect below).
+  const pickDataset = (d: Dataset) => {
+    if (d.key === sel) return
+    setSel(d.key)
+    const swap = () => { setKey(d.key); setK(d.data.optimalK) }
+    if (still()) return swap()
+    const els = rootRef.current!.querySelectorAll(SWAP)
+    gsap.killTweensOf(els)
+    gsap.to(els, { autoAlpha: 0, y: -8, duration: 0.18, ease: 'power1.in', stagger: 0.02, onComplete: swap })
+  }
+  const firstKey = useRef(true)
+  useLayoutEffect(() => {
+    if (firstKey.current) { firstKey.current = false; return }
+    const els = rootRef.current!.querySelectorAll(SWAP)
+    gsap.fromTo(els, { autoAlpha: 0, y: 12 }, { autoAlpha: 1, y: 0, duration: 0.5, ease: 'power2.out', stagger: 0.06, clearProps: 'transform,opacity,visibility' })
+  }, [key])
 
   // Roving-tabindex radiogroup: arrows move and select, Home/End jump.
   const onKey = (e: KeyboardEvent) => {
@@ -64,20 +103,56 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const W = 640, H = small ? 640 : 400, rad = small ? 10 : 7, pad = small ? 18 : 22
   const at = project(D, [pad, W - pad, pad, H - pad])
   const types = D.meta.cancerTypes
-  const group = (i: number) => (byTruth ? types.indexOf(D.samples[i].cancerType) : D.clusters[k][i] - 1)
-  const legend = byTruth ? types.map((t, i) => [t, i] as const) : Array.from({ length: k }, (_, i) => [`Cluster ${i + 1}`, i] as const)
+  const cmap = clusterGroups(D, k) // cluster c is drawn like the label it mostly holds
+  const group = (i: number) => (byTruth ? types.indexOf(D.samples[i].cancerType) : cmap[D.clusters[k][i] - 1])
+  const legend = byTruth ? types.map((t, i) => [t, i] as const) : cmap.map((g, c) => [`Cluster ${c + 1}`, g] as const)
+  const cg = (i: number) => cmap[D.clusters[k][i] - 1]
+  const ovals = cmap.map((g) => ({ g, ...oval(at.filter((_, i) => cg(i) === g), rad * 1.8) }))
+  // Scale and centre the scene so the cluster ovals fill the plot (same in both views, so points don't jump).
+  const box = ovals.map(({ cx, cy, rx, ry, deg }) => {
+    const c = Math.cos((deg * Math.PI) / 180), sn = Math.sin((deg * Math.PI) / 180)
+    const hx = Math.hypot(rx * c, ry * sn), hy = Math.hypot(rx * sn, ry * c)
+    return [cx - hx, cx + hx, cy - hy, cy + hy]
+  })
+  const [bx0, bx1, by0, by1] = [Math.min(...box.map((v) => v[0])), Math.max(...box.map((v) => v[1])), Math.min(...box.map((v) => v[2])), Math.max(...box.map((v) => v[3]))]
+  const fit = Math.min((W - 4) / (bx1 - bx0), (H - 4) / (by1 - by0))
+  const scene = `translate(${W / 2} ${H / 2}) scale(${fit}) translate(${-(bx0 + bx1) / 2} ${-(by0 + by1) / 2})`
+  // Points whose colour/shape changes (view toggle or new k) pop in; cluster ovals fade in and out.
+  const shown = at.map((_, i) => group(i))
+  const prev = useRef<{ key: string; shown: number[]; byTruth: boolean } | null>(null)
+  useLayoutEffect(() => {
+    const p = prev.current, svg = svgRef.current!
+    prev.current = { key, shown, byTruth }
+    const ovs = svg.querySelectorAll('.ov')
+    if (!p || p.key !== key || still()) { gsap.set(ovs, { autoAlpha: byTruth ? 0 : 1 }); return }
+    const pts = svg.querySelectorAll<SVGPathElement>('.pt path')
+    const moved = [...pts].filter((_, i) => p.shown[i] !== shown[i])
+    gsap.fromTo(moved, { scale: 0.2 }, { scale: 1, svgOrigin: '0 0', duration: 0.55, ease: 'back.out(2.2)', stagger: { each: 0.01, from: 'random' } })
+    if (byTruth) gsap.to(ovs, { autoAlpha: 0, scale: 0.96, transformOrigin: '50% 50%', duration: 0.3, ease: 'power1.in' })
+    else gsap.fromTo(ovs, { autoAlpha: 0, scale: 0.92 }, { autoAlpha: 1, scale: 1, transformOrigin: '50% 50%', duration: 0.7, ease: 'sine.out', stagger: 0.08, delay: 0.1 })
+  }, [key, k, byTruth])
+
+  const pct = (x: number) => `${Math.max(0, Math.min(1, x)) * 100}%`
+  const cell = (x: number | undefined) => (
+    <td><span className="num">{(x ?? NaN).toFixed(2)}</span><span className="meter" aria-hidden="true"><i style={{ width: pct(x ?? 0) }} /></span></td>
+  )
   const [v1, v2] = D.pca.varExplained
 
   return (
-      <div className="wrap" id="playground">
+      <div className="wrap" id="playground" ref={rootRef}>
         <header className="top">
           <span className="brand"><Logo />evaluomeR</span>
-          <div className="pills" role="group" aria-label="Dataset">
-            {datasets.map((d) => (
-              <button key={d.key} aria-pressed={d.key === key} onClick={() => pickDataset(d)}>
-                <span className="short">{d.short}</span><span className="long">{d.label}</span>
-              </button>
-            ))}
+          <div className="pick">
+            <span className="lbl" id="ds-lbl"><span className="long">Example data</span><span className="short">Data</span></span>
+            <div className="pills" ref={pillsRef} role="group" aria-labelledby="ds-lbl">
+              <span className="thumb" aria-hidden="true" />
+              {datasets.map((d) => (
+                <button key={d.key} aria-pressed={d.key === sel} onClick={() => pickDataset(d)}>
+                  <b><span className="short">{d.short}</span><span className="long">{d.label}</span></b>
+                  <small>{d.data.meta.nSamples} samples, {d.data.meta.cancerTypes.length} types</small>
+                </button>
+              ))}
+            </div>
           </div>
           <nav aria-label="Project">
             <a className="hide-sm" href="https://neobernad.github.io/evaluomeR/">Documentation</a>
@@ -118,12 +193,17 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
                 <button aria-pressed={byTruth} onClick={() => setByTruth(true)}>Known labels</button>
               </div>
             </div>
-            <svg className="sc" viewBox={`0 0 ${W} ${H}`} role="img" aria-describedby="scdesc">
-              {at.map((p, i) => (
-                <path key={i} d={shape(group(i), rad)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2} transform={`translate(${p.x},${p.y})`}>
-                  <title>{`${D.samples[i].id}: ${D.samples[i].cancerType}, cluster ${D.clusters[k][i]}`}</title>
-                </path>
+            <svg className="sc" ref={svgRef} viewBox={`0 0 ${W} ${H}`} role="img" aria-describedby="scdesc">
+              <g transform={scene}>
+              {ovals.map(({ g, cx, cy, rx, ry, deg }) => (
+                <g key={g} className="ov"><ellipse className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} /></g>
               ))}
+              {at.map((p, i) => (
+                <g key={i} className="pt" transform={`translate(${p.x},${p.y})`}><path d={shape(group(i), rad / fit)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2 / fit}>
+                  <title>{`${D.samples[i].id}: ${D.samples[i].cancerType}, cluster ${D.clusters[k][i]}`}</title>
+                </path></g>
+              ))}
+              </g>
             </svg>
             <p className="sr" id="scdesc">Scatter of samples on the first two principal components. The table lists the same scores for every k.</p>
             <div className="legend">
@@ -143,8 +223,8 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
               <tbody>
                 {ks.map((v) => (
                   <tr key={v} className={v === k ? 'sel' : undefined}>
-                    <th scope="row">{v}{v === o && <span className="sr"> (recommended)</span>}</th>
-                    <td>{S[v].avgStability.toFixed(2)}</td><td>{S[v].avgSilhouette.toFixed(2)}</td><td>{ari(v)}</td>
+                    <th scope="row">{v}{v === o && <><span className="best" aria-hidden="true" /><span className="sr"> (recommended)</span></>}</th>
+                    {cell(S[v].avgStability)}{cell(S[v].avgSilhouette)}{cell(S[v].ari)}
                   </tr>
                 ))}
               </tbody>
