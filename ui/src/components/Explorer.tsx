@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type RefObject } from 'react'
 import { clusterGroups, color, kValues, oval, project, shape, type Dataset } from '@/lib/demo'
 import { Logo } from '@/components/Logo'
 import gsap from 'gsap'
@@ -18,6 +18,27 @@ const useMedia = (q: string) => {
   return on
 }
 
+/**
+ * Keeps a `.thumb` inside `ref` over the element matching `sel` (via --x/--y/--w/--h), so CSS can
+ * slide it there. Re-measures on resize; the `ready` class (added after first paint) turns on the slide.
+ */
+function useThumb(ref: RefObject<HTMLElement | null>, sel: string, deps: unknown[]) {
+  useLayoutEffect(() => {
+    const el = ref.current!
+    const place = () => {
+      const b = el.querySelector(sel)
+      if (!b) return
+      const r = b.getBoundingClientRect(), c = el.getBoundingClientRect()
+      Object.entries({ x: r.left - c.left, y: r.top - c.top, w: r.width, h: r.height }).forEach(([k, v]) => el.style.setProperty(`--${k}`, `${v}px`))
+    }
+    place()
+    const raf = requestAnimationFrame(() => el.classList.add('ready'))
+    const ro = new ResizeObserver(place)
+    ro.observe(el)
+    return () => { cancelAnimationFrame(raf); ro.disconnect() }
+  }, deps)
+}
+
 /** Pick a k, see the verdict, the clusters on PC1/PC2, and the scores for every k. */
 export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const [key, setKey] = useState(() => (datasets.some((d) => d.key === readHash().get('dataset')) ? readHash().get('dataset')! : datasets[0].key))
@@ -34,21 +55,12 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const pillsRef = useRef<HTMLDivElement>(null)
   const rootRef = useRef<HTMLDivElement>(null)
   const svgRef = useRef<SVGSVGElement>(null)
+  const tableRef = useRef<HTMLDivElement>(null)
 
-  // Slide the highlight under the selected dataset; re-measure when the buttons resize (fonts, breakpoints).
-  useLayoutEffect(() => {
-    const el = pillsRef.current!
-    const place = () => {
-      const b = el.querySelector<HTMLElement>('[aria-pressed=true]')!
-      el.style.setProperty('--x', `${b.offsetLeft}px`)
-      el.style.setProperty('--w', `${b.offsetWidth}px`)
-    }
-    place()
-    requestAnimationFrame(() => el.classList.add('ready')) // no slide on first paint
-    const ro = new ResizeObserver(place)
-    el.querySelectorAll('button').forEach((b) => ro.observe(b))
-    return () => ro.disconnect()
-  }, [sel])
+  // Sliding highlights: dataset picker, k strip, selected table row.
+  useThumb(pillsRef, '[aria-pressed=true]', [sel])
+  useThumb(stripRef, '[aria-checked=true]', [key, k])
+  useThumb(tableRef, 'tr.sel', [key, k])
 
   useEffect(() => { history.replaceState(null, '', `#dataset=${key}&k=${k}`) }, [key, k])
 
@@ -116,20 +128,57 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   })
   const [bx0, bx1, by0, by1] = [Math.min(...box.map((v) => v[0])), Math.max(...box.map((v) => v[1])), Math.min(...box.map((v) => v[2])), Math.max(...box.map((v) => v[3]))]
   const fit = Math.min((W - 4) / (bx1 - bx0), (H - 4) / (by1 - by0))
-  const scene = `translate(${W / 2} ${H / 2}) scale(${fit}) translate(${-(bx0 + bx1) / 2} ${-(by0 + by1) / 2})`
-  // Points whose colour/shape changes (view toggle or new k) pop in; cluster ovals fade in and out.
+  const view = { fit, mx: (bx0 + bx1) / 2, my: (by0 + by1) / 2 }
+  const sceneOf = (v: typeof view) => `translate(${W / 2} ${H / 2}) scale(${v.fit}) translate(${-v.mx} ${-v.my})`
+  const scene = sceneOf(view)
+
+  // Points whose colour/shape changes (view toggle or new k) pop in. On a new k each cluster oval grows
+  // out of the old oval most of its samples came from, and the zoom tweens instead of jumping.
+  // All tweens drive plain numbers and write attributes (no GSAP transforms), so nothing is left over when they end.
   const shown = at.map((_, i) => group(i))
-  const prev = useRef<{ key: string; shown: number[]; byTruth: boolean } | null>(null)
+  const prev = useRef<{ key: string; k: number; shown: number[]; ovals: typeof ovals; view: typeof view } | null>(null)
+  const tweens = useRef<gsap.core.Tween[]>([])
+  const pops = useRef<gsap.core.Tween[]>([])
   useLayoutEffect(() => {
     const p = prev.current, svg = svgRef.current!
-    prev.current = { key, shown, byTruth }
-    const ovs = svg.querySelectorAll('.ov')
-    if (!p || p.key !== key || still()) { gsap.set(ovs, { autoAlpha: byTruth ? 0 : 1 }); return }
-    const pts = svg.querySelectorAll<SVGPathElement>('.pt path')
-    const moved = [...pts].filter((_, i) => p.shown[i] !== shown[i])
-    gsap.fromTo(moved, { scale: 0.2 }, { scale: 1, svgOrigin: '0 0', duration: 0.55, ease: 'back.out(2.2)', stagger: { each: 0.01, from: 'random' } })
-    if (byTruth) gsap.to(ovs, { autoAlpha: 0, scale: 0.96, transformOrigin: '50% 50%', duration: 0.3, ease: 'power1.in' })
-    else gsap.fromTo(ovs, { autoAlpha: 0, scale: 0.92 }, { autoAlpha: 1, scale: 1, transformOrigin: '50% 50%', duration: 0.7, ease: 'sine.out', stagger: 0.08, delay: 0.1 })
+    prev.current = { key, k, shown, ovals, view }
+    if (!p || p.key !== key || still()) return
+    // Pop by redrawing the shape at a growing size, not by a GSAP transform: GSAP's SVG transform origin
+    // put points ~7px off their centre mid-pop, so they jumped when it ended.
+    // A click mid-pop: stop the old pops and redraw every point at full size first.
+    const r = rad / fit
+    pops.current.forEach((t) => t.kill())
+    pops.current = []
+    svg.querySelectorAll<SVGPathElement>('.pt path').forEach((e, i) => {
+      const o = { s: p.shown[i] === shown[i] ? 1 : 0.2 }, draw = () => e.setAttribute('d', shape(shown[i], r * o.s))
+      draw()
+      if (o.s < 1) pops.current.push(gsap.to(o, { s: 1, duration: 0.55, ease: 'back.out(2.2)', delay: Math.random() * 0.15, onUpdate: draw }))
+    })
+    if (p.k === k) return
+
+    tweens.current.forEach((t) => t.kill())
+    const ease = 'power3.inOut', duration = 0.7
+    const g = svg.firstElementChild as SVGGElement
+    const v = { ...p.view }
+    g.setAttribute('transform', sceneOf(v)) // start from the old zoom on this frame
+    tweens.current = [gsap.to(v, { ...view, duration, ease, onUpdate: () => g.setAttribute('transform', sceneOf(v)) })]
+    const prevCl = D.clusters[p.k], cl = D.clusters[k]
+    svg.querySelectorAll<SVGEllipseElement>('.oval').forEach((e, c) => {
+      // Parent: the old cluster holding most of this cluster's samples.
+      const n: Record<number, number> = {}
+      cl.forEach((x, i) => { if (x === c + 1) n[prevCl[i]] = (n[prevCl[i]] ?? 0) + 1 })
+      const parent = +Object.entries(n).sort((a, b) => b[1] - a[1])[0][0]
+      const to = ovals[c], from = { ...p.ovals[parent - 1] }
+      from.deg += Math.round((to.deg - from.deg) / 180) * 180 // an ellipse turned 180° is the same: take the short way
+      const o = { cx: from.cx, cy: from.cy, rx: from.rx, ry: from.ry, deg: from.deg }
+      const set = () => {
+        Object.entries({ cx: o.cx, cy: o.cy, rx: o.rx, ry: o.ry }).forEach(([a, x]) => e.setAttribute(a, String(x)))
+        e.setAttribute('transform', `rotate(${o.deg} ${o.cx} ${o.cy})`)
+      }
+      set()
+      tweens.current.push(gsap.to(o, { cx: to.cx, cy: to.cy, rx: to.rx, ry: to.ry, deg: to.deg, duration, ease, onUpdate: set }))
+    })
+    gsap.fromTo(rootRef.current!.querySelector('.v'), { opacity: 0.25 }, { opacity: 1, duration: 0.4, ease: 'sine.out', clearProps: 'opacity' })
   }, [key, k, byTruth])
 
   const pct = (x: number) => `${Math.max(0, Math.min(1, x)) * 100}%`
@@ -168,6 +217,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
           </div>
           <div className="stripbar" ref={barRef}>
             <div className="strip" ref={stripRef} role="radiogroup" aria-label="Number of clusters k" onKeyDown={onKey}>
+              <span className="thumb" aria-hidden="true" />
               {ks.map((v) => (
                 <button key={v} role="radio" data-k={v} aria-checked={v === k} tabIndex={v === k ? 0 : -1}
                   aria-label={`k = ${v}${v === o ? ', recommended' : ''}`} onClick={() => setK(v)}>
@@ -187,7 +237,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
           </div>
           <div className="plotbox">
             <div className="plothead">
-              <h3>{byTruth ? 'Coloured by known label' : `The ${k} clusters found`}</h3>
+              <h3>{byTruth ? `Known labels, ovals show the ${k} clusters found` : `The ${k} clusters found`}</h3>
               <div className="seg" role="group" aria-label="Colour points by">
                 <button aria-pressed={!byTruth} onClick={() => setByTruth(false)}>Clusters</button>
                 <button aria-pressed={byTruth} onClick={() => setByTruth(true)}>Known labels</button>
@@ -196,7 +246,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
             <svg className="sc" ref={svgRef} viewBox={`0 0 ${W} ${H}`} role="img" aria-describedby="scdesc">
               <g transform={scene}>
               {ovals.map(({ g, cx, cy, rx, ry, deg }) => (
-                <g key={g} className="ov"><ellipse className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} /></g>
+                <ellipse key={g} className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} />
               ))}
               {at.map((p, i) => (
                 <g key={i} className="pt" transform={`translate(${p.x},${p.y})`}><path d={shape(group(i), rad / fit)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2 / fit}>
@@ -213,7 +263,8 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
             </div>
             <p className="axes">PC1 explains {(v1 * 100).toFixed(0)}% of variance, PC2 {(v2 * 100).toFixed(0)}%.</p>
           </div>
-          <div className="t">
+          <div className="t" ref={tableRef}>
+            <span className="thumb" aria-hidden="true" />
             <table>
               <caption>Scores for every k</caption>
               <thead><tr>
