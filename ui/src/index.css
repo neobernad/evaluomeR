@@ -24,11 +24,19 @@ button{font:inherit;color:inherit}
 .top nav a{display:inline-flex;align-items:center;min-height:44px;padding:0 10px;text-decoration:none;color:var(--muted);border-radius:8px}
 .top nav a:hover{color:var(--paper);background:rgba(255,255,255,.06)}
 .top nav .hide-sm{display:none}
-.pills{grid-column:1/-1;display:flex;gap:8px}
-.pills button{flex:1;min-height:44px;font-size:15px;background:transparent;color:var(--muted);
-  border:1px solid rgba(195,206,248,.45);border-radius:999px;padding:0 14px;cursor:pointer}
-.pills button[aria-pressed=true]{background:var(--paper);color:var(--cobalt);border-color:var(--paper);font-weight:600}
-.pills .long{display:none}
+/* Dataset picker: labelled toggle; a paper "thumb" slides under the selected option. */
+.pick{grid-column:1/-1;display:flex;align-items:center;gap:10px}
+.pick .lbl{font-size:14px;color:var(--muted);white-space:nowrap}
+.pills{position:relative;flex:1;display:flex;gap:2px;padding:4px;border-radius:16px;background:rgba(255,255,255,.08)}
+.pills .thumb{position:absolute;top:4px;bottom:4px;left:0;width:var(--w,0);transform:translateX(var(--x,0));border-radius:12px;background:var(--paper);box-shadow:0 2px 8px rgba(11,22,64,.25)}
+.pills.ready .thumb{transition:transform .38s cubic-bezier(.3,.8,.2,1),width .38s cubic-bezier(.3,.8,.2,1)}
+.pills button{position:relative;flex:1;min-height:44px;padding:4px 14px;border:0;border-radius:12px;background:transparent;color:var(--muted);cursor:pointer;line-height:1.25;white-space:nowrap;transition:color .25s}
+.pills button b{display:block;font-size:15px;font-weight:600;color:var(--paper);transition:color .25s}
+.pills button small{display:none;font-size:12px}
+.pills button[aria-pressed=true]{color:#4A5580}
+.pills button[aria-pressed=true] b{color:var(--cobalt)}
+.pills button:not([aria-pressed=true]):hover b{color:#fff}
+.pick .long{display:none}
 
 /* ---------- question ---------- */
 .ask{font:700 clamp(24px,6vw,36px)/1.15 var(--disp);letter-spacing:-.015em;margin:14px 0 6px;max-width:24ch;text-wrap:balance}
@@ -129,10 +137,13 @@ footer{background:var(--paper);color:#4A5580;font-size:14px;padding:0 0 calc(24p
   :root{--gutter:28px}
   .top{grid-template-columns:auto 1fr auto}
   .top .brand{grid-row:1;grid-column:1}
-  .pills{grid-column:2;grid-row:1;justify-self:start}
+  .pick{grid-column:2;grid-row:1;justify-self:start}
+  .pills{flex:none}
+  .pills button{text-align:left}
+  .pills button small{display:block}
   .top nav{grid-column:3}
   .pills button{flex:none}
-  .pills .long{display:inline}.pills .short{display:none}
+  .pick .long{display:inline}.pick .short{display:none}
   .top nav .hide-sm{display:inline-flex}
   .strip .n{font-size:52px}
   .strip [role=radio]{min-height:84px}

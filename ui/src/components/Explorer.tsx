@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { clusterGroups, color, kValues, oval, project, shape, type Dataset } from '@/lib/demo'
 import { Logo } from '@/components/Logo'
 
@@ -25,6 +25,22 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const stripRef = useRef<HTMLDivElement>(null)
   const barRef = useRef<HTMLDivElement>(null)
   const small = useMedia('(max-width: 639px)')
+  const pillsRef = useRef<HTMLDivElement>(null)
+
+  // Slide the highlight under the selected dataset; re-measure when the buttons resize (fonts, breakpoints).
+  useLayoutEffect(() => {
+    const el = pillsRef.current!
+    const place = () => {
+      const b = el.querySelector<HTMLElement>('[aria-pressed=true]')!
+      el.style.setProperty('--x', `${b.offsetLeft}px`)
+      el.style.setProperty('--w', `${b.offsetWidth}px`)
+    }
+    place()
+    requestAnimationFrame(() => el.classList.add('ready')) // no slide on first paint
+    const ro = new ResizeObserver(place)
+    el.querySelectorAll('button').forEach((b) => ro.observe(b))
+    return () => ro.disconnect()
+  }, [key])
 
   useEffect(() => { history.replaceState(null, '', `#dataset=${key}&k=${k}`) }, [key, k])
 
@@ -88,12 +104,17 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
       <div className="wrap" id="playground">
         <header className="top">
           <span className="brand"><Logo />evaluomeR</span>
-          <div className="pills" role="group" aria-label="Dataset">
-            {datasets.map((d) => (
-              <button key={d.key} aria-pressed={d.key === key} onClick={() => pickDataset(d)}>
-                <span className="short">{d.short}</span><span className="long">{d.label}</span>
-              </button>
-            ))}
+          <div className="pick">
+            <span className="lbl" id="ds-lbl"><span className="long">Example data</span><span className="short">Data</span></span>
+            <div className="pills" ref={pillsRef} role="group" aria-labelledby="ds-lbl">
+              <span className="thumb" aria-hidden="true" />
+              {datasets.map((d) => (
+                <button key={d.key} aria-pressed={d.key === key} onClick={() => pickDataset(d)}>
+                  <b><span className="short">{d.short}</span><span className="long">{d.label}</span></b>
+                  <small>{d.data.meta.nSamples} samples, {d.data.meta.cancerTypes.length} types</small>
+                </button>
+              ))}
+            </div>
           </div>
           <nav aria-label="Project">
             <a className="hide-sm" href="https://neobernad.github.io/evaluomeR/">Documentation</a>
