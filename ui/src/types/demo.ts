@@ -1,21 +1,4 @@
-export interface PCACoord {
-  pc1: number
-  pc2: number
-  pc3?: number
-}
-
-export interface Sample {
-  id: string
-  cancerType: string
-  metrics: Record<string, number>
-}
-
-export interface OptimalKRow {
-  metric: string
-  stabilityMaxK: number
-  qualityMaxK: number
-  globalOptimalK: number
-}
+// Shape of ui/src/data/*.json, written by tools/export-demo-data.R. Keep the two in sync.
 
 export interface KSummaryEntry {
   avgStability: number
@@ -24,37 +7,22 @@ export interface KSummaryEntry {
   ari?: number
 }
 
-export type MetricMap = Record<string, number>
 export type ByK<T> = Record<string, T>
 
 export interface DemoData {
   meta: {
     dataset: string
     nSamples: number
-    nCancerTypes: number
+    nMetrics: number
     cancerTypes: string[]
-    metrics: string[]
-    chartMetrics: string[]
-    kRange: [number, number]
     bs: number
-    allMetrics?: boolean
-    previewMetrics?: string[]
   }
-  samples: Sample[]
-  stability: ByK<MetricMap>
-  quality: {
-    silhouette: ByK<MetricMap>
-    ch: ByK<MetricMap>
-  }
+  samples: { id: string; cancerType: string }[]
   optimalK: number
-  optimalKPerMetric: Record<string, number>
-  optimalKDetail: OptimalKRow[]
-  kSummary: Record<string, KSummaryEntry>
-  stabilitySD?: ByK<number>
-  sampleSilhouette?: ByK<number[]>
+  kSummary: ByK<KSummaryEntry>
   clusters: ByK<number[]>
   pca: {
-    coords: PCACoord[]
-    varExplained: [number, number] | [number, number, number]
+    coords: { pc1: number; pc2: number }[]
+    varExplained: number[]
   }
 }

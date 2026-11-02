@@ -368,19 +368,13 @@ Outputs:
 `tools/export-demo-data.R` calls `run_export()` for each dataset:
 
 1. `stabilityRange(..., all_metrics=TRUE, bs=100, seed=13606)`
-2. `qualityRange(..., all_metrics=TRUE)` — silhouette and CH
+2. `qualityRange(..., all_metrics=TRUE)` (silhouette)
 3. `getOptimalKValue()` → optimal k
 4. k-means cluster labels per k (full metric matrix)
-5. ARI vs. ground-truth labels per k, per-sample silhouette, and `stabilitySD`
-   = `sd(bootmean)` across clusters from `clusterbootWrapper` (spread of
-   per-cluster Jaccard means — not a bootstrap SD of the stability index)
-6. PCA coordinates (`prcomp`, scaled) for scatter plots
-7. Writes JSON consumed by `ui/src/types/demo.ts`
-
-`tools/augment-demo-json.mjs` (Node) approximates `ari` and `sampleSilhouette`
-in existing JSON when R is unavailable. Its `stabilitySD` is **not equivalent**:
-it takes the SD across metrics, which is always 0 for the all-metrics demo JSON
-(zero-width bands). Use the R export for real `stabilitySD`.
+5. ARI vs. ground-truth labels per k
+6. PCA coordinates (`prcomp`, scaled, PC1/PC2) for the scatter plot
+7. Writes only the fields the UI reads; the shape is `DemoData` in
+   `ui/src/types/demo.ts`. Add a field there and in the export together.
 
 Parameters match the use-case notebooks: **seed = 13606**, **bs = 100**,
 **all_metrics = TRUE** (single merged index, not per-metric).
