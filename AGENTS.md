@@ -519,6 +519,18 @@ git checkout -b feature/<short-description>   # or fix/<...>
 Never commit new work directly to `develop` or `master`. Open PRs back into
 `develop`; `master` receives releases only.
 
+### Changelog and releases (required)
+
+- Every user-visible package change adds a bullet to the top section of `NEWS`,
+  "Changes in the development version (unreleased)". Create that section if it
+  is missing.
+- Before a release PR (`develop` → `master`), bump `Version:` in `DESCRIPTION`
+  (e.g. 1.8.1 → 1.8.2) and rename the NEWS section to
+  "Changes in version X.Y.Z (YYYY-MM-DD)". Do it on a `release/X.Y.Z` branch
+  merged into `develop` first. Also update the version in this file's Package
+  Overview and the "last entry" note in Repo Layout.
+- `DESCRIPTION`, `NEWS` and this file use CRLF line endings; keep them.
+
 ### Ponytail (optional, local install)
 
 [Ponytail](https://github.com/DietrichGebert/ponytail) lazy-senior-dev mode is
