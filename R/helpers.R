@@ -39,13 +39,6 @@ getDataQualityRange <- function(data, k) {
 ###############################
 
 pkg.env <- new.env()
-pkg.env$m.stab.global = NULL
-pkg.env$m.stab.global.csv = NULL
-pkg.env$m.global = NULL
-pkg.env$e.global = NULL
-pkg.env$estable = NULL
-pkg.env$names.index = NULL
-pkg.env$names.metr = NULL
 pkg.env$seed = 13606
 pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "rskc") # Supported CBIs
 
@@ -53,6 +46,25 @@ pkg.env$cbi = c("kmeans", "clara", "clara_pam", "hclust", "pamk", "pamk_pam", "r
 #####################
 ## Private methods ##
 #####################
+
+# Runs f(i, <args>) for i in 1..n: lapply when one core (or one task) is enough,
+# otherwise parLapply on at most n workers. `args` is a list built by the caller,
+# so arguments (including ...) are evaluated here, not on the workers, where the
+# caller's variables do not exist.
+mapMetrics <- function(n, f, args, numCores = 1) {
+  force(args) # evaluate now: a lazy promise would be evaluated on the worker
+  g <- function(i) do.call(f, c(list(i), args))
+  numCores <- min(if (is.null(numCores)) 1 else numCores, n)
+  if (numCores <= 1) return(lapply(seq_len(n), g))
+  message("Number of cores in parallelization: ", numCores)
+  cl <- makeCluster(numCores)
+  on.exit(stopCluster(cl), add = TRUE)
+  clusterEvalQ(cl, {
+    library(evaluomeR)
+    library(cluster)
+  })
+  parLapply(cl, seq_len(n), g)
+}
 
 # Source: http://r.789695.n4.nabble.com/Suppressing-output-e-g-from-cat-td859876.html
 # Supresses the output messages of a function 'x'

@@ -113,8 +113,11 @@ getMetricRangeByCluster <- function(df, k.range, bs, seed) {
 #' @param L1 A single L1 bound on weights (the feature weights), see \code{\link{RSKC}}.
 #' @param seed Random seed to be used.
 #'
-#' @return A dataframe including the min and the max value for each
-#' pair (metric, cluster).
+#' @return A list with \code{rskc} (the \code{\link{RSKC}} output),
+#' \code{trimmed_cases} (row indexes of the trimmed cases) and \code{relevancy}
+#' (a data frame with one row per metric, columns \code{metric} and
+#' \code{weight}, sorted by decreasing weight). A \code{Description} column,
+#' if present, is not treated as a metric.
 #' @export
 #'
 #' @examples
@@ -133,6 +136,8 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
 #  }
 
   df <- assayAsDF(df)
+  df <- df[, colnames(df) != "Description", drop = FALSE] # IDs are not a metric
+  set.seed(seed)
 
   if (is.null(L1)) {
     print(paste0("No L1 provided. Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))
@@ -201,8 +206,9 @@ getRSKCL1Boundry <- function(df, k, clustering="kmeans", seed=NULL) {
   }
 
   df <- assayAsDF(df)
-  df_data = df[-1] # Removing 'Description' column as it is not numeric
+  df_data <- df[, colnames(df) != "Description", drop = FALSE] # IDs are not a metric
   dataMatrix = as.matrix(df_data)
+  set.seed(seed)
   wbounds = seq(2,sqrt(ncol(dataMatrix)), len=30)
   
   if(clustering == "kmeans"){

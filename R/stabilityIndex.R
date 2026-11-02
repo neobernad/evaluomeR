@@ -18,7 +18,7 @@
 }
 
 # Internal: process one metric across all k values for stability analysis.
-# Called by both the serial (lapply) and parallel (parLapply) dispatchers.
+# Run for each metric by mapMetrics (serially or on parallel workers).
 # Returns list(stab_valores, csv_data).
 .runStabilityForOneMetric <- function(i.metr, datos.bruto, names.metr, cbi, seed,
                                       k.range, bs, all_metrics, gold_standard,
@@ -141,23 +141,15 @@ stability <- function(data, k=5, bs=100, cbi="kmeans",
   data <- assayAsDF(data)
 
   checkKValue(k)
-  
-  if(numCores>1){
-    # Parallel version
-    runStabilityIndex_parallel(data, k.min=k, k.max=k, bs=bs, cbi=cbi,
-                      all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.min=k, k.max=k))
-  }else{
-    runStabilityIndex(data, k.min=k, k.max=k, bs=bs, cbi=cbi,
-                      all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.min=k, k.max=k))
-  }
-  
+
+  res <- runStabilityIndex(data, k.min=k, k.max=k, bs=bs, cbi=cbi, all_metrics=all_metrics,
+                           gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
+  stabilityDataFrame <- suppressWarnings(
+    runStabilityIndexTableRange(res, k.min=k, k.max=k))
+
   if (getImages == TRUE) {
     suppressWarnings(
-      runStabilityIndexK_IMG(bs, k.min = k, k.max = k))
+      runStabilityIndexK_IMG(res, bs, k.min = k, k.max = k))
   }
   se <- createSEList(stabilityDataFrame)
   return(se)
@@ -216,23 +208,17 @@ stabilityRange <- function(data, k.range=c(2,15), bs=100, cbi="kmeans",
     stop("The first value of k.range cannot be greater than its second value")
   }
   data <- assayAsDF(data)
-  
-  if(numCores>1){
-    # Parallel version
-    runStabilityIndex_parallel(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
-  }else{
-    runStabilityIndex(data, k.min=k.min, k.max=k.max, bs, cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.min=k.min, k.max=k.max))
-  }
+
+  res <- runStabilityIndex(data, k.min=k.min, k.max=k.max, bs=bs, cbi=cbi, all_metrics=all_metrics,
+                           gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
+  stabilityDataFrame <- suppressWarnings(
+    runStabilityIndexTableRange(res, k.min=k.min, k.max=k.max))
 
   if (getImages == TRUE) {
     suppressWarnings(
-      runStabilityIndexK_IMG(bs, k.min=k.min, k.max=k.max))
+      runStabilityIndexK_IMG(res, bs, k.min=k.min, k.max=k.max))
     suppressWarnings(
-      runStabilityIndexMetric_IMG(bs, k.min=k.min, k.max=k.max))
+      runStabilityIndexMetric_IMG(res, bs, k.min=k.min, k.max=k.max))
   }
   se <- createSEList(stabilityDataFrame)
   return(se)
@@ -288,32 +274,28 @@ stabilitySet <- function(data, k.set=c(2,3), bs=100, cbi="kmeans",
   }
 
   data <- assayAsDF(data)
-  
-  if(numCores>1){
-    # Parallel version
-    runStabilityIndex_parallel(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.set = k.set))
-  }else{
-    runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics, gold_standard=gold_standard, seed=seed, ...)
-    stabilityDataFrame <- suppressWarnings(
-      runStabilityIndexTableRange(data, k.set = k.set))
-  }
-  
+
+  res <- runStabilityIndex(data, k.set = k.set, bs=bs, cbi=cbi, all_metrics=all_metrics,
+                           gold_standard=gold_standard, seed=seed, numCores=numCores, ...)
+  stabilityDataFrame <- suppressWarnings(
+    runStabilityIndexTableRange(res, k.set = k.set))
 
   if (getImages == TRUE) {
     suppressWarnings(
-      runStabilityIndexK_IMG(bs, k.set = k.set))
+      runStabilityIndexK_IMG(res, bs, k.set = k.set))
     suppressWarnings(
-      runStabilityIndexMetric_IMG(bs, k.set = k.set))
+      runStabilityIndexMetric_IMG(res, bs, k.set = k.set))
   }
   se <- createSEList(stabilityDataFrame)
   return(se)
 }
 
+# Runs the stability analysis for every metric (or once, for all_metrics) and returns
+# list(names.metr, m.stab.global, m.stab.global.csv, e.stab.global). Serial when
+# numCores <= 1, otherwise parallel across metrics.
 runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
                               cbi, all_metrics, seed, k.set=NULL,
-                              gold_standard=NULL,...) {
+                              gold_standard=NULL, numCores=1, ...) {
   if (is.null(seed)) {
     seed = pkg.env$seed
   }
@@ -334,86 +316,19 @@ runStabilityIndex <- function(data, k.min=NULL, k.max=NULL, bs,
 
   datos.bruto  <- data
   names.metr   <- names(datos.bruto)[-1]
-  pkg.env$names.metr <- names.metr
 
-  i.min <- k.min; i.max <- k.max
   if (!is.null(k.set)) {
     k.range <- k.set; k.range.length <- length(k.set)
   } else {
-    k.range <- i.min:i.max; k.range.length <- length(i.min:i.max) + 1
+    k.range <- k.min:k.max; k.range.length <- length(k.min:k.max) + 1
   }
 
   num.metrics <- if (all_metrics) 1L else length(names.metr)
-  if (all_metrics) pkg.env$names.metr <- "all_metrics"
 
-  # --- serial dispatch via lapply, same body as parallel ---
-  resultados <- lapply(seq_len(num.metrics), function(i.metr)
-    .runStabilityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
-                              k.range, bs, all_metrics, gold_standard, num.metrics, ...))
-
-  m.stab.global     <- lapply(resultados, `[[`, "stab_valores")
-  m.stab.global.csv <- lapply(resultados, `[[`, "csv_data")
-
-  e.stab.global <- NULL
-  for (j.k in k.range) {
-    e.stab.global[[j.k]] <- matrix(data=NA, nrow=k.range.length, ncol=1)
-    for (i.metr in seq_len(length(pkg.env$names.metr))) {
-      e.stab.global[[j.k]][i.metr] <- m.stab.global[[i.metr]][j.k]
-    }
-  }
-
-  pkg.env$m.stab.global.csv <- m.stab.global.csv
-  pkg.env$m.stab.global     <- m.stab.global
-  pkg.env$e.stab.global     <- e.stab.global
-}
-
-# Parallel version of runStabilityIndex
-# Parallelized function that divides the metrics across workers (adds numCores)
-runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
-                                       cbi, all_metrics, seed, k.set=NULL,
-                                       gold_standard=NULL, numCores=NULL,...) {
-
-  if (is.null(seed)) {
-    seed = pkg.env$seed
-  }
-  if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
-    stop("runStabilityIndex: All k parameters are null!")
-  }
-  if (!is.null(gold_standard)) {
-    if (all_metrics==FALSE) {
-      stop("Gold standard parameter can be set only if the clustering of all the metrics is selected (all_metrics = TRUE)")
-    }
-    if (bs != 0) {
-      message("Warning: 'gold_standard' parameter is set, argument 'bs' will be ignored.")
-    }
-  }
-
-  data <- removeNAValues(data)
-  dfStats(data)
-
-  datos.bruto  <- data
-  names.metr   <- names(datos.bruto)[-1]
-  pkg.env$names.metr <- names.metr
-
-  i.min <- k.min; i.max <- k.max
-  if (!is.null(k.set)) {
-    k.range <- k.set; k.range.length <- length(k.set)
-  } else {
-    k.range <- i.min:i.max; k.range.length <- length(i.min:i.max) + 1
-  }
-
-  num.metrics <- if (all_metrics) 1L else length(names.metr)
-  if (all_metrics) pkg.env$names.metr <- "all_metrics"
-
-  message("Number of cores in parallelization: ", numCores)
-  cl <- makeCluster(numCores)
-  on.exit(stopCluster(cl), add = TRUE)
-  clusterEvalQ(cl, library(evaluomeR))
-
-  # --- parallel dispatch: same helper as serial, different dispatcher ---
-  resultados <- parLapply(cl, seq_len(num.metrics), function(i.metr)
-    .runStabilityForOneMetric(i.metr, datos.bruto, names.metr, cbi, seed,
-                              k.range, bs, all_metrics, gold_standard, num.metrics, ...))
+  resultados <- mapMetrics(num.metrics, .runStabilityForOneMetric,
+    list(datos.bruto, names.metr, cbi, seed, k.range, bs, all_metrics,
+         gold_standard, num.metrics, ...),
+    numCores)
 
   m.stab.global     <- lapply(resultados, `[[`, "stab_valores")
   m.stab.global.csv <- lapply(resultados, `[[`, "csv_data")
@@ -426,20 +341,21 @@ runStabilityIndex_parallel <- function(data, k.min=NULL, k.max=NULL, bs,
     }
   }
 
-  pkg.env$m.stab.global.csv <- m.stab.global.csv
-  pkg.env$m.stab.global     <- m.stab.global
-  pkg.env$e.stab.global     <- e.stab.global
+  list(names.metr        = if (all_metrics) "all_metrics" else names.metr,
+       m.stab.global     = m.stab.global,
+       m.stab.global.csv = m.stab.global.csv,
+       e.stab.global     = e.stab.global)
 }
 
-runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL) {
+runStabilityIndexTableRange <- function(res, k.min=NULL, k.max=NULL, k.set=NULL) {
   if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
     stop("runStabilityIndexTableRange: All k parameters are null!")
   }
   stabilityDataFrame = NULL
 
-  m.stab.global = pkg.env$m.stab.global
-  m.stab.global.csv = pkg.env$m.stab.global.csv
-  names.metr = pkg.env$names.metr
+  m.stab.global = res$m.stab.global
+  m.stab.global.csv = res$m.stab.global.csv
+  names.metr = res$names.metr
 
   measures = NULL
   # Key = Dataframe name - Value = Header name for each k
@@ -507,7 +423,7 @@ runStabilityIndexTableRange <- function(data, k.min=NULL, k.max=NULL, k.set=NULL
 }
 
 # Stability index per K value (x values = matrics)
-runStabilityIndexK_IMG <- function(bs, k.min = NULL, k.max = NULL, k.set = NULL) {
+runStabilityIndexK_IMG <- function(res, bs, k.min = NULL, k.max = NULL, k.set = NULL) {
   if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
     stop("runStabilityIndexK_IMG: All k parameters are null!")
   }
@@ -544,8 +460,8 @@ runStabilityIndexK_IMG <- function(bs, k.min = NULL, k.max = NULL, k.set = NULL)
 
   stype <- c(1:k.range.length)
 
-  e.stab.global = pkg.env$e.stab.global
-  names.metr = pkg.env$names.metr
+  e.stab.global = res$e.stab.global
+  names.metr = res$names.metr
   margins <- par(mar=c(5,5,3,3))
   on.exit(par(margins))
   xnames=as.character(names.metr)
@@ -597,7 +513,7 @@ runStabilityIndexK_IMG <- function(bs, k.min = NULL, k.max = NULL, k.set = NULL)
 }
 
 # Stability index per metric (x values = k range)
-runStabilityIndexMetric_IMG <- function(bs, k.min=NULL, k.max=NULL, k.set=NULL) {
+runStabilityIndexMetric_IMG <- function(res, bs, k.min=NULL, k.max=NULL, k.set=NULL) {
   if (is.null(k.min) && is.null(k.max) && is.null(k.set)) {
     stop("runStabilityIndexMetric_IMG: All k parameters are null!")
   }
@@ -629,8 +545,8 @@ runStabilityIndexMetric_IMG <- function(bs, k.min=NULL, k.max=NULL, k.set=NULL) 
     k.range.length = length(k.min:k.max)
   }
 
-  m.stab.global = pkg.env$m.stab.global
-  names.metr = pkg.env$names.metr
+  m.stab.global = res$m.stab.global
+  names.metr = res$names.metr
   margins <- par(mar=c(5,5,3,3))
   on.exit(par(margins))
   for (i.metr in 1:length(names.metr)) {
