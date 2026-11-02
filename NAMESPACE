@@ -1,6 +1,7 @@
 import("MASS", "class", "prabclus", "mclust","utils")
 
 importFrom("Rdpack","reprompt")
+importFrom("parallel", "makeCluster", "stopCluster", "clusterEvalQ", "clusterExport", "parLapply")
 importFrom("corrplot","corrplot")
 # importFrom("fpc","clusterboot")
 importFrom("fpc","cluster.stats","dbscan", "kmeansruns", "fixmahal", "fpclusters", "pamk", "mergenormals")
