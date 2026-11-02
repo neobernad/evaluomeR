@@ -1,4 +1,11 @@
 Changes in the development version (unreleased)
+  + Bug fix: with numCores > 1, arguments passed through '...' (e.g. 'L1',
+    'alpha' for cbi = "rskc") that are variables in the user's session no longer
+    give NA stability or 'object not found' errors on the workers.
+  + numCores > 1 no longer needs library(parallel), and quality*() returns the
+    same shape as with numCores = 1 (previously a data.frame or a list of them).
+  + Parallel runs start at most one worker per task; all_metrics = TRUE runs
+    serially.
   + Bug fix: getMetricsRelevancy no longer weighs the 'Description' column as a
     metric, and now uses its 'seed' argument. Its relevancy table changes:
     on ontMetrics it now lists the 19 metrics only.
