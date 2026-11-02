@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
-import { color, kValues, project, shape, type Dataset } from '@/lib/demo'
+import { clusterGroups, color, kValues, oval, project, shape, type Dataset } from '@/lib/demo'
 import { Logo } from '@/components/Logo'
 
 const readHash = () => new URLSearchParams(location.hash.slice(1))
@@ -64,8 +64,24 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const W = 640, H = small ? 640 : 400, rad = small ? 10 : 7, pad = small ? 18 : 22
   const at = project(D, [pad, W - pad, pad, H - pad])
   const types = D.meta.cancerTypes
-  const group = (i: number) => (byTruth ? types.indexOf(D.samples[i].cancerType) : D.clusters[k][i] - 1)
-  const legend = byTruth ? types.map((t, i) => [t, i] as const) : Array.from({ length: k }, (_, i) => [`Cluster ${i + 1}`, i] as const)
+  const cmap = clusterGroups(D, k) // cluster c is drawn like the label it mostly holds
+  const group = (i: number) => (byTruth ? types.indexOf(D.samples[i].cancerType) : cmap[D.clusters[k][i] - 1])
+  const legend = byTruth ? types.map((t, i) => [t, i] as const) : cmap.map((g, c) => [`Cluster ${c + 1}`, g] as const)
+  const cg = (i: number) => cmap[D.clusters[k][i] - 1]
+  const ovals = cmap.map((g) => ({ g, ...oval(at.filter((_, i) => cg(i) === g), rad * 1.8) }))
+  // Scale and centre the scene so the cluster ovals fill the plot (same in both views, so points don't jump).
+  const box = ovals.map(({ cx, cy, rx, ry, deg }) => {
+    const c = Math.cos((deg * Math.PI) / 180), sn = Math.sin((deg * Math.PI) / 180)
+    const hx = Math.hypot(rx * c, ry * sn), hy = Math.hypot(rx * sn, ry * c)
+    return [cx - hx, cx + hx, cy - hy, cy + hy]
+  })
+  const [bx0, bx1, by0, by1] = [Math.min(...box.map((v) => v[0])), Math.max(...box.map((v) => v[1])), Math.min(...box.map((v) => v[2])), Math.max(...box.map((v) => v[3]))]
+  const fit = Math.min((W - 4) / (bx1 - bx0), (H - 4) / (by1 - by0))
+  const scene = `translate(${W / 2} ${H / 2}) scale(${fit}) translate(${-(bx0 + bx1) / 2} ${-(by0 + by1) / 2})`
+  const pct = (x: number) => `${Math.max(0, Math.min(1, x)) * 100}%`
+  const cell = (x: number | undefined) => (
+    <td><span className="num">{(x ?? NaN).toFixed(2)}</span><span className="meter" aria-hidden="true"><i style={{ width: pct(x ?? 0) }} /></span></td>
+  )
   const [v1, v2] = D.pca.varExplained
 
   return (
@@ -119,11 +135,16 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
               </div>
             </div>
             <svg className="sc" viewBox={`0 0 ${W} ${H}`} role="img" aria-describedby="scdesc">
+              <g transform={scene}>
+              {!byTruth && ovals.map(({ g, cx, cy, rx, ry, deg }) => (
+                <ellipse key={g} className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} />
+              ))}
               {at.map((p, i) => (
-                <path key={i} d={shape(group(i), rad)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2} transform={`translate(${p.x},${p.y})`}>
+                <path key={i} d={shape(group(i), rad / fit)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2 / fit} transform={`translate(${p.x},${p.y})`}>
                   <title>{`${D.samples[i].id}: ${D.samples[i].cancerType}, cluster ${D.clusters[k][i]}`}</title>
                 </path>
               ))}
+              </g>
             </svg>
             <p className="sr" id="scdesc">Scatter of samples on the first two principal components. The table lists the same scores for every k.</p>
             <div className="legend">
@@ -143,8 +164,8 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
               <tbody>
                 {ks.map((v) => (
                   <tr key={v} className={v === k ? 'sel' : undefined}>
-                    <th scope="row">{v}{v === o && <span className="sr"> (recommended)</span>}</th>
-                    <td>{S[v].avgStability.toFixed(2)}</td><td>{S[v].avgSilhouette.toFixed(2)}</td><td>{ari(v)}</td>
+                    <th scope="row">{v}{v === o && <><span className="best" aria-hidden="true" /><span className="sr"> (recommended)</span></>}</th>
+                    {cell(S[v].avgStability)}{cell(S[v].avgSilhouette)}{cell(S[v].ari)}
                   </tr>
                 ))}
               </tbody>
