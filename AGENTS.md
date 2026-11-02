@@ -267,6 +267,12 @@ Triggered on push/PR to `main`, `master`, `develop`.
 Steps: checkout → setup-r → setup-r-dependencies → `r-lib/actions/check-r-package`.
 
 A PR must pass this job before merging.
+A new push to the same branch cancels the run it supersedes.
+
+### Benchmarks — `.github/workflows/benchmarks.yaml`
+
+Weekly (Mondays) and manual. Runs the slow timing scripts kept out of
+`R CMD check`; fails only if they crash.
 
 ### pkgdown docs — `.github/workflows/pkgdown.yaml`
 
@@ -562,8 +568,12 @@ verify manually against a bundled dataset (e.g. `rnaMetrics`).
 **Known drift:** `man/*.Rd` headers still say "Please edit documentation in
 R/metricsAnalysis.R" (file was split). Run `devtools::document()` to regenerate.
 
-Parallel benchmark scripts (`tests/*_parallel.R`) are excluded from the package
-build; run them only when changing parallel execution paths.
+Benchmark scripts are excluded from the package build (`.Rbuildignore`), so
+`R CMD check` skips them: the parallel ones (`tests/*_parallel.R`) and the slow
+timing ones (`testL1_clustering.R`, `testPCA.R`, `testCH_index.R`, ~20 min
+together). The timing ones run weekly and on demand in
+`.github/workflows/benchmarks.yaml`. Run them by hand when changing ATSC,
+RSKC, PCA or quality-index paths, or parallel execution.
 
 When a change spans multiple areas, run every matching script before claiming
 the work is done.

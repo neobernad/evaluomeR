@@ -1,0 +1,36 @@
+name: Benchmarks
+
+# Slow timing scripts kept out of R CMD check (see .Rbuildignore).
+# They only fail if the code crashes.
+on:
+  schedule:
+    - cron: '0 3 * * 1'   # Mondays 03:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  benchmarks:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          use-public-rspm: true
+
+      - uses: r-lib/actions/setup-r-dependencies@v2
+        with:
+          extra-packages: local::.
+          cache-version: 1
+
+      - name: Run benchmark scripts
+        run: |
+          for f in testCH_index testL1_clustering testPCA; do
+            echo "::group::$f"
+            Rscript "tests/$f.R"
+            echo "::endgroup::"
+          done

@@ -10,3 +10,6 @@
 ^pkgdown$
 ^Dockerfile$
 ^docker-compose\.yml$
+^tests/testL1_clustering\.R$
+^tests/testPCA\.R$
+^tests/testCH_index\.R$
