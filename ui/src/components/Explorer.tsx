@@ -117,19 +117,18 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
   const [bx0, bx1, by0, by1] = [Math.min(...box.map((v) => v[0])), Math.max(...box.map((v) => v[1])), Math.min(...box.map((v) => v[2])), Math.max(...box.map((v) => v[3]))]
   const fit = Math.min((W - 4) / (bx1 - bx0), (H - 4) / (by1 - by0))
   const scene = `translate(${W / 2} ${H / 2}) scale(${fit}) translate(${-(bx0 + bx1) / 2} ${-(by0 + by1) / 2})`
-  // Points whose colour/shape changes (view toggle or new k) pop in; cluster ovals fade in and out.
+  // Points whose colour/shape changes (view toggle or new k) pop in; new cluster ovals fade in.
+  // Only opacity on the ovals and a cleared scale on points: leftover GSAP transforms would shift them.
   const shown = at.map((_, i) => group(i))
-  const prev = useRef<{ key: string; shown: number[]; byTruth: boolean } | null>(null)
+  const prev = useRef<{ key: string; k: number; shown: number[] } | null>(null)
   useLayoutEffect(() => {
     const p = prev.current, svg = svgRef.current!
-    prev.current = { key, shown, byTruth }
-    const ovs = svg.querySelectorAll('.ov')
-    if (!p || p.key !== key || still()) { gsap.set(ovs, { autoAlpha: byTruth ? 0 : 1 }); return }
+    prev.current = { key, k, shown }
+    if (!p || p.key !== key || still()) return
     const pts = svg.querySelectorAll<SVGPathElement>('.pt path')
     const moved = [...pts].filter((_, i) => p.shown[i] !== shown[i])
-    gsap.fromTo(moved, { scale: 0.2 }, { scale: 1, svgOrigin: '0 0', duration: 0.55, ease: 'back.out(2.2)', stagger: { each: 0.01, from: 'random' } })
-    if (byTruth) gsap.to(ovs, { autoAlpha: 0, scale: 0.96, transformOrigin: '50% 50%', duration: 0.3, ease: 'power1.in' })
-    else gsap.fromTo(ovs, { autoAlpha: 0, scale: 0.92 }, { autoAlpha: 1, scale: 1, transformOrigin: '50% 50%', duration: 0.7, ease: 'sine.out', stagger: 0.08, delay: 0.1 })
+    gsap.fromTo(moved, { scale: 0.2 }, { scale: 1, transformOrigin: '50% 50%', duration: 0.55, ease: 'back.out(2.2)', stagger: { each: 0.01, from: 'random' }, clearProps: 'transform' })
+    if (p.k !== k) gsap.fromTo(svg.querySelectorAll('.oval'), { opacity: 0 }, { opacity: 1, duration: 0.6, ease: 'sine.out', stagger: 0.06, clearProps: 'opacity' })
   }, [key, k, byTruth])
 
   const pct = (x: number) => `${Math.max(0, Math.min(1, x)) * 100}%`
@@ -187,7 +186,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
           </div>
           <div className="plotbox">
             <div className="plothead">
-              <h3>{byTruth ? 'Coloured by known label' : `The ${k} clusters found`}</h3>
+              <h3>{byTruth ? `Known labels, ovals show the ${k} clusters found` : `The ${k} clusters found`}</h3>
               <div className="seg" role="group" aria-label="Colour points by">
                 <button aria-pressed={!byTruth} onClick={() => setByTruth(false)}>Clusters</button>
                 <button aria-pressed={byTruth} onClick={() => setByTruth(true)}>Known labels</button>
@@ -196,7 +195,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
             <svg className="sc" ref={svgRef} viewBox={`0 0 ${W} ${H}`} role="img" aria-describedby="scdesc">
               <g transform={scene}>
               {ovals.map(({ g, cx, cy, rx, ry, deg }) => (
-                <g key={g} className="ov"><ellipse className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} /></g>
+                <ellipse key={g} className="oval" cx={cx} cy={cy} rx={rx} ry={ry} transform={`rotate(${deg} ${cx} ${cy})`} stroke={color(g)} fill={color(g)} />
               ))}
               {at.map((p, i) => (
                 <g key={i} className="pt" transform={`translate(${p.x},${p.y})`}><path d={shape(group(i), rad / fit)} fill={color(group(i))} stroke="rgba(11,22,64,.65)" strokeWidth={1.2 / fit}>
