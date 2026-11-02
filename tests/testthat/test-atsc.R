@@ -17,11 +17,12 @@ test_that("ATSC trims the gold standard together with the rows", {
   expect_length(r$gold_standard_trimmed, 62)
 })
 
-test_that("getMetricsRelevancy weighs every metric and returns the trimmed cases", {
+test_that("getMetricsRelevancy weighs only the metrics, reproducibly", {
   m <- getMetricsRelevancy(ontMetrics, k = 3, alpha = 0.1, seed = 100)
   metrics <- setdiff(names(df_of(ontMetrics)), "Description")
-  # Known issue: Description is weighed too (it is not dropped before RSKC),
-  # so check the metrics are present rather than the exact row count.
-  expect_true(all(metrics %in% m$relevancy$metric))
-  expect_length(m$trimmed_cases, 13)
+  expect_setequal(m$relevancy$metric, metrics)
+  expect_equal(m$relevancy$metric[1], "WMCOnto")
+  expect_equal(m$relevancy$weight[1], 0.99267148870117661, tolerance = 1e-8)
+  expect_equal(m$trimmed_cases, c(2, 3, 5, 13, 21, 41, 59, 67, 71, 73))
+  expect_identical(getMetricsRelevancy(ontMetrics, k = 3, alpha = 0.1, seed = 100)$relevancy, m$relevancy)
 })

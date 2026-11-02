@@ -133,6 +133,8 @@ getMetricsRelevancy <- function(df, k, alpha=0, L1=NULL, seed=NULL) {
 #  }
 
   df <- assayAsDF(df)
+  df <- df[, colnames(df) != "Description", drop = FALSE] # IDs are not a metric
+  set.seed(seed)
 
   if (is.null(L1)) {
     print(paste0("No L1 provided. Computing best L1 boundry with 'sparcl::KMeansSparseCluster.permute'"))

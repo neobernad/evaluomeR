@@ -570,8 +570,5 @@ R/metricsAnalysis.R" (file was split). Run `devtools::document()` to regenerate.
 For ATSC, RSKC, PCA, quality-index or parallel changes, also run the matching
 script in `tests/benchmarks/` by hand.
 
-**Known issue:** `getMetricsRelevancy` passes the `Description` column to RSKC
-(unlike `getRSKCL1Boundry`, which drops it), so it gets a relevancy weight.
-
 When a change spans multiple areas, run every matching test file before claiming
 the work is done.
