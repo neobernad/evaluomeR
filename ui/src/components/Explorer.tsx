@@ -89,7 +89,7 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
         <section className="head">
           <div>
             <h2 className="ask">How many groups are in these {D.meta.nSamples} {ds.noun}?</h2>
-            <p className="sub">Pick a k. Each was scored on {D.meta.metrics.length} metrics with {D.meta.bs} bootstraps.</p>
+            <p className="sub">Pick a k. Each was scored on {D.meta.nMetrics} metrics with {D.meta.bs} bootstraps.</p>
           </div>
           <div className="stripbar" ref={barRef}>
             <div className="strip" ref={stripRef} role="radiogroup" aria-label="Number of clusters k" onKeyDown={onKey}>
