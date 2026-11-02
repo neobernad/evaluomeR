@@ -134,17 +134,26 @@ export function Explorer({ datasets }: { datasets: Dataset[] }) {
 
   // Points whose colour/shape changes (view toggle or new k) pop in. On a new k each cluster oval grows
   // out of the old oval most of its samples came from, and the zoom tweens instead of jumping.
-  // Tweens drive plain numbers and write attributes, so nothing is left over when they end.
+  // All tweens drive plain numbers and write attributes (no GSAP transforms), so nothing is left over when they end.
   const shown = at.map((_, i) => group(i))
   const prev = useRef<{ key: string; k: number; shown: number[]; ovals: typeof ovals; view: typeof view } | null>(null)
   const tweens = useRef<gsap.core.Tween[]>([])
+  const pops = useRef<gsap.core.Tween[]>([])
   useLayoutEffect(() => {
     const p = prev.current, svg = svgRef.current!
     prev.current = { key, k, shown, ovals, view }
     if (!p || p.key !== key || still()) return
-    const pts = svg.querySelectorAll<SVGPathElement>('.pt path')
-    const moved = [...pts].filter((_, i) => p.shown[i] !== shown[i])
-    gsap.fromTo(moved, { scale: 0.2 }, { scale: 1, transformOrigin: '50% 50%', duration: 0.55, ease: 'back.out(2.2)', stagger: { each: 0.01, from: 'random' }, clearProps: 'transform' })
+    // Pop by redrawing the shape at a growing size, not by a GSAP transform: GSAP's SVG transform origin
+    // put points ~7px off their centre mid-pop, so they jumped when it ended.
+    // A click mid-pop: stop the old pops and redraw every point at full size first.
+    const r = rad / fit
+    pops.current.forEach((t) => t.kill())
+    pops.current = []
+    svg.querySelectorAll<SVGPathElement>('.pt path').forEach((e, i) => {
+      const o = { s: p.shown[i] === shown[i] ? 1 : 0.2 }, draw = () => e.setAttribute('d', shape(shown[i], r * o.s))
+      draw()
+      if (o.s < 1) pops.current.push(gsap.to(o, { s: 1, duration: 0.55, ease: 'back.out(2.2)', delay: Math.random() * 0.15, onUpdate: draw }))
+    })
     if (p.k === k) return
 
     tweens.current.forEach((t) => t.kill())
