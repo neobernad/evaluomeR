@@ -1,5 +1,8 @@
+# performPCA runs an nFactors bootstrap that takes no seed and crashes for a
+# few RNG states on golub (e.g. set.seed(17)), so seed it here.
 golub_pca <- function() {
   clean <- cleanDataset(golub, correlation_threshold = 1)
+  set.seed(100)
   performPCA(clean$dataset)$dataset_ncp
 }
 
@@ -15,6 +18,15 @@ test_that("ATSC trims the gold standard together with the rows", {
   r <- ATSC(golub_pca(), alpha = 0.1, k.range = c(3, 10), cbi = "kmeans", gold_standard = gs)
   expect_equal(r$optimalK, 3)
   expect_length(r$gold_standard_trimmed, 62)
+})
+
+test_that("getRSKCL1Boundry is reproducible whatever the RNG state", {
+  set.seed(1)
+  a <- getRSKCL1Boundry(ontMetrics, k = 3, seed = 100)
+  set.seed(2)
+  b <- getRSKCL1Boundry(ontMetrics, k = 3, seed = 100)
+  expect_identical(a, b)
+  expect_equal(a, 2)
 })
 
 test_that("getMetricsRelevancy weighs only the metrics, reproducibly", {

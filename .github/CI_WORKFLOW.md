@@ -5,7 +5,7 @@ This document describes the continuous integration (CI) workflows for evaluomeR.
 ## Overview
 
 CI validates the installable R package. `R CMD check` runs the testthat suite
-in `tests/testthat/` (~10 s). The slow timing scripts in `tests/benchmarks/` are
+in `tests/testthat/` (under 10 s). The slow timing scripts in `tests/benchmarks/` are
 left out of the check and run weekly in the Benchmarks workflow.
 
 ## Workflows
@@ -25,8 +25,8 @@ left out of the check and run weekly in the Benchmarks workflow.
 `r-lib/actions/check-r-package`.
 
 This runs `R CMD check`, which exercises examples, vignette code, the testthat
-suite and package metadata. A failing check blocks merge. A new push to the
-same branch cancels the run it supersedes.
+suite and package metadata. A failing check blocks merge. A new push to a PR
+cancels the run it supersedes; runs on `develop`/`master` are never cancelled.
 
 ### Benchmarks — `.github/workflows/benchmarks.yaml`
 

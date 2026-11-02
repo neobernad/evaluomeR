@@ -52,3 +52,12 @@ test_that("a gold standard gives ARI per k on golub", {
   expect_equal(unlist(ari["all_metrics", ]), c(k_2 = 0.693041608535879, k_3 = 0.913043422965347),
                tolerance = 1e-8)
 })
+
+test_that("a two-class gold standard gives ARI per k on breastCancer", {
+  gs <- as.numeric(factor(breastCancer$diagnosis, levels = c("B", "M")))
+  s <- stabilityRange(breastCancer[, -2], k.range = c(2, 3), bs = 10, all_metrics = TRUE,
+                      seed = 100, gold_standard = gs)
+  ari <- standardizeStabilityData(s, k.range = c(2, 3))
+  expect_equal(unlist(ari["all_metrics", ]), c(k_2 = 0.491424536224555, k_3 = 0.541206168253931),
+               tolerance = 1e-8)
+})

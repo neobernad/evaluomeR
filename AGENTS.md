@@ -236,7 +236,7 @@ Default is `"kmeans"` for most functions and `"clara"` for ATSC.
 
 Tests use **testthat** (edition 3) and live in `tests/testthat/`, one file per
 area. `R CMD check` runs them through `tests/testthat.R`; the suite takes about
-10 s. From the repo root with the package installed:
+under 10 s. From the repo root with the package installed:
 
 ```r
 devtools::test()                                         # whole suite
@@ -268,7 +268,7 @@ Triggered on push/PR to `main`, `master`, `develop`.
 Steps: checkout → setup-r → setup-r-dependencies → `r-lib/actions/check-r-package`.
 
 A PR must pass this job before merging.
-A new push to the same branch cancels the run it supersedes.
+A new push to a PR cancels the run it supersedes (runs on `develop`/`master` are never cancelled).
 
 ### Benchmarks — `.github/workflows/benchmarks.yaml`
 
@@ -537,7 +537,7 @@ for a session. `.cursor/` is gitignored.
 ### Area-specific tests (required after code changes)
 
 See [Running Tests](#running-tests). After editing package code, run the
-test files for the area you changed (or the whole suite, ~10 s):
+test files for the area you changed (or the whole suite, under 10 s):
 
 ```r
 testthat::test_file("tests/testthat/<file>.R")

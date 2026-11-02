@@ -19,5 +19,8 @@ test_that("plotting functions run without error", {
   expect_no_error(plotMetricsBoxplot(rnaMetrics))
   expect_no_error(plotMetricsCluster(ontMetrics, scale = TRUE))
   expect_no_error(plotMetricsViolin(rnaMetrics))
+  expect_no_error(plotMetricsViolin(ontMetrics, 2))
   expect_no_error(plotMetricsClusterComparison(rnaMetrics, k.vector1 = 3, k.vector2 = c(2, 5)))
+  expect_no_error(plotMetricsClusterComparison(rnaMetrics, k.vector1 = 3))
+  expect_no_error(plotMetricsClusterComparison(rnaMetrics, k.vector1 = c(5, 5), k.vector2 = c(2, 2)))
 })
